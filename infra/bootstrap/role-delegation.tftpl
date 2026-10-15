@@ -1,0 +1,25 @@
+(
+  (
+    !(ActionMatches{'Microsoft.Authorization/roleAssignments/write'})
+  )
+  OR
+  (
+    @Request[Microsoft.Authorization/roleAssignments:RoleDefinitionId] ForAnyOfAnyValues:GuidEquals {${roles}}
+    AND
+    @Request[Microsoft.Authorization/roleAssignments:PrincipalType] ForAnyOfAnyValues:StringEqualsIgnoreCase {'ServicePrincipal'}
+    AND
+    @Request[Microsoft.Authorization/roleAssignments:PrincipalId] ForAnyOfAllValues:GuidNotEquals {${excluded}}
+  )
+)
+AND
+(
+  (
+    !(ActionMatches{'Microsoft.Authorization/roleAssignments/delete'})
+  )
+  OR
+  (
+    @Resource[Microsoft.Authorization/roleAssignments:RoleDefinitionId] ForAnyOfAnyValues:GuidEquals {${roles}}
+    AND
+    @Resource[Microsoft.Authorization/roleAssignments:PrincipalType] ForAnyOfAnyValues:StringEqualsIgnoreCase {'ServicePrincipal'}
+  )
+)
