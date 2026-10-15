@@ -45,6 +45,17 @@ resource "azurerm_role_assignment" "owner_state" {
   principal_type       = "User"
 }
 
+# Backfills and the legacy archive go into the lakes by hand. The lakes do not
+# exist yet, and apply cannot grant anything to a user.
+resource "azurerm_role_assignment" "owner_lakes" {
+  for_each = azurerm_resource_group.env
+
+  scope                = each.value.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = local.owner_object_id
+  principal_type       = "User"
+}
+
 resource "azurerm_role_definition" "plan_reader" {
   name        = "Meteo plan reader"
   scope       = azurerm_resource_group.env["prod"].id
