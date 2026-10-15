@@ -15,3 +15,11 @@ skip-check:
   - CKV_AZURE_109  # vault firewall rules: GitHub-hosted runners have no fixed addresses
   - CKV_AZURE_189  # vault public network access: needed by the runners; data access is Entra RBAC only
   - CKV2_AZURE_32  # vault private endpoint: there is no VNet in this project
+  - CKV_AZURE_19   # Defender standard tier: every plan is pinned to Free in governance.tf
+  - CKV_AZURE_55   # Defender for Servers: there are no virtual machines
+  - CKV_AZURE_61   # Defender for App Service: billed per instance, more than this project's whole budget
+  - CKV_AZURE_69   # Defender for Azure SQL: there are no SQL databases
+  - CKV_AZURE_79   # Defender for SQL on machines: there are no SQL servers
+  - CKV_AZURE_84   # Defender for Storage: billed per account, more than this project's whole budget
+  - CKV_AZURE_87   # Defender for Key Vault: left at Free with the other plans
+  - CKV_AZURE_234  # Defender for Resource Manager: left at Free with the other plans
