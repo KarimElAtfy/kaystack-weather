@@ -64,3 +64,23 @@ resource "azurerm_key_vault" "main" {
     prevent_destroy = true
   }
 }
+
+# The azure_vault key provider calls Encrypt on every run and Decrypt when it
+# reads state, so these two operations are all the keys allow.
+resource "azurerm_key_vault_key" "state" {
+  #checkov:skip=CKV_AZURE_112:HSM keys need the Premium tier and only wrap a 32-byte data key here
+  #checkov:skip=CKV_AZURE_40:an expired key would stop OpenTofu from writing state
+  for_each = toset(["bootstrap", "prod", "dev"])
+
+  name         = "tfstate-${each.key}"
+  key_vault_id = azurerm_key_vault.main.id
+  key_type     = "RSA"
+  key_size     = 2048
+  key_opts     = ["encrypt", "decrypt"]
+
+  depends_on = [azurerm_role_assignment.owner_vault]
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
