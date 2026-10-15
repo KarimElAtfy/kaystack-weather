@@ -8,6 +8,13 @@ terraform {
     }
   }
 
+  backend "azurerm" {
+    storage_account_name = local.state_account_name
+    container_name       = "bootstrap"
+    key                  = "bootstrap.tfstate"
+    use_azuread_auth     = true
+  }
+
   encryption {
     key_provider "azure_vault" "state" {
       vault_uri      = "https://${local.key_vault_name}.vault.azure.net"
