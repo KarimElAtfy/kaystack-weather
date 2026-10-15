@@ -1,6 +1,7 @@
 locals {
   location           = "italynorth"
   state_account_name = "stkaystackmeteostate"
+  key_vault_name     = "kv-kaystack-meteo"
   repo               = "KarimElAtfy/meteo"
 
   tags = {

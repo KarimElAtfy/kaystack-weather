@@ -12,3 +12,6 @@ skip-check:
   - CKV_AZURE_206  # geo-replication: the state account is zone-redundant and versioned, enough for a few small files
   - CKV_AZURE_33   # queue logging: no queues are used
   - CKV2_AZURE_21  # blob read logging: it would need a Log Analytics workspace and paid ingestion for a few state reads a day
+  - CKV_AZURE_109  # vault firewall rules: GitHub-hosted runners have no fixed addresses
+  - CKV_AZURE_189  # vault public network access: needed by the runners; data access is Entra RBAC only
+  - CKV2_AZURE_32  # vault private endpoint: there is no VNet in this project
