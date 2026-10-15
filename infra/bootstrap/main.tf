@@ -1,6 +1,7 @@
 locals {
-  location = "italynorth"
-  repo     = "KarimElAtfy/meteo"
+  location           = "italynorth"
+  state_account_name = "stkaystackmeteostate"
+  repo               = "KarimElAtfy/meteo"
 
   tags = {
     project    = "meteo"
@@ -8,6 +9,8 @@ locals {
     repo       = "github.com/${local.repo}"
   }
 }
+
+data "azurerm_client_config" "current" {}
 
 resource "azurerm_resource_group" "shared" {
   name     = "rg-meteo-shared"

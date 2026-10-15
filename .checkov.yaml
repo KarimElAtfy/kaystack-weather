@@ -5,3 +5,10 @@ framework:
 compact: true
 quiet: true
 skip-download: true
+skip-check:
+  - CKV_AZURE_59   # storage public network access: GitHub-hosted runners have no fixed addresses; every request is Entra-authenticated
+  - CKV2_AZURE_33  # storage private endpoint: there is no VNet in this project
+  - CKV2_AZURE_1   # customer-managed storage key: Microsoft-managed keys, and the state is also encrypted client side
+  - CKV_AZURE_206  # geo-replication: the state account is zone-redundant and versioned, enough for a few small files
+  - CKV_AZURE_33   # queue logging: no queues are used
+  - CKV2_AZURE_21  # blob read logging: it would need a Log Analytics workspace and paid ingestion for a few state reads a day
