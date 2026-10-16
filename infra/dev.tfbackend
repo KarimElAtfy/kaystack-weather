@@ -1,0 +1,4 @@
+storage_account_name = "stkaystackmeteostate"
+container_name       = "dev"
+key                  = "infra.tfstate"
+use_azuread_auth     = true
