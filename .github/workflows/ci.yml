@@ -12,8 +12,6 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
-  TOFU_VERSION: 1.13.1
-  TOFU_SHA256: 8ccbc6f8ee21d2827715f3c6e08a9b3e0209b1e62057c05067ef117e047c1a80
   TFLINT_VERSION: 0.64.0
   TFLINT_SHA256: cca9d13e2e1d7a2c627af60ff899a3c9b74212899416aeb96ec764d2ef954537
   ACTIONLINT_VERSION: 1.7.12
@@ -72,10 +70,7 @@ jobs:
           persist-credentials: false
 
       - name: Install OpenTofu
-        run: |
-          curl -fsSLo /tmp/tofu.zip "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_linux_amd64.zip"
-          echo "${TOFU_SHA256}  /tmp/tofu.zip" | sha256sum -c -
-          sudo unzip -o -q /tmp/tofu.zip tofu -d /usr/local/bin
+        run: bash .github/install-tofu.sh
 
       - name: Install TFLint
         run: |
@@ -172,10 +167,7 @@ jobs:
           persist-credentials: false
 
       - name: Install OpenTofu
-        run: |
-          curl -fsSLo /tmp/tofu.zip "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_linux_amd64.zip"
-          echo "${TOFU_SHA256}  /tmp/tofu.zip" | sha256sum -c -
-          sudo unzip -o -q /tmp/tofu.zip tofu -d /usr/local/bin
+        run: bash ../.github/install-tofu.sh
 
       # The var file is needed at init too: the state key name comes from var.environment.
       - run: tofu init -input=false -lockfile=readonly -backend-config=prod.tfbackend -var-file=prod.tfvars
