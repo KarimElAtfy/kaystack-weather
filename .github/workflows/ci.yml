@@ -12,8 +12,6 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
-  TOFU_VERSION: 1.13.1
-  TOFU_SHA256: 8ccbc6f8ee21d2827715f3c6e08a9b3e0209b1e62057c05067ef117e047c1a80
   TFLINT_VERSION: 0.64.0
   TFLINT_SHA256: cca9d13e2e1d7a2c627af60ff899a3c9b74212899416aeb96ec764d2ef954537
   ACTIONLINT_VERSION: 1.7.12
@@ -72,10 +70,7 @@ jobs:
           persist-credentials: false
 
       - name: Install OpenTofu
-        run: |
-          curl -fsSLo /tmp/tofu.zip "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_linux_amd64.zip"
-          echo "${TOFU_SHA256}  /tmp/tofu.zip" | sha256sum -c -
-          sudo unzip -o -q /tmp/tofu.zip tofu -d /usr/local/bin
+        run: bash .github/install-tofu.sh
 
       - name: Install TFLint
         run: |
@@ -172,10 +167,7 @@ jobs:
           persist-credentials: false
 
       - name: Install OpenTofu
-        run: |
-          curl -fsSLo /tmp/tofu.zip "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_linux_amd64.zip"
-          echo "${TOFU_SHA256}  /tmp/tofu.zip" | sha256sum -c -
-          sudo unzip -o -q /tmp/tofu.zip tofu -d /usr/local/bin
+        run: bash ../.github/install-tofu.sh
 
       # The var file is needed at init too: the state key name comes from var.environment.
       - run: tofu init -input=false -lockfile=readonly -backend-config=prod.tfbackend -var-file=prod.tfvars
@@ -188,13 +180,13 @@ jobs:
         env:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          tofu show -json -var-file=prod.tfvars prod.tfplan | jq -r --arg sha "${HEAD_SHA:0:7}" '
-            [.resource_changes[]?
-              | select(.change.actions != ["no-op"] and .change.actions != ["read"])
-              | "\(.change.actions | join("/"))  \(.address)"]
-            | if length == 0 then "Prod plan for \($sha): no changes."
-              else "Prod plan for \($sha), \(length) resources:\n\n```\n\(join("\n"))\n```"
-              end' > "$RUNNER_TEMP/plan.md"
+          tofu show -json -var-file=prod.tfvars prod.tfplan | jq -r -f ../.github/plan-changes.jq > "$RUNNER_TEMP/changes.txt"
+          count=$(grep -c . "$RUNNER_TEMP/changes.txt" || true)
+          if [ "$count" -eq 0 ]; then
+            echo "Prod plan for ${HEAD_SHA:0:7}: no changes." > "$RUNNER_TEMP/plan.md"
+          else
+            { echo "Prod plan for ${HEAD_SHA:0:7}, $count resources:"; echo; echo '```'; cat "$RUNNER_TEMP/changes.txt"; echo '```'; } > "$RUNNER_TEMP/plan.md"
+          fi
           cat "$RUNNER_TEMP/plan.md" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Comment
