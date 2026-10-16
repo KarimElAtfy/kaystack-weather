@@ -1,0 +1,224 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  TOFU_VERSION: 1.13.1
+  TOFU_SHA256: 8ccbc6f8ee21d2827715f3c6e08a9b3e0209b1e62057c05067ef117e047c1a80
+  TFLINT_VERSION: 0.64.0
+  TFLINT_SHA256: cca9d13e2e1d7a2c627af60ff899a3c9b74212899416aeb96ec764d2ef954537
+  ACTIONLINT_VERSION: 1.7.12
+  ACTIONLINT_SHA256: 8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8
+  ZIZMOR_VERSION: 1.31.0
+  ZIZMOR_SHA256: bb4203c790f8d33e110dbeee2ac6d70911e233b93574ffc770aaa21ecd850302
+
+jobs:
+  changes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      infra: ${{ steps.paths.outputs.infra }}
+      workflows: ${{ steps.paths.outputs.workflows }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+
+      - id: paths
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT_NAME" != pull_request ]; then
+            echo "infra=true" >> "$GITHUB_OUTPUT"
+            echo "workflows=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # The pull_request checkout is GitHub's test merge commit, and its
+          # first parent is the current tip of the base branch.
+          changed=$(git diff --name-only HEAD^1 HEAD)
+          echo "$changed"
+
+          infra=false
+          workflows=false
+          if grep -qE '^(infra/|\.tflint\.hcl$|\.checkov\.yaml$)' <<< "$changed"; then infra=true; fi
+          # A change to CI runs every job, so it is tested by the jobs it touches.
+          if grep -q '^\.github/' <<< "$changed"; then infra=true; workflows=true; fi
+          echo "infra=$infra" >> "$GITHUB_OUTPUT"
+          echo "workflows=$workflows" >> "$GITHUB_OUTPUT"
+
+  infra-static:
+    needs: changes
+    if: needs.changes.outputs.infra == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install OpenTofu
+        run: |
+          curl -fsSLo /tmp/tofu.zip "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_linux_amd64.zip"
+          echo "${TOFU_SHA256}  /tmp/tofu.zip" | sha256sum -c -
+          sudo unzip -o -q /tmp/tofu.zip tofu -d /usr/local/bin
+
+      - name: Install TFLint
+        run: |
+          curl -fsSLo /tmp/tflint.zip "https://github.com/terraform-linters/tflint/releases/download/v${TFLINT_VERSION}/tflint_linux_amd64.zip"
+          echo "${TFLINT_SHA256}  /tmp/tflint.zip" | sha256sum -c -
+          sudo unzip -o -q /tmp/tflint.zip tflint -d /usr/local/bin
+
+      - name: Install Checkov
+        run: |
+          python3 -m venv /tmp/checkov
+          /tmp/checkov/bin/pip install --quiet --require-hashes --only-binary :all: --no-deps -r .github/checkov.txt
+
+      - name: tofu fmt
+        run: tofu fmt -check -diff -recursive infra
+
+      - name: tflint
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          tflint --init
+          # --recursive looks for .tflint.hcl in each directory it visits, so
+          # the root config is passed by absolute path.
+          tflint --recursive --config "$PWD/.tflint.hcl" --format compact
+
+      - name: checkov
+        run: /tmp/checkov/bin/checkov --config-file .checkov.yaml
+
+      - name: tofu validate
+        run: |
+          tofu -chdir=infra/bootstrap init -backend=false -input=false -lockfile=readonly
+          tofu -chdir=infra/bootstrap validate
+          tofu -chdir=infra init -backend=false -input=false -lockfile=readonly -var-file=prod.tfvars
+          for env in prod dev; do
+            tofu -chdir=infra validate -var-file="$env.tfvars"
+          done
+
+  workflows:
+    needs: changes
+    if: needs.changes.outputs.workflows == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install actionlint
+        run: |
+          curl -fsSLo /tmp/actionlint.tar.gz "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
+          echo "${ACTIONLINT_SHA256}  /tmp/actionlint.tar.gz" | sha256sum -c -
+          tar -xzf /tmp/actionlint.tar.gz -C /tmp actionlint
+
+      - name: actionlint
+        run: /tmp/actionlint
+
+      - name: Install zizmor
+        run: |
+          python3 -m venv /tmp/zizmor
+          echo "zizmor==${ZIZMOR_VERSION} --hash=sha256:${ZIZMOR_SHA256}" > /tmp/zizmor.txt
+          /tmp/zizmor/bin/pip install --quiet --require-hashes --only-binary :all: -r /tmp/zizmor.txt
+
+      - name: zizmor
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: /tmp/zizmor/bin/zizmor .
+
+  plan-prod:
+    needs: [changes, infra-static]
+    # A fork PR never gets an OIDC token, so the plan would only fail there.
+    if: >-
+      github.event_name == 'pull_request'
+      && github.event.pull_request.head.repo.full_name == github.repository
+      && needs.changes.outputs.infra == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write # OIDC sign-in as the plan identity
+      pull-requests: write # the plan comment
+    env:
+      ARM_USE_OIDC: "true"
+      ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID_PLAN }}
+      TF_IN_AUTOMATION: "1"
+    defaults:
+      run:
+        working-directory: infra
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install OpenTofu
+        run: |
+          curl -fsSLo /tmp/tofu.zip "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_linux_amd64.zip"
+          echo "${TOFU_SHA256}  /tmp/tofu.zip" | sha256sum -c -
+          sudo unzip -o -q /tmp/tofu.zip tofu -d /usr/local/bin
+
+      # The var file is needed at init too: the state key name comes from var.environment.
+      - run: tofu init -input=false -lockfile=readonly -backend-config=prod.tfbackend -var-file=prod.tfvars
+
+      # The plan identity can read the state blob but not lease it. The full
+      # plan stays out of the log because the logs of a public repo are public.
+      - run: tofu plan -input=false -lock=false -var-file=prod.tfvars -out=prod.tfplan > /dev/null
+
+      - name: Summarise
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          tofu show -json -var-file=prod.tfvars prod.tfplan | jq -r --arg sha "${HEAD_SHA:0:7}" '
+            [.resource_changes[]?
+              | select(.change.actions != ["no-op"] and .change.actions != ["read"])
+              | "\(.change.actions | join("/"))  \(.address)"]
+            | if length == 0 then "Prod plan for \($sha): no changes."
+              else "Prod plan for \($sha), \(length) resources:\n\n```\n\(join("\n"))\n```"
+              end' > "$RUNNER_TEMP/plan.md"
+          cat "$RUNNER_TEMP/plan.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: gh pr comment "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/plan.md" --edit-last --create-if-none
+
+  ci-ok:
+    # always() and not !cancelled(): a cancelled run has to leave a failed
+    # ci-ok behind, because a skipped required check counts as passed.
+    if: always()
+    needs: [changes, infra-static, workflows, plan-prod]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "$RESULTS"
+          for result in $RESULTS; do
+            case "$result" in
+              success | skipped) ;;
+              *) exit 1 ;;
+            esac
+          done
