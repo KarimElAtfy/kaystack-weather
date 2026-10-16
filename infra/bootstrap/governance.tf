@@ -107,3 +107,11 @@ resource "azurerm_consumption_budget_resource_group" "dev" {
     ignore_changes = [time_period]
   }
 }
+
+resource "azurerm_cost_anomaly_alert" "subscription" {
+  name            = "meteo-cost-anomaly"
+  display_name    = "Meteo cost anomaly"
+  subscription_id = data.azurerm_subscription.current.id
+  email_subject   = "Cost anomaly on the meteo subscription"
+  email_addresses = [var.alert_email]
+}
