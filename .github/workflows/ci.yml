@@ -180,13 +180,13 @@ jobs:
         env:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          tofu show -json -var-file=prod.tfvars prod.tfplan | jq -r --arg sha "${HEAD_SHA:0:7}" '
-            [.resource_changes[]?
-              | select(.change.actions != ["no-op"] and .change.actions != ["read"])
-              | "\(.change.actions | join("/"))  \(.address)"]
-            | if length == 0 then "Prod plan for \($sha): no changes."
-              else "Prod plan for \($sha), \(length) resources:\n\n```\n\(join("\n"))\n```"
-              end' > "$RUNNER_TEMP/plan.md"
+          tofu show -json -var-file=prod.tfvars prod.tfplan | jq -r -f ../.github/plan-changes.jq > "$RUNNER_TEMP/changes.txt"
+          count=$(grep -c . "$RUNNER_TEMP/changes.txt" || true)
+          if [ "$count" -eq 0 ]; then
+            echo "Prod plan for ${HEAD_SHA:0:7}: no changes." > "$RUNNER_TEMP/plan.md"
+          else
+            { echo "Prod plan for ${HEAD_SHA:0:7}, $count resources:"; echo; echo '```'; cat "$RUNNER_TEMP/changes.txt"; echo '```'; } > "$RUNNER_TEMP/plan.md"
+          fi
           cat "$RUNNER_TEMP/plan.md" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Comment
