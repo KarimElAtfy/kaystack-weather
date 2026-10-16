@@ -141,7 +141,7 @@ resource "azurerm_role_assignment" "apply_prod_delegation" {
   })
 }
 
-# Meant for the ARPA secret only, but the secret is created by hand in M1 and a
+# Meant for the ARPA secret only, but the secret is created by hand later and a
 # role assignment cannot target a scope that does not exist yet. On this vault
 # Secrets User can read secrets only; it gives no access to the state keys.
 resource "azurerm_role_assignment" "apply_vault_delegation" {

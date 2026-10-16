@@ -20,9 +20,9 @@ The condition on `apply`: it may hand out only five roles in `rg-meteo-prod` and
 
 ## Consequences
 
-A pull request job can at most read. Its token subject is `pull_request`, and only `plan` trusts it. The [negative test](https://github.com/KarimElAtfy/meteo/actions/runs/38890574240) shows Entra refusing `apply` to a job outside `prod`.
+A pull request job can at most read. Its token subject ends in `:pull_request`, and only `plan` trusts that. The [negative test](https://github.com/KarimElAtfy/meteo/actions/runs/38890574240) shows Entra refusing `apply` to a job outside `prod`.
 
-Accepted risk: from M1 the plan identity can read the Static Web App deployment token, through `listsecrets` and through the prod state it decrypts. Only branches I push run with that identity, and fork pull requests get no OIDC token.
+Accepted risk: once the Static Web App exists, the plan identity can read the Static Web App deployment token, through `listsecrets` and through the prod state it decrypts. Only branches I push run with that identity, and fork pull requests get no OIDC token.
 
 A condition can limit which roles are handed out but not on which resource, so that part is checked in review of the main stack.
 
