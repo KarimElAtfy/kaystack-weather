@@ -92,6 +92,20 @@ resource "azurerm_role_definition" "deployer" {
   assignable_scopes = [azurerm_resource_group.env["prod"].id]
 }
 
+# Before it creates a Function App, azurerm asks Microsoft.Web whether the name
+# is free. That call is made on the subscription, where apply has no other role.
+resource "azurerm_role_definition" "name_check" {
+  name        = "Meteo name check"
+  scope       = data.azurerm_subscription.current.id
+  description = "The subscription-level name check azurerm makes before creating a Function App."
+
+  permissions {
+    actions = ["Microsoft.Web/checknameavailability/read"]
+  }
+
+  assignable_scopes = [data.azurerm_subscription.current.id]
+}
+
 resource "azurerm_role_assignment" "plan_prod" {
   scope              = azurerm_resource_group.env["prod"].id
   role_definition_id = azurerm_role_definition.plan_reader.role_definition_resource_id
@@ -127,6 +141,13 @@ resource "azurerm_role_assignment" "apply_prod" {
   role_definition_name = "Contributor"
   principal_id         = azurerm_user_assigned_identity.ci["apply"].principal_id
   principal_type       = "ServicePrincipal"
+}
+
+resource "azurerm_role_assignment" "apply_name_check" {
+  scope              = data.azurerm_subscription.current.id
+  role_definition_id = azurerm_role_definition.name_check.role_definition_resource_id
+  principal_id       = azurerm_user_assigned_identity.ci["apply"].principal_id
+  principal_type     = "ServicePrincipal"
 }
 
 resource "azurerm_role_assignment" "apply_prod_delegation" {
