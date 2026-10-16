@@ -58,7 +58,7 @@ resource "azurerm_function_app_flex_consumption" "main" {
     PUBLIC_ACCOUNT = module.public.name
     RADAR_ORIGIN   = "https://weather.kaystack.dev"
     TIMERS_ENABLED = tostring(var.timers_enabled)
-    USER_AGENT     = "weather.kaystack.dev github.com/KarimElAtfy/meteo"
+    USER_AGENT     = "weather.kaystack.dev github.com/KarimElAtfy/kaystack-weather"
   }, local.arpa_token_setting)
 
   tags = local.tags

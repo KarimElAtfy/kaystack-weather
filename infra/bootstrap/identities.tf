@@ -14,7 +14,7 @@ locals {
   # The repository's tokens carry the owner and repository ids in the subject
   # (use_immutable_subject), so a renamed or recreated repo with the same name
   # can't match these credentials.
-  github_subject = "repo:KarimElAtfy@255750400/meteo@1421413677"
+  github_subject = "repo:KarimElAtfy@255750400/kaystack-weather@1421413677"
 }
 
 resource "azurerm_federated_identity_credential" "plan_pull_request" {
