@@ -115,3 +115,19 @@ resource "azurerm_cost_anomaly_alert" "subscription" {
   email_subject   = "Cost anomaly on the meteo subscription"
   email_addresses = [var.alert_email]
 }
+
+# Alerts in the main stack find this group by name, so the address is set only
+# here, from the owner's PC, and never passes through GitHub. Saving it sends a
+# one-time passcode to the address, to be confirmed within 30 minutes.
+resource "azurerm_monitor_action_group" "owner" {
+  name                = "ag-meteo-owner"
+  resource_group_name = azurerm_resource_group.env["prod"].name
+  short_name          = "meteo"
+  tags                = local.tags
+
+  email_receiver {
+    name                    = "owner"
+    email_address           = var.alert_email
+    use_common_alert_schema = true
+  }
+}
