@@ -2,7 +2,7 @@ locals {
   tags = {
     project    = "meteo"
     managed-by = "opentofu"
-    repo       = "github.com/KarimElAtfy/meteo"
+    repo       = "github.com/KarimElAtfy/kaystack-weather"
     env        = var.environment
   }
 }
