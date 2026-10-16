@@ -4,7 +4,7 @@ Date: 2026-10-16
 
 ## Context
 
-The state is more sensitive than it looks. From M1 it will hold the Static Web App deployment token, because azurerm always writes it there, and it already has some attributes of the storage keys. Entra-only access protects the storage account, but anyone with read access on a container would still see that state in clear text. With client-side encryption they also need the key in Key Vault, which is a separate grant. This is one of the reasons I picked OpenTofu over Terraform.
+The state is more sensitive than it looks. Once the Static Web App exists it will hold its deployment token, because azurerm always writes it there, and it already has some attributes of the storage keys. Entra-only access protects the storage account, but anyone with read access on a container would still see that state in clear text. With client-side encryption they also need the key in Key Vault, which is a separate grant. This is one of the reasons I picked OpenTofu over Terraform.
 
 ## Decision
 
