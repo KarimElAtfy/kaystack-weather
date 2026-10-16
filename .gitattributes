@@ -1,3 +1,4 @@
 * text=auto eol=lf
 
+.github/checkov.txt linguist-generated=true
 **/.terraform.lock.hcl linguist-generated=true
