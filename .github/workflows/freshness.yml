@@ -1,0 +1,50 @@
+name: freshness
+
+# GitHub mails the owner when this run fails. It also stops scheduling it after
+# 60 days without activity in the repository.
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  status:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      STATUS_URL: https://stkaystackmeteopubprod.blob.core.windows.net/public/status.json
+      # Minutes allowed since the newest data and since the pipeline last asked
+      # the source. pipeline/meteo/status.py has the same table and a test there
+      # fails if the two differ. The copy stays here so that this check never
+      # takes its limits from the pipeline it checks.
+      LIMITS: |
+        {
+          "radar":      {"data": 30,   "checked": 15},
+          "metar":      {"data": 90,   "checked": 60},
+          "open-meteo": {"data": 360,  "checked": 120},
+          "ensemble":   {"data": 420,  "checked": 120},
+          "arpa":       {"data": 1080, "checked": 360},
+          "mosmix":     {"data": 540,  "checked": 120},
+          "yr":         {"data": 480,  "checked": 420}
+        }
+    steps:
+      - name: Every source is recent
+        run: |
+          curl -fsS --retry 3 --max-time 30 "$STATUS_URL" -o status.json
+          jq -r --argjson now "$(date -u +%s)" --argjson limits "$LIMITS" '
+            def minutes_since: ($now - (sub("\\.[0-9]+"; "") | fromdateiso8601)) / 60 | floor;
+            .sources as $sources
+            | $limits | to_entries[]
+            | .key as $name | .value as $max | ($sources[$name] // {}) as $source
+            | if ($source.data_time == null or $source.checked_at == null) then "\($name) missing"
+              else
+                ($source.data_time | minutes_since) as $data
+                | ($source.checked_at | minutes_since) as $checked
+                | "\($name) data \($data) min, checked \($checked) min"
+                  + (if $data > $max.data or $checked > $max.checked then " late" else "" end)
+              end
+          ' status.json | tee report.txt
+          if grep -qE ' (late|missing)$' report.txt; then exit 1; fi
