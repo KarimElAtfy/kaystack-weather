@@ -33,8 +33,10 @@ LIMITS = {
     # An issue listed at :12-:16 is stored at :45, so the age reaches 7 h 17 min
     # at :17; with 480, one DWD delay past :45 would mail.
     "mosmix": (540, 120),
-    # Yr is asked four times a day.
-    "yr": (480, 420),
+    # Yr is asked every 6 h and gets what MET last updated, which can be hours
+    # older: the 16:45 fetch on 2026-10-17 got 13:17, 9 h old by 22:17. 720
+    # allows for up to 6 h between two MET updates.
+    "yr": (720, 420),
 }
 
 
