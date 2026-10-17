@@ -1,0 +1,39 @@
+name = "Sesto Calende"
+slug = "sesto-calende"
+province = "VA"
+lat = 45.7240
+lon = 8.6344
+
+[reference]
+id = "ispra-jrc"
+name = "Ispra JRC"
+arpa_station = 1807
+lat = 45.8060
+lon = 8.6366
+elevation_m = 249
+sensors = { temperature = 32353, humidity = 32354, precipitation = 32355 }
+buddies = { precipitation = 8167 }
+
+# Night minima away from the lake. Over 2025 (365 days) the daily minimum here
+# averaged 2.6 °C below Ispra JRC.
+[inland]
+id = "varano-borghi"
+name = "Varano Borghi"
+arpa_station = 1375
+lat = 45.7664
+lon = 8.7123
+elevation_m = 241
+sensors = { temperature = 14528 }
+
+[airport]
+id = "limc"
+icao = "LIMC"
+wmo = 16066
+name = "Milano Malpensa"
+lat = 45.6300
+lon = 8.7231
+elevation_m = 234
+
+[radar]
+# Shifted north so the lake shows up to Locarno.
+view = { west = -361000, east = -241000, south = 371000, north = 491000 }

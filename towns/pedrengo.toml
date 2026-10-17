@@ -1,0 +1,32 @@
+name = "Pedrengo"
+slug = "pedrengo"
+province = "BG"
+lat = 45.6959
+lon = 9.7392
+
+[reference]
+id = "torre-boldone"
+name = "Torre Boldone"
+arpa_station = 889
+lat = 45.7190
+lon = 9.7102
+elevation_m = 311
+# No humidity or wind sensor at this station, so those stay raw model consensus for Pedrengo.
+sensors = { temperature = 8145, precipitation = 8161 }
+# Bergamo Goisis, 1.7 km away. Only used to cross-check the two sensors above.
+buddies = { temperature = 5864, precipitation = 5857 }
+
+[airport]
+id = "lime"
+icao = "LIME"
+wmo = 16076
+name = "Bergamo Orio al Serio"
+lat = 45.6689
+lon = 9.7003
+elevation_m = 238
+# Also forecast as a hidden point and scored against DWD MOSMIX and the METAR. Never listed as a town.
+benchmark = true
+
+[radar]
+# Metres on the DPC SRI grid: transverse Mercator centred on 42N 12.5E, WGS84, 1 km cells.
+view = { west = -275000, east = -155000, south = 354000, north = 474000 }

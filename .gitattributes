@@ -2,3 +2,8 @@
 
 .github/checkov.txt linguist-generated=true
 **/.terraform.lock.hcl linguist-generated=true
+pipeline/uv.lock linguist-generated=true
+pipeline/requirements.txt linguist-generated=true
+
+# Recorded responses are compared byte for byte in the tests.
+pipeline/tests/fixtures/** -text

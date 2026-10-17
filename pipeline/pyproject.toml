@@ -1,0 +1,48 @@
+[project]
+name = "meteo-pipeline"
+version = "0.1.0"
+description = "Collects weather observations and forecasts for Pedrengo and Sesto Calende into the lake."
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "azure-functions>=2.3.0",
+    "azure-identity>=1.26.0",
+    "azure-storage-blob>=12.31.0",
+    "duckdb>=1.5.6",
+    "numpy>=2.5.3",
+    "pillow>=12.3.0",
+    "requests>=2.34.2",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=2.4.0",
+    "pytest>=9.1.1",
+    "ruff>=0.16.10",
+    "types-requests>=2.33.0.20261006",
+]
+
+[tool.uv]
+package = false
+required-version = ">=0.13.0,<0.14"
+# New releases wait a week before they reach the lock file.
+exclude-newer = "7 days"
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "DTZ", "RUF"]
+
+[tool.mypy]
+files = ["function_app.py", "meteo", "scripts"]
+python_version = "3.13"
+# The Function runs on Linux; dry runs on Windows skip the Linux-only parts.
+platform = "linux"
+check_untyped_defs = true
+warn_unused_ignores = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-p no:cacheprovider"

@@ -1,0 +1,73 @@
+{
+ "frame_utc": "2026-10-15T17:00:00Z",
+ "crop": {
+  "row0": 57,
+  "col0": 117,
+  "rows": 350,
+  "cols": 450
+ },
+ "points": {
+  "torre-boldone": {
+   "x": -217196.4,
+   "y": 417003.4,
+   "row": 232,
+   "col": 382,
+   "crop_row": 175,
+   "crop_col": 265,
+   "rate_center": 0.03999999910593033,
+   "mean_3x3": 0.028
+  },
+  "ispra-jrc": {
+   "x": -300309.7,
+   "y": 430150.8,
+   "row": 219,
+   "col": 299,
+   "crop_row": 162,
+   "crop_col": 182,
+   "rate_center": 0.0,
+   "mean_3x3": 0.0
+  },
+  "varano-borghi": {
+   "x": -294634.5,
+   "y": 425467.6,
+   "row": 224,
+   "col": 305,
+   "crop_row": 167,
+   "crop_col": 188,
+   "rate_center": 0.0,
+   "mean_3x3": 0.0
+  },
+  "lime": {
+   "x": -218162.0,
+   "y": 411462.1,
+   "row": 238,
+   "col": 381,
+   "crop_row": 181,
+   "crop_col": 264,
+   "rate_center": 0.0,
+   "mean_3x3": 0.0
+  },
+  "pedrengo": {
+   "x": -215027.3,
+   "y": 414357.7,
+   "row": 235,
+   "col": 384,
+   "crop_row": 178,
+   "crop_col": 267,
+   "rate_center": 0.0,
+   "mean_3x3": 0.018
+  },
+  "sesto-calende": {
+   "x": -300921.9,
+   "y": 421045.6,
+   "row": 228,
+   "col": 299,
+   "crop_row": 171,
+   "crop_col": 182,
+   "rate_center": 0.0,
+   "mean_3x3": 0.0
+  }
+ },
+ "crop_sha256": "f038dc0624b94fcf28acd57b70b4ff80284e48525ab2e6011993862143afe09f",
+ "crop_bytes": 4670
+}

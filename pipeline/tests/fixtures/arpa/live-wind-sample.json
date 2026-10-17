@@ -1,0 +1,12 @@
+[{"idsensore":"14536","data":"2026-10-15T10:00:00.000","valore":"61","idoperatore":"1","stato":"VA"}
+,{"idsensore":"14536","data":"2026-10-15T10:00:00.000","valore":"52","idoperatore":"3","stato":"VA"}
+,{"idsensore":"14537","data":"2026-10-15T10:00:00.000","valore":"0.80","idoperatore":"1","stato":"VA"}
+,{"idsensore":"14537","data":"2026-10-15T10:00:00.000","valore":"1.50","idoperatore":"3","stato":"VA"}
+,{"idsensore":"14536","data":"2026-10-15T10:10:00.000","valore":"74","idoperatore":"1","stato":"VA"}
+,{"idsensore":"14536","data":"2026-10-15T10:10:00.000","valore":"74","idoperatore":"3","stato":"VA"}
+,{"idsensore":"14537","data":"2026-10-15T10:10:00.000","valore":"0.70","idoperatore":"1","stato":"VA"}
+,{"idsensore":"14537","data":"2026-10-15T10:10:00.000","valore":"1.40","idoperatore":"3","stato":"VA"}
+,{"idsensore":"14536","data":"2026-10-15T10:20:00.000","valore":"112","idoperatore":"1","stato":"VA"}
+,{"idsensore":"14536","data":"2026-10-15T10:20:00.000","valore":"80","idoperatore":"3","stato":"VA"}
+,{"idsensore":"14537","data":"2026-10-15T10:20:00.000","valore":"0.30","idoperatore":"1","stato":"VA"}
+,{"idsensore":"14537","data":"2026-10-15T10:20:00.000","valore":"1.10","idoperatore":"3","stato":"VA"}]
