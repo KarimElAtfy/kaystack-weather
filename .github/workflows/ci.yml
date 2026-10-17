@@ -18,6 +18,10 @@ env:
   ACTIONLINT_SHA256: 8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8
   ZIZMOR_VERSION: 1.31.0
   ZIZMOR_SHA256: bb4203c790f8d33e110dbeee2ac6d70911e233b93574ffc770aaa21ecd850302
+  UV_VERSION: 0.13.0
+  UV_SHA256: 1468ebd5a5541121837c5a2817b9972ba6090fa6caa3d142620850a47fb75154
+  OSV_SCANNER_VERSION: 2.6.0
+  OSV_SCANNER_SHA256: ca69b3d3cd08f889a49dc0a383122f71cc528b83803671df5fd874d97485b108
 
 jobs:
   changes:
@@ -27,6 +31,7 @@ jobs:
       contents: read
     outputs:
       infra: ${{ steps.paths.outputs.infra }}
+      python: ${{ steps.paths.outputs.python }}
       workflows: ${{ steps.paths.outputs.workflows }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -39,8 +44,7 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
         run: |
           if [ "$EVENT_NAME" != pull_request ]; then
-            echo "infra=true" >> "$GITHUB_OUTPUT"
-            echo "workflows=true" >> "$GITHUB_OUTPUT"
+            printf 'infra=true\npython=true\nworkflows=true\n' >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -50,12 +54,13 @@ jobs:
           echo "$changed"
 
           infra=false
+          python=false
           workflows=false
           if grep -qE '^(infra/|\.tflint\.hcl$|\.checkov\.yaml$)' <<< "$changed"; then infra=true; fi
+          if grep -qE '^(pipeline/|towns/)' <<< "$changed"; then python=true; fi
           # A change to CI runs every job, so it is tested by the jobs it touches.
-          if grep -q '^\.github/' <<< "$changed"; then infra=true; workflows=true; fi
-          echo "infra=$infra" >> "$GITHUB_OUTPUT"
-          echo "workflows=$workflows" >> "$GITHUB_OUTPUT"
+          if grep -q '^\.github/' <<< "$changed"; then infra=true; python=true; workflows=true; fi
+          printf 'infra=%s\npython=%s\nworkflows=%s\n' "$infra" "$python" "$workflows" >> "$GITHUB_OUTPUT"
 
   infra-static:
     needs: changes
@@ -106,6 +111,61 @@ jobs:
           for env in prod dev; do
             tofu -chdir=infra validate -var-file="$env.tfvars"
           done
+
+  python:
+    needs: changes
+    if: needs.changes.outputs.python == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: pipeline
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        run: |
+          curl -fsSLo /tmp/uv.tar.gz "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-x86_64-unknown-linux-gnu.tar.gz"
+          echo "${UV_SHA256}  /tmp/uv.tar.gz" | sha256sum -c -
+          sudo tar -xzf /tmp/uv.tar.gz -C /usr/local/bin --strip-components=1 uv-x86_64-unknown-linux-gnu/uv
+
+      - run: uv sync --locked
+      - run: uv run --no-sync ruff check
+      - run: uv run --no-sync ruff format --check
+      - run: uv run --no-sync mypy
+      - run: uv run --no-sync pytest
+
+      # The deploy package is built from requirements.txt, so it has to say
+      # exactly what uv.lock says.
+      - name: requirements.txt matches uv.lock
+        run: |
+          uv export --frozen --no-dev --no-emit-project --format requirements-txt -o requirements.txt
+          git diff --exit-code -- requirements.txt
+
+  deps:
+    needs: changes
+    if: needs.changes.outputs.python == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install osv-scanner
+        run: |
+          curl -fsSLo /tmp/osv-scanner "https://github.com/google/osv-scanner/releases/download/v${OSV_SCANNER_VERSION}/osv-scanner_linux_amd64"
+          echo "${OSV_SCANNER_SHA256}  /tmp/osv-scanner" | sha256sum -c -
+          chmod +x /tmp/osv-scanner
+
+      - name: osv-scanner
+        run: /tmp/osv-scanner scan source --lockfile pipeline/uv.lock
 
   workflows:
     needs: changes
@@ -199,7 +259,7 @@ jobs:
     # always() and not !cancelled(): a cancelled run has to leave a failed
     # ci-ok behind, because a skipped required check counts as passed.
     if: always()
-    needs: [changes, infra-static, workflows, plan-prod]
+    needs: [changes, infra-static, python, deps, workflows, plan-prod]
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions: {}
