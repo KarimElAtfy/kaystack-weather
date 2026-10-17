@@ -1,0 +1,71 @@
+name: scheduled
+
+on:
+  schedule:
+    - cron: "41 5 * * 1"
+  workflow_dispatch:
+
+permissions: {}
+
+env:
+  OSV_SCANNER_VERSION: 2.6.0
+  OSV_SCANNER_SHA256: ca69b3d3cd08f889a49dc0a383122f71cc528b83803671df5fd874d97485b108
+
+jobs:
+  drift:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write # OIDC sign-in as the plan identity
+    env:
+      ARM_USE_OIDC: "true"
+      ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID_PLAN }}
+      TF_IN_AUTOMATION: "1"
+    defaults:
+      run:
+        working-directory: infra
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install OpenTofu
+        run: bash ../.github/install-tofu.sh
+
+      - run: tofu init -input=false -lockfile=readonly -backend-config=prod.tfbackend -var-file=prod.tfvars
+
+      # Exit code 2 means Azure no longer matches the code; the list of what
+      # differs goes to the run summary, the values stay out of the public log.
+      - name: Prod matches the code
+        run: |
+          set +e
+          tofu plan -input=false -lock=false -detailed-exitcode -var-file=prod.tfvars -out=prod.tfplan > /dev/null
+          code=$?
+          set -e
+          if [ "$code" -eq 2 ]; then
+            { echo "Drift in prod:"; echo; echo '```'; tofu show -json -var-file=prod.tfvars prod.tfplan | jq -r -f ../.github/plan-changes.jq; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          fi
+          exit "$code"
+
+  dependencies:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install osv-scanner
+        run: |
+          curl -fsSLo /tmp/osv-scanner "https://github.com/google/osv-scanner/releases/download/v${OSV_SCANNER_VERSION}/osv-scanner_linux_amd64"
+          echo "${OSV_SCANNER_SHA256}  /tmp/osv-scanner" | sha256sum -c -
+          chmod +x /tmp/osv-scanner
+
+      # New advisories appear without any commit, so the lock is scanned weekly too.
+      - name: osv-scanner
+        run: /tmp/osv-scanner scan source --lockfile pipeline/uv.lock
