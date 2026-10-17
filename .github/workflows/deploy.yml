@@ -1,0 +1,144 @@
+name: deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "pipeline/**"
+      - "!pipeline/tests/**"
+      - "!pipeline/scripts/**"
+      - "towns/**"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
+jobs:
+  package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      UV_VERSION: 0.13.0
+      UV_SHA256: 1468ebd5a5541121837c5a2817b9972ba6090fa6caa3d142620850a47fb75154
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        run: |
+          curl -fsSLo /tmp/uv.tar.gz "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-x86_64-unknown-linux-gnu.tar.gz"
+          echo "${UV_SHA256}  /tmp/uv.tar.gz" | sha256sum -c -
+          sudo tar -xzf /tmp/uv.tar.gz -C /usr/local/bin --strip-components=1 uv-x86_64-unknown-linux-gnu/uv
+
+      # Only committed files go in, plus the dependencies built here for Linux
+      # under .python_packages, where the Functions host looks for them. The
+      # package then runs the exact wheels uv.lock pins, and the deploy needs no
+      # remote build, which has a 60 s limit for the whole install.
+      - name: Build the package
+        run: |
+          mkdir -p "$RUNNER_TEMP/src"
+          git archive --format=tar HEAD pipeline towns | tar -x -C "$RUNNER_TEMP/src"
+          cd "$RUNNER_TEMP/src/pipeline"
+          uv pip install --no-config --target .python_packages/lib/site-packages \
+            --python "$(cat .python-version)" --python-platform x86_64-manylinux_2_28 \
+            --only-binary :all: --require-hashes -r requirements.txt
+          rm -rf tests scripts pyproject.toml uv.lock .python-version
+          cp -r ../towns towns
+          zip -q -r "$RUNNER_TEMP/pipeline.zip" .
+          zipinfo -1 "$RUNNER_TEMP/pipeline.zip" | grep -v '^\.python_packages/'
+          ls -l "$RUNNER_TEMP/pipeline.zip"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: pipeline
+          path: ${{ runner.temp }}/pipeline.zip
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+
+  deploy:
+    needs: package
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment: release
+    permissions:
+      id-token: write # OIDC sign-in as the deploy identity
+    env:
+      AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      RESOURCE_GROUP: rg-meteo-prod
+      FUNCTION_APP: func-kaystack-meteo-prod
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: pipeline
+          path: ${{ runner.temp }}/package
+
+      - name: Sign in as deploy
+        run: |
+          token=$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://AzureADTokenExchange" | jq -r .value)
+          echo "::add-mask::$token"
+          az login --service-principal --username "$AZURE_CLIENT_ID" --tenant "$AZURE_TENANT_ID" \
+            --federated-token "$token" --allow-no-subscriptions --output none
+          az account set --subscription "$AZURE_SUBSCRIPTION_ID"
+
+      # az functionapp deployment source config-zip would also list the app
+      # settings and the host keys, which the deploy identity is not allowed to
+      # read. This is the same One Deploy call it makes, without those reads.
+      - name: Deploy the package
+        run: |
+          site="/subscriptions/$AZURE_SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP/providers/Microsoft.Web/sites/$FUNCTION_APP"
+          scm=$(az rest --method get --url "https://management.azure.com$site?api-version=2024-04-01" \
+            --query "properties.hostNameSslStates[?hostType=='Repository'].name | [0]" -o tsv)
+          bearer=$(az account get-access-token --query accessToken -o tsv)
+          echo "::add-mask::$bearer"
+          latest() {
+            curl -sS -o "$RUNNER_TEMP/latest.json" -w '%{http_code}' \
+              -H "Authorization: Bearer $bearer" "https://$scm/api/deployments/latest"
+          }
+
+          # The previous deployment stays at /latest until the new one shows up.
+          previous=""
+          [ "$(latest)" = 200 ] && previous=$(jq -r '.id // empty' "$RUNNER_TEMP/latest.json")
+
+          code=$(curl -sS -o "$RUNNER_TEMP/publish.txt" -w '%{http_code}' -X POST \
+            "https://$scm/api/publish?RemoteBuild=false&Deployer=github_actions" \
+            -H "Authorization: Bearer $bearer" -H "Content-Type: application/zip" \
+            --data-binary "@$RUNNER_TEMP/package/pipeline.zip")
+          echo "publish answered $code: $(cat "$RUNNER_TEMP/publish.txt")"
+          [ "$code" = 202 ]
+
+          # Read the same way az does for Flex apps: 202 while the deployment
+          # runs, then either a final status or a 404 once it is done. Kudu
+          # status 4 is success; 3 failed, 5 superseded, 6 partial, -1 cancelled.
+          running=false
+          for _ in $(seq 1 120); do
+            sleep 5
+            case "$(latest)" in
+              202) running=true ;;
+              404) if [ "$running" = true ]; then echo "deployed"; exit 0; fi ;;
+              200)
+                id=$(jq -r '.id // empty' "$RUNNER_TEMP/latest.json")
+                if [ -z "$id" ] || [ "$id" = "$previous" ]; then continue; fi
+                case "$(jq -r '.status' "$RUNNER_TEMP/latest.json")" in
+                  4) jq '{id, status, end_time}' "$RUNNER_TEMP/latest.json"; exit 0 ;;
+                  3 | 5 | 6 | -1)
+                    curl -sS -H "Authorization: Bearer $bearer" "https://$scm/api/deployments/$id/log" | jq -r '.[].message'
+                    exit 1
+                    ;;
+                esac
+                ;;
+            esac
+          done
+          echo "The deployment was still running after 10 minutes."
+          exit 1
