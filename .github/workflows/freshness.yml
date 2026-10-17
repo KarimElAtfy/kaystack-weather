@@ -28,7 +28,7 @@ jobs:
           "ensemble":   {"data": 420,  "checked": 120},
           "arpa":       {"data": 1080, "checked": 360},
           "mosmix":     {"data": 540,  "checked": 120},
-          "yr":         {"data": 480,  "checked": 420}
+          "yr":         {"data": 720,  "checked": 420}
         }
     steps:
       - name: Every source is recent
