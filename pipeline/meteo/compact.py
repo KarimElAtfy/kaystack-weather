@@ -13,8 +13,10 @@ import gzip
 import io
 import json
 import logging
+import sys
 import tempfile
 import time
+import types
 from collections.abc import Callable, Iterable
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
@@ -101,6 +103,13 @@ def run(
 
 
 def connect(tmp: Path):
+    # DuckDB imports __main__ on load to tell a script from a notebook, and the
+    # Python 3.13 worker on Azure has none: the import fails with "initialization
+    # failed". A module with a __file__ reads as a script.
+    if "__main__" not in sys.modules:
+        main = types.ModuleType("__main__")
+        main.__file__ = __file__
+        sys.modules["__main__"] = main
     import duckdb
 
     con = duckdb.connect()

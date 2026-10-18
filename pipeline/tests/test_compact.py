@@ -3,7 +3,10 @@ the shape the live dataset returns; their values are made up to hit each rule.""
 
 import gzip
 import json
+import subprocess
+import sys
 from datetime import UTC, date, datetime, timedelta
+from pathlib import Path
 
 import pytest
 from tables import compact_on_time, put_arpa, read_table
@@ -233,3 +236,23 @@ def test_a_day_near_the_open_meteo_expiry_keeps_its_model_tables(lake, all_towns
     jobs.compact_day(lake, all_towns, DAY, deadline=1e12, today=DAY + timedelta(days=86))
     assert lake.read("curated", compact.curated_name("nwp_hourly", DAY))[0] == b"complete"
     assert lake.read("curated", compact.completeness_name(DAY))[0] == b"{}"
+
+
+# The Azure worker runs the jobs with no __main__ module at all.
+WITHOUT_MAIN = """
+import pathlib, sys
+del sys.modules["__main__"]
+from meteo import compact
+print(compact.connect(pathlib.Path(sys.argv[1])).execute("SELECT 42").fetchone()[0])
+"""
+
+
+def test_duckdb_loads_in_a_worker_without_main(tmp_path):
+    out = subprocess.run(
+        [sys.executable, "-c", WITHOUT_MAIN, str(tmp_path)],
+        cwd=Path(__file__).resolve().parents[1],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert out.stdout.strip() == "42"
