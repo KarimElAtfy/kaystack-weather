@@ -29,7 +29,11 @@ LIMITS = {
     # D2-EPS and CH1-EPS runs land at R+2:45, so at :17 the newest start can be
     # 5 h 17 min old: 360 would leave 43 minutes for a late run.
     "ensemble": (420, 120),
-    "arpa": (1080, 360),
+    # ARPA stopped publishing on Sunday 2026-10-18: values ending about 04:20 UTC
+    # stayed the newest until after midnight, 21 h. It serves training and
+    # verification only, so 2880 matches the live pull's 48 h lookback: a longer
+    # stall leaves a gap that only the nightly 30-day pull fills.
+    "arpa": (2880, 360),
     # An issue listed at :12-:16 is stored at :45, so the age reaches 7 h 17 min
     # at :17; with 480, one DWD delay past :45 would mail.
     "mosmix": (540, 120),
