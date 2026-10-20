@@ -59,6 +59,6 @@ test('caches only content-hashed files for good', () => {
   const forever = config.routes.filter((route) =>
     route.headers?.['Cache-Control']?.includes('immutable')
   );
-  expect(forever.map((route) => route.route)).toEqual(['/_app/immutable/*']);
+  expect(forever.map((route) => route.route)).toEqual(['/_app/immutable/*', '/island/assets/*']);
   expect(headers['Cache-Control']).toBe('no-cache');
 });

@@ -4,3 +4,4 @@ build/
 test-results/
 playwright-report/
 src/generated/
+static/island/

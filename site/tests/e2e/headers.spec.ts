@@ -1,6 +1,7 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { expect, test } from '@playwright/test';
+import { freezeClock, useScenario } from './fixtures.ts';
 
 const config = JSON.parse(readFileSync('build/staticwebapp.config.json', 'utf8')) as {
   globalHeaders: Record<string, string>;
@@ -21,7 +22,9 @@ function pages(dir: string): string[] {
 }
 
 for (const url of pages('build')) {
-  test(`${url} loads under the policy with no violation`, async ({ page }) => {
+  test(`${url} loads under the policy with no violation`, async ({ page, context, baseURL }) => {
+    await useScenario(context, 'pioggia', baseURL ?? '');
+    await freezeClock(page);
     const problems: string[] = [];
     await page.exposeFunction('reportViolation', (text: string) => problems.push(text));
     await page.addInitScript(() => {
@@ -36,7 +39,7 @@ for (const url of pages('build')) {
     });
     page.on('pageerror', (error) => problems.push(error.message));
 
-    const response = await page.goto(url, { waitUntil: 'load' });
+    const response = await page.goto(url, { waitUntil: 'networkidle' });
     expect(response?.status()).toBe(200);
     expect(response?.headers()['content-security-policy']).toBe(
       config.globalHeaders['Content-Security-Policy']

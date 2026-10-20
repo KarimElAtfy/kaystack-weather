@@ -20,6 +20,8 @@
 <svelte:head>
   <title>{t('site.title_town', { paese: name })}</title>
   <meta name="description" content={t('site.description')} />
+  <!-- Built from the island manifest at build time; no data ever reaches it. -->
+  {@html data.island}
 </svelte:head>
 
 <a class="skip" href="#main">{t('site.skip')}</a>

@@ -62,9 +62,18 @@ export function statusFile(): Source<Status> {
   return { url: `${DATA}/status.json`, decode: decodeStatus, due: () => Infinity, lazy: true };
 }
 
+// In development `?now=2026-10-24T13:10:00Z` sets the page's clock, so the
+// fixtures, written for that Saturday, read as fresh. Builds leave it out.
+function clockShift(): number {
+  if (!import.meta.env.DEV) return 0;
+  const now = Date.parse(new URLSearchParams(location.search).get('now') ?? '');
+  return Number.isNaN(now) ? 0 : now - Date.now();
+}
+
 export function browserEnv(): Env {
+  const shift = clockShift();
   return {
-    now: () => Date.now(),
+    now: () => Date.now() + shift,
     hidden: () => document.visibilityState === 'hidden',
     online: () => navigator.onLine,
     wait: (ms, then) => {
