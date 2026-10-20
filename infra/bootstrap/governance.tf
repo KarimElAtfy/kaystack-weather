@@ -36,9 +36,13 @@ resource "azurerm_resource_group_policy_assignment" "allowed_locations" {
   resource_group_id    = each.value
   policy_definition_id = data.azurerm_policy_definition.allowed_locations.id
 
-  # The Static Web App is the one resource outside Italy North.
+  # The Static Web App is the one resource outside Italy North. West Europe
+  # stopped taking new customers, so it lives in East US 2 (ADR 7), and only
+  # the resource groups that can hold it admit that region.
   parameters = jsonencode({
-    listOfAllowedLocations = { value = ["italynorth", "westeurope"] }
+    listOfAllowedLocations = {
+      value = each.key == "shared" ? ["italynorth", "westeurope"] : ["italynorth", "westeurope", "eastus2"]
+    }
   })
 }
 
