@@ -58,6 +58,10 @@ export function radarFile(slug: string): Source<RadarFile> {
   };
 }
 
+// The sprite named by radar.json, next to it. Each update has a new name, so it
+// is read once, not followed.
+export const spriteUrl = (slug: string, name: string) => `${DATA}/v1/${slug}/${name}`;
+
 export function statusFile(): Source<Status> {
   return { url: `${DATA}/status.json`, decode: decodeStatus, due: () => Infinity, lazy: true };
 }
