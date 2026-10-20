@@ -34,6 +34,11 @@
     const night = isNight(data.clock, data.town.lat, data.town.lon);
     return fromMetar(metar.weather) ?? fromCover(metar.cloud_cover, night);
   });
+  // The name people use; an airport without one in the copy keeps the METAR's.
+  const airport = (m: { icao: string; name: string }) => {
+    const key = `airport.${m.icao}`;
+    return has(key) ? t(key) : m.name;
+  };
   const cover = (code: string | null | undefined) => {
     const key = `metar.cover.${code}`;
     return code && has(key) ? t(key) : null;
@@ -51,7 +56,7 @@
         {@const at = Date.parse(metar.observed_at)}
         {@const freshness = metarFreshness(metar, data.clock)}
         {@const source = t('now.source_metar', {
-          aeroporto: metar.name,
+          aeroporto: airport(metar),
           km: km(metar.distance_km),
           ora: hm(at),
           fa: ago(at, data.clock)

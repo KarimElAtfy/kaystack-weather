@@ -10,6 +10,9 @@ test('says when the forecast was issued, in Rome time', async ({ page }) => {
   await page.goto('/pedrengo');
   await expect(page.locator('#issued')).toHaveText('Emessa alle 14:00, 1 h 10 min fa.');
   await expect(page.locator('.trust strong')).toHaveText('Torre Boldone');
+  await expect(page.locator('#adesso .src').first()).toContainText(
+    'Aeroporto di Orio al Serio, a 4,3 km.'
+  );
 });
 
 test('tells when the data was last checked', async ({ page }) => {
