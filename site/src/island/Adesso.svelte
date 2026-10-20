@@ -18,6 +18,7 @@
   import { fromCover, fromMetar } from '#lib/symbols/pick.ts';
   import Sky from '#lib/symbols/Sky.svelte';
   import Icon from '#lib/symbols/Icon.svelte';
+  import { skyName } from '#lib/symbols/words.ts';
   import { ago, hm, isNight } from '#lib/time.ts';
   import type { TownData } from './town.svelte.ts';
 
@@ -33,10 +34,6 @@
     const night = isNight(data.clock, data.town.lat, data.town.lon);
     return fromMetar(metar.weather) ?? fromCover(metar.cloud_cover, night);
   });
-  const skyName = (key: string) => {
-    const name = `sky.${key}`;
-    return has(name) ? t(name) : '';
-  };
   const cover = (code: string | null | undefined) => {
     const key = `metar.cover.${code}`;
     return code && has(key) ? t(key) : null;
@@ -76,7 +73,7 @@
             </p>
           {/if}
           <div class="now-hero" class:stale-val={stale}>
-            {#if sky}<Sky {sky} size={56} label={skyName(sky.key)} />{/if}
+            {#if sky}<Sky {sky} size={56} label={skyName(sky)} />{/if}
             <p class="now-temp">
               <span class="vh">{t('now.temp_label')}: </span>{metar.temperature_c === null
                 ? t('state.nodata')

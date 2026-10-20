@@ -3,6 +3,7 @@ import { mount, type Component } from 'svelte';
 import { browserEnv } from '#lib/data/source.ts';
 import { TownData, type TownInfo } from './town.svelte.ts';
 import Adesso from './Adesso.svelte';
+import H48 from './H48.svelte';
 import Issued from './Issued.svelte';
 import Refreshed from './Refreshed.svelte';
 
@@ -20,4 +21,5 @@ if (main?.dataset.town) {
   place('issued', Issued);
   place('refreshed', Refreshed);
   place('adesso-body', Adesso);
+  place('ore48-body', H48);
 }
