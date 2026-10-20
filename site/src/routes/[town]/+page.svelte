@@ -33,6 +33,7 @@
       <h1>{name} <span class="prov">{named(`town.province.${town.slug}`)}</span></h1>
       <p class="trust">
         {station[0]}<strong>{town.station}</strong>{station[1]}
+        <a href="/come-funziona#stazione">{t('trust.why')}</a>
         <span id="statusline">{t('state.loading')}</span>
       </p>
       <p id="announce" class="vh" role="status"></p>
