@@ -1,0 +1,26 @@
+{
+ "schema": "now/1",
+ "license": "CC BY-SA 4.0",
+ "attribution": "Radar-DPC (CC BY-SA 4.0); METAR: NOAA Aviation Weather Center",
+ "generated_at": "2026-10-24T12:51:00Z",
+ "town": "sesto-calende",
+ "reference": {
+  "name": "Ispra JRC",
+  "distance_km": 9.1
+ },
+ "metar": {
+  "icao": "LIMC",
+  "name": "Milano Malpensa",
+  "distance_km": 12.5,
+  "observed_at": "2026-10-24T12:50:00Z",
+  "temperature_c": 14,
+  "dew_point_c": null,
+  "wind_kmh": 15,
+  "wind_dir_deg": 210,
+  "gust_kmh": null,
+  "visibility_m": null,
+  "weather": "-SHRA",
+  "stale_after_min": 90
+ },
+ "radar": null
+}

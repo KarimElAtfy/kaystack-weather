@@ -1,0 +1,28 @@
+{
+ "schema": "status/1",
+ "license": "CC BY-SA 4.0",
+ "attribution": "Open-Meteo.com, Radar-DPC, NOAA Aviation Weather Center, ARPA Lombardia",
+ "generated_at": "2026-10-24T13:09:00Z",
+ "sources": {
+  "metar": {
+   "checked_at": "2026-10-24T13:07:00Z",
+   "data_time": "2026-10-24T12:50:00Z",
+   "parts": {}
+  },
+  "radar": {
+   "checked_at": "2026-10-24T13:07:00Z",
+   "data_time": "2026-10-24T13:05:00Z",
+   "parts": {}
+  },
+  "open-meteo": {
+   "checked_at": "2026-10-24T12:45:00Z",
+   "data_time": "2026-10-24T09:00:00Z",
+   "parts": {}
+  },
+  "arpa": {
+   "checked_at": "2026-10-24T11:40:00Z",
+   "data_time": "2026-10-24T05:20:00Z",
+   "parts": {}
+  }
+ }
+}
