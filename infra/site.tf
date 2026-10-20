@@ -15,3 +15,14 @@ resource "azurerm_static_web_app" "site" {
 
   tags = local.tags
 }
+
+# With cname-delegation the platform checks, while the domain is being added,
+# that its CNAME already points at the default host name, so the record at the
+# registrar has to exist before this is applied.
+resource "azurerm_static_web_app_custom_domain" "site" {
+  count = var.site_domain == null ? 0 : 1
+
+  static_web_app_id = azurerm_static_web_app.site.id
+  domain_name       = var.site_domain
+  validation_type   = "cname-delegation"
+}
