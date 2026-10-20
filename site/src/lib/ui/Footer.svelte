@@ -13,7 +13,7 @@
         <p class="space">{t('footer.credits')}</p>
       </div>
       <div>
-        <nav>
+        <nav aria-label={t('footer.nav_label')}>
           <ul>
             <li>
               <a href="https://github.com/KarimElAtfy/kaystack-weather">{t('footer.code')}</a>
