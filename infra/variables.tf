@@ -32,3 +32,8 @@ variable "immutable_days" {
   type        = number
   description = "Time-based retention on the forecasts and legacy containers, 0 for none. A lake holding protected blobs cannot be deleted, so dev has none."
 }
+
+variable "site_domain" {
+  type        = string
+  description = "The site's own domain, or null for none. Its CNAME has to point at site_host_name before the apply."
+}
