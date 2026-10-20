@@ -97,8 +97,7 @@ function group(code: string): string {
   const showers = descriptors.includes('SH');
   let text: string;
   if (descriptors.includes('TS')) text = keys.length ? `${t('wx.TS_with')} ${words}` : t('wx.TS');
-  // The copy has no word yet for showers of nothing named, as in VCSH.
-  else if (showers && !keys.length) return t('wx.unknown', { codice: code });
+  else if (showers && !keys.length) text = t('wx.SH_alone');
   else if (showers) text = `${t('wx.SH')} ${words}`;
   else {
     text = words;

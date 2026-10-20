@@ -69,7 +69,8 @@ test('puts METAR weather groups into Italian', () => {
   expect(weather('-RA BR')).toBe('Pioggia debole, foschia');
   expect(weather('-SHRA')).toBe('Rovesci di pioggia deboli');
   expect(weather('+TSRA')).toBe('Temporale con pioggia forte');
-  expect(weather('VCSH')).toBe('Fenomeno non riconosciuto (VCSH)');
+  expect(weather('VCSH')).toBe('Rovesci nelle vicinanze');
+  expect(weather('VCTS')).toBe('Temporale nelle vicinanze');
   expect(weather('BCFG')).toBe('Nebbia a banchi');
   expect(weather('XXYY')).toBe('Fenomeno non riconosciuto (XXYY)');
   expect(weather('')).toBeNull();
