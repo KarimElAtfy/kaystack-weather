@@ -24,3 +24,13 @@ repos:
         entry: uv run --project pipeline --frozen ruff format
         language: system
         types: [python]
+
+      # prettier and its Svelte plugin come from site/package-lock.json, the
+      # same versions CI runs. The plugin is named by path in site/.prettierrc
+      # because this hook runs from the repo root.
+      - id: prettier
+        name: prettier
+        entry: node site/node_modules/prettier/bin/prettier.cjs --write --ignore-unknown
+        language: system
+        files: ^site/
+        exclude: ^site/package-lock\.json$
