@@ -200,42 +200,44 @@ One line under the station sentence, always the same height (two lines reserved)
 
 ## Radar
 
-| chiave                    | dove                                           | max  | testo                                                                 |
-| ------------------------- | ---------------------------------------------- | ---- | --------------------------------------------------------------------- |
-| `radar.h2`                | titolo della sezione                           | 20   | Radar                                                                 |
-| `radar.sub`               | sotto il titolo                                | riga | L'ultima ora osservata, un'immagine ogni 5 minuti.                    |
-| `radar.map_label`         | descrizione della mappa per lettori di schermo | riga | Mappa del radar intorno a {paese}, immagine delle {ora}. {sintesi}    |
-| `radar.observed`          | etichetta sull'immagine                        | 12   | osservato                                                             |
-| `radar.forecast`          | etichetta sull'immagine, dalla v1.1            | 12   | previsto                                                              |
-| `radar.play`              | pulsante                                       | 10   | Avvia                                                                 |
-| `radar.pause`             | pulsante                                       | 10   | Ferma                                                                 |
-| `radar.latest`            | pulsante                                       | 12   | Ultima                                                                |
-| `radar.slider`            | nome del cursore del tempo                     | riga | Ora dell'immagine                                                     |
-| `radar.frame_missing`     | sull'immagine, quando manca un fotogramma      | 30   | immagine mancante                                                     |
-| `radar.legend_title`      | titolo della legenda                           | 30   | Pioggia (mm/h)                                                        |
-| `radar.legend_nodata`     | legenda                                        | 16   | nessun dato                                                           |
-| `radar.class.1`           | legenda, prima classe                          | 14   | molto debole                                                          |
-| `radar.class.2`           | legenda                                        | 14   | debole                                                                |
-| `radar.class.3`           | legenda                                        | 14   | moderata                                                              |
-| `radar.class.4`           | legenda                                        | 14   | forte                                                                 |
-| `radar.class.5`           | legenda                                        | 14   | molto forte                                                           |
-| `radar.class.6`           | legenda, ultima classe                         | 14   | nubifragio                                                            |
-| `radar.rings`             | legenda degli anelli                           | riga | Anelli a 10, 25 e 50 km dal paese.                                    |
-| `radar.over`              | legenda, ultima classe                         | 10   | oltre {v}                                                             |
-| `radar.summary`           | sotto la mappa, cambia con l'immagine          | riga | Alle {ora}: {qui} {vicino}                                            |
-| `radar.sum_here`          | parte della frase sotto la mappa               | riga | sul paese piove ({classe}).                                           |
-| `radar.sum_here_none`     | parte della frase sotto la mappa               | riga | sul paese non piove.                                                  |
-| `radar.sum_near`          | parte della frase sotto la mappa               | riga | Entro 10 km la pioggia più forte è {classe}.                          |
-| `radar.sum_near_none`     | parte della frase sotto la mappa               | riga | Entro 10 km non piove.                                                |
-| `radar.probe_hint`        | sotto la legenda                               | riga | Tocca la mappa per leggere la pioggia in un punto.                    |
-| `radar.probe`             | sotto la mappa, dopo aver toccato un punto     | riga | A {km} a {dir} di {paese}: {valore}.                                  |
-| `radar.probe_town`        | sotto la mappa, punto sul paese                | riga | Su {paese}: {valore}.                                                 |
-| `radar.probe_dry`         | valore del punto toccato                       | 16   | non piove                                                             |
-| `radar.credit`            | sotto l'immagine, sempre visibile              | riga | Radar: Dipartimento della Protezione Civile (Radar-DPC), CC BY-SA 4.0 |
-| `radar.basemap_credit`    | sotto l'immagine                               | riga | Mappa: Natural Earth.                                                 |
-| `radar.unavailable`       | al posto della mappa                           | riga | Radar non disponibile.                                                |
-| `radar.unavailable_since` | sotto                                          | riga | L'ultima immagine arrivata è delle {ora}, {fa}.                       |
-| `radar.stale`             | sopra la mappa, se le immagini sono vecchie    | riga | Il radar non si aggiorna dalle {ora}: le immagini sono di {fa}.       |
+| chiave                    | dove                                                                  | max  | testo                                                                 |
+| ------------------------- | --------------------------------------------------------------------- | ---- | --------------------------------------------------------------------- |
+| `radar.h2`                | titolo della sezione                                                  | 20   | Radar                                                                 |
+| `radar.sub`               | sotto il titolo                                                       | riga | L'ultima ora osservata, un'immagine ogni 5 minuti.                    |
+| `radar.map_label`         | descrizione della mappa per lettori di schermo                        | riga | Mappa del radar intorno a {paese}, immagine delle {ora}. {sintesi}    |
+| `radar.observed`          | etichetta sull'immagine                                               | 12   | osservato                                                             |
+| `radar.forecast`          | etichetta sull'immagine, dalla v1.1                                   | 12   | previsto                                                              |
+| `radar.play`              | pulsante                                                              | 10   | Avvia                                                                 |
+| `radar.pause`             | pulsante                                                              | 10   | Ferma                                                                 |
+| `radar.latest`            | pulsante                                                              | 12   | Ultima                                                                |
+| `radar.slider`            | nome del cursore del tempo                                            | riga | Ora dell'immagine                                                     |
+| `radar.frame_missing`     | nel cursore e nella frase, quando manca un fotogramma                 | 30   | immagine mancante                                                     |
+| `radar.frame_missing_box` | riquadro sopra la mappa velata, quando manca un fotogramma            | riga | Manca l'immagine delle {ora}.                                         |
+| `radar.loading`           | riquadro sopra la mappa velata, finché le immagini non sono disegnate | 30   | Carico le immagini                                                    |
+| `radar.legend_title`      | titolo della legenda                                                  | 30   | Pioggia (mm/h)                                                        |
+| `radar.legend_nodata`     | legenda                                                               | 16   | nessun dato                                                           |
+| `radar.class.1`           | legenda, prima classe                                                 | 14   | molto debole                                                          |
+| `radar.class.2`           | legenda                                                               | 14   | debole                                                                |
+| `radar.class.3`           | legenda                                                               | 14   | moderata                                                              |
+| `radar.class.4`           | legenda                                                               | 14   | forte                                                                 |
+| `radar.class.5`           | legenda                                                               | 14   | molto forte                                                           |
+| `radar.class.6`           | legenda, ultima classe                                                | 14   | nubifragio                                                            |
+| `radar.rings`             | legenda degli anelli                                                  | riga | Anelli a 10, 25 e 50 km dal paese.                                    |
+| `radar.over`              | legenda, ultima classe                                                | 10   | oltre {v}                                                             |
+| `radar.summary`           | sotto la mappa, cambia con l'immagine                                 | riga | Alle {ora}: {qui} {vicino}                                            |
+| `radar.sum_here`          | parte della frase sotto la mappa                                      | riga | sul paese piove ({classe}).                                           |
+| `radar.sum_here_none`     | parte della frase sotto la mappa                                      | riga | sul paese non piove.                                                  |
+| `radar.sum_near`          | parte della frase sotto la mappa                                      | riga | Entro 10 km la pioggia più forte è {classe}.                          |
+| `radar.sum_near_none`     | parte della frase sotto la mappa                                      | riga | Entro 10 km non piove.                                                |
+| `radar.probe_hint`        | sotto la legenda                                                      | riga | Tocca la mappa per leggere la pioggia in un punto.                    |
+| `radar.probe`             | sotto la mappa, dopo aver toccato un punto                            | riga | A {km} a {dir} di {paese}: {valore}.                                  |
+| `radar.probe_town`        | sotto la mappa, punto sul paese                                       | riga | Su {paese}: {valore}.                                                 |
+| `radar.probe_dry`         | valore del punto toccato                                              | 16   | non piove                                                             |
+| `radar.credit`            | sotto l'immagine, sempre visibile                                     | riga | Radar: Dipartimento della Protezione Civile (Radar-DPC), CC BY-SA 4.0 |
+| `radar.basemap_credit`    | sotto l'immagine                                                      | riga | Mappa: Natural Earth.                                                 |
+| `radar.unavailable`       | al posto della mappa                                                  | riga | Radar non disponibile.                                                |
+| `radar.unavailable_since` | sotto                                                                 | riga | L'ultima immagine arrivata è delle {ora}, {fa}.                       |
+| `radar.stale`             | sopra la mappa, se le immagini sono vecchie                           | riga | Il radar non si aggiorna dalle {ora}: le immagini sono di {fa}.       |
 
 ## Stati: caricamento, dati vecchi, dati mancanti, fuori linea
 
@@ -476,6 +478,14 @@ La pioggia
 
 Per ogni ora contiamo quanti modelli danno almeno 0,2 mm, per ogni giorno quanti ne danno almeno 1 mm. "7 modelli su 10" vuol dire questo, e non una probabilità del 70%. La quantità che vedi nella tabella è la media dei modelli, senza correzione. Una vera probabilità di pioggia, misurata e calibrata, arriverà con la versione 1.0.
 
+#### page.how.h_symbols
+
+I simboli
+
+#### page.how.symbols
+
+Il simbolo del cielo viene dalle nuvole previste e da quanti modelli danno pioggia. Una goccia vuota vuol dire pioggia possibile: la dà qualche modello, ma meno della metà. Le gocce piene compaiono quando la dà almeno la metà dei modelli, e sono una, due o tre secondo la quantità media. Nebbia, temporale e neve compaiono solo in Adesso, perché vengono dal bollettino dell'aeroporto.
+
 #### page.how.h_far
 
 Giorni 8, 9 e 10
@@ -538,7 +548,7 @@ Simboli del cielo: disegnati per questo sito, con la stessa licenza del codice.
 
 #### page.sources.ours
 
-Le previsioni che pubblichiamo: licenza da decidere (proposta: CC BY-SA 4.0). Il codice del sito e della pipeline: licenza MIT.
+Le previsioni che pubblichiamo hanno licenza CC BY-SA 4.0. Il codice del sito e della pipeline ha licenza MIT.
 
 #### page.privacy.p1
 
