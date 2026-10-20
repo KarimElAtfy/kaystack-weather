@@ -314,11 +314,18 @@ a:hover {
   letter-spacing: 0;
 }
 .trust {
+  /* Room for the issue time, which arrives with the data. */
+  min-height: 4.5em;
   margin-top: var(--sp-2);
   color: var(--text-2);
   font-size: var(--fs-sm);
   line-height: 1.5;
   max-width: 62ch;
+}
+@media (min-width: 560px) {
+  .trust {
+    min-height: 3em;
+  }
 }
 .trust strong {
   color: var(--text);
@@ -441,7 +448,8 @@ a:hover {
   color: var(--text-2);
 }
 
-/* Loading: the same heights the blocks have once their data arrives. */
+/* Loading: about the heights the blocks have once their data arrives, measured
+   on the fixtures at each width, so the page barely moves when it does. */
 .skel {
   background: var(--surface-2);
   border-radius: 6px;
@@ -452,13 +460,34 @@ a:hover {
   font-size: var(--fs-sm);
 }
 .skel-now {
-  min-height: 300px;
+  min-height: 580px;
 }
 .skel-48 {
-  min-height: 520px;
+  min-height: 1040px;
 }
 .skel-10 {
-  min-height: 560px;
+  min-height: 720px;
+}
+@media (min-width: 560px) {
+  .skel-now {
+    min-height: 470px;
+  }
+  .skel-48 {
+    min-height: 920px;
+  }
+  .skel-10 {
+    min-height: 685px;
+  }
+}
+@media (min-width: 720px) {
+  .skel-now {
+    min-height: 370px;
+  }
+}
+@media (min-width: 1100px) {
+  .skel-now {
+    min-height: 292px;
+  }
 }
 .skel-radar {
   aspect-ratio: 1 / 1;
