@@ -112,14 +112,47 @@
   font-size: var(--fs-xs);
   color: var(--text-2);
 }
-.map .missing {
+/* Over a frame with nothing painted, loading or missing: the no-data hatch,
+   under the rings and labels, and a box that says why. The box sits low so the
+   town at the centre stays in sight while scrubbing. */
+.map .veil {
   position: absolute;
   inset: 0;
+  opacity: 0.6;
+  background: repeating-linear-gradient(135deg, var(--nodata) 0 2px, transparent 2px 5px);
+}
+.map .veil-box {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  /* 8% is where the scale bar starts: a few pixels more leave a gap above it. */
+  bottom: calc(8% + 5px);
   display: flex;
-  align-items: center;
   justify-content: center;
+  text-align: center;
+  pointer-events: none;
+}
+.map .veil-box p {
+  background: var(--surface);
+  padding: var(--sp-2) var(--sp-4);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
   font-weight: 600;
-  color: var(--text-2);
+  /* At 320 px the message takes two lines; kept tight so the town name above stays clear. */
+  line-height: 1.3;
+}
+@media (max-width: 399px) {
+  /* Smaller below 400 px, so the message keeps to one line and more of the map shows. */
+  .map .veil-box p {
+    font-size: var(--fs-sm);
+  }
+}
+@media (max-width: 359px) {
+  /* 80% of a 262 px map leaves 176 px inside the box for 191 px of text. */
+  .map .veil-box {
+    left: 6%;
+    right: 6%;
+  }
 }
 .map-empty {
   aspect-ratio: 1 / 1;

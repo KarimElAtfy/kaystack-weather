@@ -21,6 +21,8 @@
   let chosen = $state<number | null>(null);
   const shown = $derived(chosen ?? last);
   const frame = $derived(radar?.frames[shown]);
+  // Until the sprite is decoded nothing is painted, and a clean map would read as dry.
+  const loading = $derived(!!radar && !frames && !data.spriteFailed);
   const lastTime = $derived(radar?.frames.at(-1)?.time ?? null);
   const freshness = $derived(
     lastTime
@@ -189,6 +191,7 @@
         ><use href="{map}#under" /></svg
       >
       <canvas bind:this={canvas} {width} {height}></canvas>
+      {#if loading || frame?.missing}<div class="veil" aria-hidden="true"></div>{/if}
       <svg viewBox="0 0 {width} {height}" aria-hidden="true">
         <use href="{map}#over" />
         {#each rings as km (km)}
@@ -221,13 +224,19 @@
           >
         </g>
       </svg>
-      {#if frame}
+      {#if frame && !loading}
         <div class="stamp">{hm(Date.parse(frame.time))}<span>{t('radar.observed')}</span></div>
       {/if}
-      {#if frame?.missing}<div class="missing">{t('radar.frame_missing')}</div>{/if}
+      {#if loading}
+        <div class="veil-box"><p>{t('radar.loading')}</p></div>
+      {:else if frame?.missing}
+        <div class="veil-box">
+          <p>{t('radar.frame_missing_box', { ora: hm(Date.parse(frame.time)) })}</p>
+        </div>
+      {/if}
     </div>
     <div class="controls">
-      <button class="btn play" type="button" onclick={toggle}>
+      <button class="btn play" type="button" disabled={loading} onclick={toggle}>
         <Icon name={playing ? 'pause' : 'play'} />{playing ? t('radar.pause') : t('radar.play')}
       </button>
       <input
@@ -236,18 +245,25 @@
         max={last}
         step="1"
         value={shown}
+        disabled={loading}
         oninput={(event) => {
           stop();
           chosen = Number(event.currentTarget.value);
         }}
         aria-label={t('radar.slider')}
-        aria-valuetext={frame ? sentence || hm(Date.parse(frame.time)) : undefined}
+        aria-valuetext={loading
+          ? t('radar.loading')
+          : frame
+            ? sentence || hm(Date.parse(frame.time))
+            : undefined}
       />
-      <span class="ftime" aria-hidden="true">{frame ? hm(Date.parse(frame.time)) : ''}</span>
+      <span class="ftime" aria-hidden="true"
+        >{frame && !loading ? hm(Date.parse(frame.time)) : ''}</span
+      >
       <button
         class="btn latest"
         type="button"
-        disabled={shown === last && !playing}
+        disabled={loading || (shown === last && !playing)}
         onclick={() => {
           stop();
           chosen = null;
