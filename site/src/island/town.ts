@@ -1,11 +1,13 @@
 // Mounts the data blocks into the prerendered town page.
 import { mount, type Component } from 'svelte';
+import '#lib/radar/radar.css';
 import { browserEnv } from '#lib/data/source.ts';
 import { TownData, type TownInfo } from './town.svelte.ts';
 import Adesso from './Adesso.svelte';
 import Announce from './Announce.svelte';
 import D10 from './D10.svelte';
 import H48 from './H48.svelte';
+import Radar from './Radar.svelte';
 import Refreshed from './Refreshed.svelte';
 import Sources from './Sources.svelte';
 import Status from './Status.svelte';
@@ -50,6 +52,7 @@ if (main?.dataset.town) {
   place('adesso-body', Adesso);
   place('ore48-body', H48);
   place('giorni10-body', D10);
+  place('radar-body', Radar);
   place('sources', Sources);
   sectionBar();
 }

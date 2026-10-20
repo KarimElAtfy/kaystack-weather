@@ -11,6 +11,15 @@ export const SCENARIOS = ['pioggia', 'asciutto', 'vecchi', 'mancanti'] as const;
 export type Scenario = (typeof SCENARIOS)[number];
 
 export async function useScenario(context: BrowserContext, scenario: Scenario, origin: string) {
+  // The radar maps come from the pipeline later; the stand-ins answer for them.
+  await context.route(`${origin}/radar/*.svg`, (route) =>
+    route.fulfill({
+      contentType: 'image/svg+xml',
+      body: readFileSync(
+        join('tests/fixtures/maps', new URL(route.request().url()).pathname.slice(7))
+      )
+    })
+  );
   await context.route(`${ACCOUNT}/public/**`, (route) => {
     const path = new URL(route.request().url()).pathname.replace(/^\/public\//, '');
     const file = join('tests/fixtures', scenario, path);
