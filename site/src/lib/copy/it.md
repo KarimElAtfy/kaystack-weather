@@ -61,6 +61,26 @@ Numbers, dates and times are formatted by the code in Italian (comma decimals, 2
 | `trust.issued_day` | seconda frase, se la previsione è di un altro giorno | riga | Emessa {giorno} alle {ora}, {fa}.                                      |
 | `trust.why`        | link alla spiegazione                                | 30   | Perché una stazione?                                                   |
 
+## Riga di stato (sotto la riga di fiducia)
+
+One line under the station sentence, always the same height (two lines reserved), so nothing moves when the state changes. It shows one message, in this order of priority: offline, unreachable, missing, old, stale, normal. Every message stays within 62 characters with its values filled in. The hidden announcements are read once by screen readers when the state changes; ages are never in them.
+
+| chiave               | dove                                                  | max | testo                                                          |
+| -------------------- | ----------------------------------------------------- | --- | -------------------------------------------------------------- |
+| `status.ok`          | riga di stato, normale (oggi)                         | 62  | Emessa alle {ora}, {fa}.                                       |
+| `status.ok_day`      | riga di stato, normale (altro giorno)                 | 62  | Emessa {giorno} alle {ora}, {fa}.                              |
+| `status.stale`       | riga di stato, previsione in ritardo (avviso)         | 62  | Emessa alle {ora}, {fa}: di solito si aggiorna ogni ora.       |
+| `status.old`         | riga di stato, previsione di più di un giorno (grave) | 62  | Previsione vecchia: emessa {giorno} alle {ora}.                |
+| `status.missing`     | riga di stato, nessuna previsione                     | 62  | Previsione non disponibile in questo momento.                  |
+| `status.offline`     | riga di stato, dispositivo offline                    | 62  | Sei offline: dati scaricati alle {ora}.                        |
+| `status.failed`      | riga di stato, letture fallite con dati vecchi        | 62  | Non riusciamo a scaricare i dati: gli ultimi sono delle {ora}. |
+| `status.failed_none` | riga di stato, letture fallite senza dati             | 62  | Non riusciamo a scaricare i dati: riproviamo tra un minuto.    |
+| `announce.stale`     | annuncio nascosto                                     | 40  | La previsione non è aggiornata.                                |
+| `announce.old`       | annuncio nascosto                                     | 40  | La previsione è vecchia.                                       |
+| `announce.offline`   | annuncio nascosto                                     | 40  | Sei offline.                                                   |
+| `announce.failed`    | annuncio nascosto                                     | 40  | Non riusciamo a scaricare i dati.                              |
+| `announce.back`      | annuncio nascosto, di nuovo in linea                  | 40  | Di nuovo in linea.                                             |
+
 ## Adesso
 
 | chiave               | dove                                                                                  | max  | testo                                                           |
