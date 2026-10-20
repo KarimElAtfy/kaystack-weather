@@ -2,6 +2,7 @@
 import { mount, type Component } from 'svelte';
 import { browserEnv } from '#lib/data/source.ts';
 import { TownData, type TownInfo } from './town.svelte.ts';
+import Adesso from './Adesso.svelte';
 import Issued from './Issued.svelte';
 import Refreshed from './Refreshed.svelte';
 
@@ -11,9 +12,12 @@ if (main?.dataset.town) {
   const place = (id: string, block: Component<{ data: TownData }>) => {
     const target = document.getElementById(id);
     if (!target) return;
+    // The block draws its own placeholder, the same as the prerendered one.
     target.replaceChildren();
+    target.classList.remove(...[...target.classList].filter((name) => name.startsWith('skel')));
     mount(block, { target, props: { data } });
   };
   place('issued', Issued);
   place('refreshed', Refreshed);
+  place('adesso-body', Adesso);
 }
