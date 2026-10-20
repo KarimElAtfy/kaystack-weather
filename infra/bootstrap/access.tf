@@ -107,14 +107,16 @@ resource "azurerm_role_definition" "name_check" {
 }
 
 # A custom domain on the Static Web App reports its progress on the
-# subscription, under the app's region, and azurerm polls it there.
+# subscription, under the app's region, and azurerm polls it there. The check
+# is on Microsoft.Web/locations/staticSitesOperationStatuses/read, which is not
+# a registered provider operation, so a role can only grant it by wildcard.
 resource "azurerm_role_definition" "site_operations" {
   name        = "Meteo site operations"
   scope       = data.azurerm_subscription.current.id
   description = "Read the status of Static Web App operations, which Azure keeps on the subscription."
 
   permissions {
-    actions = ["Microsoft.Web/locations/staticSitesOperationStatuses/read"]
+    actions = ["Microsoft.Web/locations/*/read"]
   }
 
   assignable_scopes = [data.azurerm_subscription.current.id]
