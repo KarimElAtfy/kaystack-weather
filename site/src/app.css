@@ -997,6 +997,37 @@ table.data .warr {
   vertical-align: -3px;
   margin-right: 2px;
 }
+/* Below 360 px the wind needs room for its speed and gusts on two lines like
+   the other columns; the letters give the direction, so the arrow goes. The
+   other columns keep just their widest word, with thinner padding. */
+@media (max-width: 359px) {
+  table.data th,
+  table.data td {
+    padding-left: 3px;
+    padding-right: 3px;
+  }
+  table.data col.c-time {
+    width: 40px;
+  }
+  table.data col.c-sky {
+    width: 42px;
+  }
+  table.data col.c-temp {
+    width: 62px;
+  }
+  table.data col.c-rain {
+    width: 50px;
+  }
+  table.data .warr {
+    display: none;
+  }
+  /* A wider font, or "ora legale" under the hour, wraps instead of spilling
+     into the next column. */
+  table.data td .sub,
+  table.data tbody th .sub {
+    white-space: normal;
+  }
+}
 table.data tr.night td,
 table.data tr.night th[scope='row'] {
   background: color-mix(in srgb, var(--surface-2) 45%, transparent);
