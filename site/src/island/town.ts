@@ -10,6 +10,29 @@ import Issued from './Issued.svelte';
 import Refreshed from './Refreshed.svelte';
 import Sources from './Sources.svelte';
 
+// Marks the section being read in the section bar. On wide screens the radar
+// sits in its own column and is never "the" section being read.
+function sectionBar() {
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('.sections a')];
+  const sections = links.map((link) => document.getElementById(link.hash.slice(1)));
+  const mark = () => {
+    const wide = window.matchMedia('(min-width: 1024px)').matches;
+    let current = sections[0];
+    for (const section of sections) {
+      if (
+        section &&
+        !(wide && section.id === 'radar') &&
+        section.getBoundingClientRect().top < 120
+      ) {
+        current = section;
+      }
+    }
+    links.forEach((link, i) => link.setAttribute('aria-current', String(sections[i] === current)));
+  };
+  window.addEventListener('scroll', mark, { passive: true });
+  mark();
+}
+
 const main = document.querySelector<HTMLElement>('[data-town]');
 if (main?.dataset.town) {
   const data = new TownData(JSON.parse(main.dataset.town) as TownInfo, browserEnv());
@@ -28,4 +51,5 @@ if (main?.dataset.town) {
   place('giorni10-body', D10);
   place('banners', Banners);
   place('sources', Sources);
+  sectionBar();
 }
