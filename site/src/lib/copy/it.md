@@ -63,36 +63,38 @@ Numbers, dates and times are formatted by the code in Italian (comma decimals, 2
 
 ## Adesso
 
-| chiave               | dove                                                              | max  | testo                                                           |
-| -------------------- | ----------------------------------------------------------------- | ---- | --------------------------------------------------------------- |
-| `now.h2`             | titolo della sezione                                              | 20   | Adesso                                                          |
-| `now.measured`       | etichetta accanto al titolo: distingue le misure dalle previsioni | 30   | misurato, non previsto                                          |
-| `now.measured_short` | etichetta accanto al titolo Radar                                 | 12   | osservato                                                       |
-| `now.temp_label`     | nome della temperatura grande, per lettori di schermo             | riga | Temperatura misurata                                            |
-| `now.source_metar`   | sotto la temperatura                                              | riga | Aeroporto di {aeroporto}, a {km}. Bollettino delle {ora}, {fa}. |
-| `now.wind`           | griglia dei valori                                                | 14   | Vento                                                           |
-| `now.gust`           | griglia dei valori                                                | 14   | Raffiche                                                        |
-| `now.humidity`       | griglia dei valori                                                | 14   | Umidità                                                         |
-| `now.humidity_short` | sotto il valore dell'umidità                                      | 12   | calcolata                                                       |
-| `now.humidity_note`  | spiegazione dell'umidità (al passaggio e per lettori di schermo)  | riga | Calcolata dalla temperatura e dal punto di rugiada.             |
-| `now.dewpoint`       | griglia dei valori                                                | 18   | Punto di rugiada                                                |
-| `now.visibility`     | griglia dei valori                                                | 14   | Visibilità                                                      |
-| `now.sky`            | griglia dei valori: nuvole viste dall'aeroporto                   | 14   | Nuvole                                                          |
-| `now.weather_none`   | quando il bollettino non segnala fenomeni                         | 30   | Nessun fenomeno segnalato                                       |
-| `now.no_gust`        | raffiche assenti nel bollettino                                   | 14   | nessuna                                                         |
-| `now.rain_h3`        | titolo del blocco radar                                           | 30   | Piove adesso?                                                   |
-| `now.rain_none`      | il radar non vede pioggia sul paese né entro 10 km                | riga | Non piove, e non piove entro 10 km.                             |
-| `now.rain_here_past` | piove sul paese, ma l'immagine è vecchia                          | riga | Alle {ora} pioveva sul paese: pioggia {intensita}, {valore}.    |
-| `now.rain_none_past` | non piove, ma l'immagine è vecchia                                | riga | Alle {ora} non pioveva sul paese.                               |
-| `now.rain_none_near` | niente sul paese, ma qualcosa vicino                              | riga | Non piove sul paese.                                            |
-| `now.rain_here`      | piove sul paese                                                   | riga | Sì: pioggia {intensita}, {valore}.                              |
-| `now.rain_5`         | entro 5 km                                                        | riga | Entro 5 km: fino a {valore}.                                    |
-| `now.rain_10`        | entro 10 km                                                       | riga | Entro 10 km: fino a {valore}.                                   |
-| `now.rain_5_none`    | entro 5 km, niente                                                | riga | Entro 5 km: niente.                                             |
-| `now.rain_10_none`   | entro 10 km, niente                                               | riga | Entro 10 km: niente.                                            |
-| `now.source_radar`   | sotto il blocco radar                                             | riga | Radar della Protezione Civile, immagine delle {ora}, {fa}.      |
-| `now.to_radar`       | link alla sezione radar                                           | 30   | Guarda il radar                                                 |
-| `now.metar_raw`      | link per vedere il bollettino originale                           | 40   | Bollettino METAR originale                                      |
+| chiave               | dove                                                                                  | max  | testo                                                           |
+| -------------------- | ------------------------------------------------------------------------------------- | ---- | --------------------------------------------------------------- |
+| `now.h2`             | titolo della sezione                                                                  | 20   | Adesso                                                          |
+| `now.measured`       | etichetta accanto al titolo: distingue le misure dalle previsioni                     | 30   | misurato, non previsto                                          |
+| `now.measured_short` | etichetta accanto al titolo Radar                                                     | 12   | osservato                                                       |
+| `now.temp_label`     | nome della temperatura grande, per lettori di schermo                                 | riga | Temperatura misurata                                            |
+| `airport.LIME`       | nome breve dell'aeroporto in Adesso; un codice sconosciuto usa il nome del bollettino | 20   | Orio al Serio                                                   |
+| `airport.LIMC`       | nome breve dell'aeroporto in Adesso                                                   | 20   | Malpensa                                                        |
+| `now.source_metar`   | sotto la temperatura                                                                  | riga | Aeroporto di {aeroporto}, a {km}. Bollettino delle {ora}, {fa}. |
+| `now.wind`           | griglia dei valori                                                                    | 14   | Vento                                                           |
+| `now.gust`           | griglia dei valori                                                                    | 14   | Raffiche                                                        |
+| `now.humidity`       | griglia dei valori                                                                    | 14   | Umidità                                                         |
+| `now.humidity_short` | sotto il valore dell'umidità                                                          | 12   | calcolata                                                       |
+| `now.humidity_note`  | spiegazione dell'umidità (al passaggio e per lettori di schermo)                      | riga | Calcolata dalla temperatura e dal punto di rugiada.             |
+| `now.dewpoint`       | griglia dei valori                                                                    | 18   | Punto di rugiada                                                |
+| `now.visibility`     | griglia dei valori                                                                    | 14   | Visibilità                                                      |
+| `now.sky`            | griglia dei valori: nuvole viste dall'aeroporto                                       | 14   | Nuvole                                                          |
+| `now.weather_none`   | quando il bollettino non segnala fenomeni                                             | 30   | Nessun fenomeno segnalato                                       |
+| `now.no_gust`        | raffiche assenti nel bollettino                                                       | 14   | nessuna                                                         |
+| `now.rain_h3`        | titolo del blocco radar                                                               | 30   | Piove adesso?                                                   |
+| `now.rain_none`      | il radar non vede pioggia sul paese né entro 10 km                                    | riga | Non piove, e non piove entro 10 km.                             |
+| `now.rain_here_past` | piove sul paese, ma l'immagine è vecchia                                              | riga | Alle {ora} pioveva sul paese: pioggia {intensita}, {valore}.    |
+| `now.rain_none_past` | non piove, ma l'immagine è vecchia                                                    | riga | Alle {ora} non pioveva sul paese.                               |
+| `now.rain_none_near` | niente sul paese, ma qualcosa vicino                                                  | riga | Non piove sul paese.                                            |
+| `now.rain_here`      | piove sul paese                                                                       | riga | Sì: pioggia {intensita}, {valore}.                              |
+| `now.rain_5`         | entro 5 km                                                                            | riga | Entro 5 km: fino a {valore}.                                    |
+| `now.rain_10`        | entro 10 km                                                                           | riga | Entro 10 km: fino a {valore}.                                   |
+| `now.rain_5_none`    | entro 5 km, niente                                                                    | riga | Entro 5 km: niente.                                             |
+| `now.rain_10_none`   | entro 10 km, niente                                                                   | riga | Entro 10 km: niente.                                            |
+| `now.source_radar`   | sotto il blocco radar                                                                 | riga | Radar della Protezione Civile, immagine delle {ora}, {fa}.      |
+| `now.to_radar`       | link alla sezione radar                                                               | 30   | Guarda il radar                                                 |
+| `now.metar_raw`      | link per vedere il bollettino originale                                               | 40   | Bollettino METAR originale                                      |
 
 ## Prossime 48 ore
 
@@ -136,7 +138,7 @@ Numbers, dates and times are formatted by the code in Italian (comma decimals, 2
 | `h48.readout_wind`      | riquadro dei valori                                                  | riga | Vento {v} da {dir}, raffiche {g}                                                                                                 |
 | `h48.readout_cloud`     | riquadro dei valori                                                  | riga | Nuvole {pct}                                                                                                                     |
 | `h48.range_label`       | nome del cursore sotto il grafico, per tastiera e lettori di schermo | 24   | Ora del grafico                                                                                                                  |
-| `h48.chart_help`        | aiuto sotto il grafico                                               | riga | Tocca o trascina sul grafico per vedere un'ora. Da tastiera: frecce sinistra e destra.                                           |
+| `h48.chart_help`        | aiuto sotto il grafico e il cursore                                  | riga | Tocca o trascina sul grafico per vedere un'ora. Da tastiera usa il cursore qui sopra.                                            |
 | `h48.chart_aria`        | descrizione del grafico per lettori di schermo                       | riga | Grafico delle prossime 48 ore. Temperatura da {min} a {max}. {pioggia} I valori sono anche nella tabella.                        |
 | `h48.footnote`          | sotto il grafico e la tabella                                        | riga | Solo la temperatura è corretta sulla stazione. Vento, raffiche, nuvole e quantità di pioggia sono la media semplice dei modelli. |
 | `h48.models_note`       | sotto il grafico e la tabella                                        | riga | Modelli usati: {m} fino a {ora1}, poi meno, perché alcuni non arrivano così lontano.                                             |
@@ -244,26 +246,27 @@ Numbers, dates and times are formatted by the code in Italian (comma decimals, 2
 
 ## Piè di pagina e stato delle fonti
 
-| chiave                  | dove                           | max  | testo                                                                                                                                                                                            |
-| ----------------------- | ------------------------------ | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `footer.status_h2`      | titolo apribile                | 30   | Stato delle fonti                                                                                                                                                                                |
-| `footer.status_ok`      | accanto a una fonte aggiornata | 16   | aggiornata                                                                                                                                                                                       |
-| `footer.status_late`    | accanto a una fonte in ritardo | 16   | in ritardo                                                                                                                                                                                       |
-| `footer.status_down`    | accanto a una fonte ferma      | 16   | ferma                                                                                                                                                                                            |
-| `footer.status_row`     | riga di una fonte              | riga | Dati delle {ora}, {fa}                                                                                                                                                                           |
-| `footer.src.metar`      | nome della fonte               | 40   | Bollettini METAR degli aeroporti                                                                                                                                                                 |
-| `footer.src.radar`      | nome della fonte               | 40   | Radar della Protezione Civile                                                                                                                                                                    |
-| `footer.src.open-meteo` | nome della fonte               | 40   | Modelli meteorologici (Open-Meteo)                                                                                                                                                               |
-| `footer.src.arpa`       | nome della fonte               | 40   | Stazioni ARPA Lombardia                                                                                                                                                                          |
-| `footer.src.arpa_note`  | sotto ARPA                     | riga | Arrivano con 3-9 ore di ritardo: servono a correggere e verificare, non per Adesso.                                                                                                              |
-| `footer.credits`        | crediti, sempre visibili       | riga | Dati dei modelli: Open-Meteo.com, CC BY 4.0. Radar: Dipartimento della Protezione Civile (Radar-DPC), CC BY-SA 4.0. Osservazioni: METAR, NOAA Aviation Weather Center. Stazioni: ARPA Lombardia. |
-| `footer.how`            | link                           | 20   | Come funziona                                                                                                                                                                                    |
-| `footer.sources`        | link                           | 20   | Fonti e licenze                                                                                                                                                                                  |
-| `footer.score`          | link                           | 24   | Quanto ci prendiamo                                                                                                                                                                              |
-| `footer.score_soon`     | accanto al link                | 16   | da fine novembre                                                                                                                                                                                 |
-| `footer.privacy`        | link                           | 12   | Privacy                                                                                                                                                                                          |
-| `footer.code`           | link al codice                 | 30   | Codice sorgente                                                                                                                                                                                  |
-| `footer.beta`           | ultima riga                    | riga | Versione beta. I dati possono mancare o essere sbagliati: non usarli per decisioni di sicurezza.                                                                                                 |
+| chiave                  | dove                                                             | max  | testo                                                                                                                                                                                            |
+| ----------------------- | ---------------------------------------------------------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `footer.status_h2`      | titolo apribile                                                  | 30   | Stato delle fonti                                                                                                                                                                                |
+| `footer.status_ok`      | accanto a una fonte aggiornata                                   | 16   | aggiornata                                                                                                                                                                                       |
+| `footer.status_late`    | accanto a una fonte in ritardo                                   | 16   | in ritardo                                                                                                                                                                                       |
+| `footer.status_down`    | accanto a una fonte ferma                                        | 16   | ferma                                                                                                                                                                                            |
+| `footer.status_row`     | riga di una fonte                                                | riga | Dati delle {ora}, {fa}                                                                                                                                                                           |
+| `footer.src.metar`      | nome della fonte                                                 | 40   | Bollettini METAR degli aeroporti                                                                                                                                                                 |
+| `footer.src.radar`      | nome della fonte                                                 | 40   | Radar della Protezione Civile                                                                                                                                                                    |
+| `footer.src.open-meteo` | nome della fonte                                                 | 40   | Modelli meteorologici (Open-Meteo)                                                                                                                                                               |
+| `footer.src.arpa`       | nome della fonte                                                 | 40   | Stazioni ARPA Lombardia                                                                                                                                                                          |
+| `footer.src.arpa_note`  | sotto ARPA                                                       | riga | Arrivano con 3-9 ore di ritardo: servono a correggere e verificare, non per Adesso.                                                                                                              |
+| `footer.credits`        | crediti, sempre visibili                                         | riga | Dati dei modelli: Open-Meteo.com, CC BY 4.0. Radar: Dipartimento della Protezione Civile (Radar-DPC), CC BY-SA 4.0. Osservazioni: METAR, NOAA Aviation Weather Center. Stazioni: ARPA Lombardia. |
+| `footer.how`            | link                                                             | 20   | Come funziona                                                                                                                                                                                    |
+| `footer.sources`        | link                                                             | 20   | Fonti e licenze                                                                                                                                                                                  |
+| `footer.score`          | link                                                             | 24   | Quanto ci prendiamo                                                                                                                                                                              |
+| `footer.score_soon`     | accanto al link                                                  | 16   | da fine novembre                                                                                                                                                                                 |
+| `footer.privacy`        | link                                                             | 12   | Privacy                                                                                                                                                                                          |
+| `footer.code`           | link al codice                                                   | 30   | Codice sorgente                                                                                                                                                                                  |
+| `footer.nav_label`      | nome della navigazione del piè di pagina, per lettori di schermo | riga | Pagine del sito                                                                                                                                                                                  |
+| `footer.beta`           | ultima riga                                                      | riga | Versione beta. I dati possono mancare o essere sbagliati: non usarli per decisioni di sicurezza.                                                                                                 |
 
 ## Unità, tempi, direzioni
 
@@ -349,49 +352,53 @@ The highest cloud cover the airport reports. It is what the airport sees, so it 
 
 The code reads each group of the METAR weather field (for example `-RA BR`) and writes the parts below in order: intensity, kind, phenomenon. `-RA BR` becomes "Pioggia debole, foschia". Unknown codes show as "Fenomeno non riconosciuto ({codice})".
 
-| chiave        | dove                       | max | testo                                |
-| ------------- | -------------------------- | --- | ------------------------------------ |
-| `wx.light`    | intensità `-`              | 12  | debole                               |
-| `wx.heavy`    | intensità `+`              | 12  | forte                                |
-| `wx.light_pl` | intensità `-` dopo rovesci | 12  | deboli                               |
-| `wx.heavy_pl` | intensità `+` dopo rovesci | 12  | forti                                |
-| `wx.vicinity` | `VC`                       | 24  | nelle vicinanze                      |
-| `wx.SH`       | rovesci                    | 16  | rovesci di                           |
-| `wx.TS`       | temporale                  | 16  | temporale                            |
-| `wx.TS_with`  | temporale con un fenomeno  | 20  | temporale con                        |
-| `wx.FZ`       | che gela                   | 16  | che gela                             |
-| `wx.MI`       | sottile                    | 12  | sottile                              |
-| `wx.BC`       | a banchi                   | 12  | a banchi                             |
-| `wx.PR`       | parziale                   | 12  | parziale                             |
-| `wx.BL`       | sollevata dal vento        | 24  | sollevata dal vento                  |
-| `wx.DR`       | trasportata dal vento      | 24  | trasportata dal vento                |
-| `wx.RA`       | fenomeno                   | 20  | pioggia                              |
-| `wx.DZ`       | fenomeno                   | 20  | pioviggine                           |
-| `wx.SN`       | fenomeno                   | 20  | neve                                 |
-| `wx.SG`       | fenomeno                   | 20  | nevischio                            |
-| `wx.GR`       | fenomeno                   | 20  | grandine                             |
-| `wx.GS`       | fenomeno                   | 20  | grandine piccola                     |
-| `wx.PL`       | fenomeno                   | 20  | granuli di ghiaccio                  |
-| `wx.UP`       | fenomeno                   | 32  | precipitazione non identificata      |
-| `wx.BR`       | fenomeno                   | 20  | foschia                              |
-| `wx.FG`       | fenomeno                   | 20  | nebbia                               |
-| `wx.HZ`       | fenomeno                   | 20  | caligine                             |
-| `wx.FU`       | fenomeno                   | 20  | fumo                                 |
-| `wx.DU`       | fenomeno                   | 20  | polvere                              |
-| `wx.SA`       | fenomeno                   | 20  | sabbia                               |
-| `wx.VA`       | fenomeno                   | 20  | cenere vulcanica                     |
-| `wx.unknown`  | codice sconosciuto         | 40  | Fenomeno non riconosciuto ({codice}) |
+| chiave        | dove                                                                     | max | testo                                |
+| ------------- | ------------------------------------------------------------------------ | --- | ------------------------------------ |
+| `wx.light`    | intensità `-`                                                            | 12  | debole                               |
+| `wx.heavy`    | intensità `+`                                                            | 12  | forte                                |
+| `wx.light_pl` | intensità `-` dopo rovesci                                               | 12  | deboli                               |
+| `wx.heavy_pl` | intensità `+` dopo rovesci                                               | 12  | forti                                |
+| `wx.vicinity` | `VC`                                                                     | 24  | nelle vicinanze                      |
+| `wx.SH`       | rovesci, seguito dal fenomeno                                            | 16  | rovesci di                           |
+| `wx.SH_alone` | rovesci senza fenomeno indicato (VCSH diventa "Rovesci nelle vicinanze") | 16  | rovesci                              |
+| `wx.TS`       | temporale                                                                | 16  | temporale                            |
+| `wx.TS_with`  | temporale con un fenomeno                                                | 20  | temporale con                        |
+| `wx.FZ`       | che gela                                                                 | 16  | che gela                             |
+| `wx.MI`       | sottile                                                                  | 12  | sottile                              |
+| `wx.BC`       | a banchi                                                                 | 12  | a banchi                             |
+| `wx.PR`       | parziale                                                                 | 12  | parziale                             |
+| `wx.BL`       | sollevata dal vento                                                      | 24  | sollevata dal vento                  |
+| `wx.DR`       | trasportata dal vento                                                    | 24  | trasportata dal vento                |
+| `wx.RA`       | fenomeno                                                                 | 20  | pioggia                              |
+| `wx.DZ`       | fenomeno                                                                 | 20  | pioviggine                           |
+| `wx.SN`       | fenomeno                                                                 | 20  | neve                                 |
+| `wx.SG`       | fenomeno                                                                 | 20  | nevischio                            |
+| `wx.GR`       | fenomeno                                                                 | 20  | grandine                             |
+| `wx.GS`       | fenomeno                                                                 | 20  | grandine piccola                     |
+| `wx.PL`       | fenomeno                                                                 | 20  | granuli di ghiaccio                  |
+| `wx.UP`       | fenomeno                                                                 | 32  | precipitazione non identificata      |
+| `wx.BR`       | fenomeno                                                                 | 20  | foschia                              |
+| `wx.FG`       | fenomeno                                                                 | 20  | nebbia                               |
+| `wx.HZ`       | fenomeno                                                                 | 20  | caligine                             |
+| `wx.FU`       | fenomeno                                                                 | 20  | fumo                                 |
+| `wx.DU`       | fenomeno                                                                 | 20  | polvere                              |
+| `wx.SA`       | fenomeno                                                                 | 20  | sabbia                               |
+| `wx.VA`       | fenomeno                                                                 | 20  | cenere vulcanica                     |
+| `wx.unknown`  | codice sconosciuto                                                       | 40  | Fenomeno non riconosciuto ({codice}) |
 
 ## Pagine di testo: titoli e link
 
-| chiave               | dove                                  | max | testo                |
-| -------------------- | ------------------------------------- | --- | -------------------- |
-| `page.how.title`     | titolo della pagina                   | 40  | Come funziona        |
-| `page.sources.title` | titolo della pagina                   | 40  | Fonti e licenze      |
-| `page.privacy.title` | titolo della pagina                   | 40  | Privacy              |
-| `page.score.title`   | titolo della pagina                   | 40  | Quanto ci prendiamo  |
-| `page.back`          | link per tornare al paese             | 30  | Torna a {paese}      |
-| `page.updated`       | sotto il titolo delle pagine di testo | 40  | Aggiornato il {data} |
+| chiave               | dove                                   | max  | testo                                 |
+| -------------------- | -------------------------------------- | ---- | ------------------------------------- |
+| `page.how.title`     | titolo della pagina                    | 40   | Come funziona                         |
+| `page.sources.title` | titolo della pagina                    | 40   | Fonti e licenze                       |
+| `page.privacy.title` | titolo della pagina                    | 40   | Privacy                               |
+| `page.score.title`   | titolo della pagina                    | 40   | Quanto ci prendiamo                   |
+| `page.back`          | link per tornare al paese              | 30   | Torna a {paese}                       |
+| `page.404.title`     | titolo della pagina 404 e della scheda | 40   | Pagina non trovata                    |
+| `page.404.p1`        | prima frase                            | riga | Questo indirizzo non esiste sul sito. |
+| `page.404.p2`        | prima dei link ai due paesi            | riga | Le previsioni sono qui:               |
+| `page.updated`       | sotto il titolo delle pagine di testo  | 40   | Aggiornato il {data}                  |
 
 ## Testi lunghi
 
@@ -523,7 +530,7 @@ Il paese che scegli resta salvato solo nel tuo browser, per riaprirlo la volta d
 
 #### page.privacy.p3
 
-Il sito e i dati sono ospitati da Microsoft Azure, in Europa. Come ogni server web, quelli di Azure ricevono l'indirizzo IP di chi si collega; non usiamo questi dati per sapere chi visita il sito.
+Le pagine del sito sono file fissi, distribuiti dalla rete di Microsoft Azure Static Web Apps; le impostazioni del servizio stanno in una regione Azure negli Stati Uniti (East US 2). I dati meteo arrivano da un archivio Azure in Italia. Come ogni server web, quelli di Azure ricevono l'indirizzo IP di chi si collega. Il sito non ha un server suo, non registra le visite e non conserva niente su chi lo usa.
 
 #### page.score.p1
 
