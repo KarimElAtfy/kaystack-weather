@@ -49,3 +49,13 @@ test('answers the station question where the town page points', async ({ page })
   await expect(page).toHaveURL(/\/come-funziona#stazione$/);
   await expect(page.locator('#stazione')).toHaveText('Perché una stazione');
 });
+
+test('answers an unknown address with a 404 that leads to the towns', async ({ page }) => {
+  const response = await page.goto('/milano');
+  expect(response?.status()).toBe(404);
+  await expect(page.locator('h1')).toHaveText('Pagina non trovata');
+  await expect(page.getByRole('link', { name: 'Sesto Calende' }).last()).toHaveAttribute(
+    'href',
+    '/sesto-calende'
+  );
+});

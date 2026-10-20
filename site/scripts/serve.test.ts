@@ -46,6 +46,12 @@ test('lets a route header override the global one', () => {
   expect(headers['X-Frame-Options']).toBe('DENY');
 });
 
+test('answers a missing address with the 404 page and its status', () => {
+  const withPage: Config = { ...config, responseOverrides: { '404': { rewrite: '/404.html' } } };
+  const has404 = (file: string) => file === '/404.html' || exists(file);
+  expect(answer(withPage, '/nope', has404)).toMatchObject({ status: 404, file: '/404.html' });
+});
+
 test('sends the global headers with a 404', () => {
   expect(answer(config, '/nope', exists)).toMatchObject({
     status: 404,
