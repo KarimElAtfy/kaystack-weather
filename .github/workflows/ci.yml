@@ -22,6 +22,8 @@ env:
   UV_SHA256: 1468ebd5a5541121837c5a2817b9972ba6090fa6caa3d142620850a47fb75154
   OSV_SCANNER_VERSION: 2.6.0
   OSV_SCANNER_SHA256: ca69b3d3cd08f889a49dc0a383122f71cc528b83803671df5fd874d97485b108
+  NODE_VERSION: 24.22.0
+  NODE_SHA256: cc2f601cee82d9a5a233302fe307abc600727035fd7d2c3a3571755989e95008
 
 jobs:
   changes:
@@ -32,6 +34,7 @@ jobs:
     outputs:
       infra: ${{ steps.paths.outputs.infra }}
       python: ${{ steps.paths.outputs.python }}
+      site: ${{ steps.paths.outputs.site }}
       workflows: ${{ steps.paths.outputs.workflows }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -44,7 +47,7 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
         run: |
           if [ "$EVENT_NAME" != pull_request ]; then
-            printf 'infra=true\npython=true\nworkflows=true\n' >> "$GITHUB_OUTPUT"
+            printf 'infra=true\npython=true\nsite=true\nworkflows=true\n' >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -55,12 +58,15 @@ jobs:
 
           infra=false
           python=false
+          site=false
           workflows=false
           if grep -qE '^(infra/|\.tflint\.hcl$|\.checkov\.yaml$)' <<< "$changed"; then infra=true; fi
           if grep -qE '^(pipeline/|towns/)' <<< "$changed"; then python=true; fi
+          # The site reads the town files at build time and takes its types from schema/.
+          if grep -qE '^(site/|schema/|towns/)' <<< "$changed"; then site=true; fi
           # A change to CI runs every job, so it is tested by the jobs it touches.
-          if grep -q '^\.github/' <<< "$changed"; then infra=true; python=true; workflows=true; fi
-          printf 'infra=%s\npython=%s\nworkflows=%s\n' "$infra" "$python" "$workflows" >> "$GITHUB_OUTPUT"
+          if grep -q '^\.github/' <<< "$changed"; then infra=true; python=true; site=true; workflows=true; fi
+          printf 'infra=%s\npython=%s\nsite=%s\nworkflows=%s\n' "$infra" "$python" "$site" "$workflows" >> "$GITHUB_OUTPUT"
 
   infra-static:
     needs: changes
@@ -146,9 +152,44 @@ jobs:
           uv export --frozen --no-dev --no-emit-project --format requirements-txt -o requirements.txt
           git diff --exit-code -- requirements.txt
 
+  site:
+    needs: changes
+    if: needs.changes.outputs.site == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # A folder of its own: unpacked over the runner's Node in /usr/local, npm
+      # mixes in files of the older npm and fails to start.
+      - name: Install Node
+        run: |
+          curl -fsSLo /tmp/node.tar.xz "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz"
+          echo "${NODE_SHA256}  /tmp/node.tar.xz" | sha256sum -c -
+          sudo mkdir /opt/node
+          sudo tar -xJf /tmp/node.tar.xz -C /opt/node --strip-components=1
+          echo /opt/node/bin >> "$GITHUB_PATH"
+
+      # .npmrc sets ignore-scripts, so no dependency runs code at install.
+      - run: |
+          echo "node $(node --version), npm $(npm --version)"
+          npm ci
+      - run: npm run format:check
+      - run: npm run check
+      - run: npm test
+      - run: npm run build
+      - run: npm run budget
+
   deps:
     needs: changes
-    if: needs.changes.outputs.python == 'true'
+    if: needs.changes.outputs.python == 'true' || needs.changes.outputs.site == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
@@ -165,7 +206,7 @@ jobs:
           chmod +x /tmp/osv-scanner
 
       - name: osv-scanner
-        run: /tmp/osv-scanner scan source --lockfile pipeline/uv.lock
+        run: /tmp/osv-scanner scan source --lockfile pipeline/uv.lock --lockfile site/package-lock.json
 
   workflows:
     needs: changes
@@ -259,7 +300,7 @@ jobs:
     # always() and not !cancelled(): a cancelled run has to leave a failed
     # ci-ok behind, because a skipped required check counts as passed.
     if: always()
-    needs: [changes, infra-static, python, deps, workflows, plan-prod]
+    needs: [changes, infra-static, python, site, deps, workflows, plan-prod]
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions: {}
