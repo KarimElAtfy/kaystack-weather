@@ -25,4 +25,10 @@ resource "azurerm_static_web_app_custom_domain" "site" {
   static_web_app_id = azurerm_static_web_app.site.id
   domain_name       = var.site_domain
   validation_type   = "cname-delegation"
+
+  # The API does not return validation_type, so after the import of
+  # 2026-10-20 every plan would replace the domain to set it again.
+  lifecycle {
+    ignore_changes = [validation_type]
+  }
 }
