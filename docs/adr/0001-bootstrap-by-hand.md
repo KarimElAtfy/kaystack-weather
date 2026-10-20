@@ -10,7 +10,7 @@ The state storage, the key vault and the identities GitHub signs in with have to
 
 The resources everything else depends on live in `infra/bootstrap`: state storage, the Key Vault, the three CI identities and their roles, the Defender plans, the location policy, budgets and the cost anomaly alert. I apply them from my PC, one step at a time, and CI never applies them. The first applies ran on a local state, because the account that holds it didn't exist yet. That state was encrypted and moved to Azure as soon as the keys existed.
 
-All resources are in Italy North except the Static Web App, which is in West Europe. An "Allowed locations" policy on the three resource groups admits only these two regions.
+All resources are in Italy North except the Static Web App, which is in West Europe. An "Allowed locations" policy on the three resource groups admits only these two regions. ADR 7 moved the Static Web App to East US 2.
 
 ## Consequences
 
