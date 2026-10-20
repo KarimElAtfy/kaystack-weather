@@ -189,7 +189,7 @@ jobs:
 
   deps:
     needs: changes
-    if: needs.changes.outputs.python == 'true'
+    if: needs.changes.outputs.python == 'true' || needs.changes.outputs.site == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
@@ -206,7 +206,7 @@ jobs:
           chmod +x /tmp/osv-scanner
 
       - name: osv-scanner
-        run: /tmp/osv-scanner scan source --lockfile pipeline/uv.lock
+        run: /tmp/osv-scanner scan source --lockfile pipeline/uv.lock --lockfile site/package-lock.json
 
   workflows:
     needs: changes
