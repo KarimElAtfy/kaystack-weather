@@ -264,39 +264,6 @@ a:hover {
   color: var(--text);
 }
 
-/* Banners */
-.banners:empty {
-  display: none;
-}
-.banners {
-  display: grid;
-  gap: var(--sp-2);
-  padding-bottom: var(--sp-3);
-}
-.banner {
-  display: flex;
-  gap: var(--sp-3);
-  align-items: flex-start;
-  padding: var(--sp-3) var(--sp-4);
-  border-radius: var(--radius-sm);
-  border: 1px solid;
-  font-size: var(--fs-sm);
-  line-height: 1.43;
-}
-.banner .icon {
-  margin-top: 1px;
-}
-.banner.warn {
-  background: var(--warn-bg);
-  border-color: var(--warn-line);
-  color: var(--warn-text);
-}
-.banner.bad {
-  background: var(--bad-bg);
-  border-color: var(--bad-line);
-  color: var(--bad-text);
-}
-
 /* Town head */
 .town-head {
   padding: var(--sp-5) 0 var(--sp-4);
@@ -314,18 +281,27 @@ a:hover {
   letter-spacing: 0;
 }
 .trust {
-  /* Room for the issue time, which arrives with the data. */
-  min-height: 4.5em;
   margin-top: var(--sp-2);
   color: var(--text-2);
   font-size: var(--fs-sm);
   line-height: 1.5;
   max-width: 62ch;
 }
-@media (min-width: 560px) {
-  .trust {
-    min-height: 3em;
-  }
+/* The status line: a line of its own with room for two, at every width, so
+   neither the data nor a change of state moves the words around it. */
+#statusline {
+  display: block;
+  min-height: 3em;
+}
+#statusline .icon {
+  vertical-align: -2px;
+  margin-right: var(--sp-1);
+}
+#statusline .warn {
+  color: var(--warn-text);
+}
+#statusline .bad {
+  color: var(--bad-text);
 }
 .trust strong {
   color: var(--text);

@@ -33,10 +33,10 @@
       <h1>{name} <span class="prov">{named(`town.province.${town.slug}`)}</span></h1>
       <p class="trust">
         {station[0]}<strong>{town.station}</strong>{station[1]}
-        <span id="issued">{t('state.loading')}</span>
+        <span id="statusline">{t('state.loading')}</span>
       </p>
+      <p id="announce" class="vh" role="status"></p>
     </div>
-    <div id="banners" class="banners" role="status"></div>
   </div>
 
   <nav class="sections" aria-label={t('nav.label')}>

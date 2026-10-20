@@ -3,12 +3,12 @@ import { mount, type Component } from 'svelte';
 import { browserEnv } from '#lib/data/source.ts';
 import { TownData, type TownInfo } from './town.svelte.ts';
 import Adesso from './Adesso.svelte';
-import Banners from './Banners.svelte';
+import Announce from './Announce.svelte';
 import D10 from './D10.svelte';
 import H48 from './H48.svelte';
-import Issued from './Issued.svelte';
 import Refreshed from './Refreshed.svelte';
 import Sources from './Sources.svelte';
+import Status from './Status.svelte';
 
 // Marks the section being read in the section bar. On wide screens the radar
 // sits in its own column and is never "the" section being read.
@@ -44,12 +44,12 @@ if (main?.dataset.town) {
     target.classList.remove(...[...target.classList].filter((name) => name.startsWith('skel')));
     mount(block, { target, props: { data } });
   };
-  place('issued', Issued);
+  place('statusline', Status);
+  place('announce', Announce);
   place('refreshed', Refreshed);
   place('adesso-body', Adesso);
   place('ore48-body', H48);
   place('giorni10-body', D10);
-  place('banners', Banners);
   place('sources', Sources);
   sectionBar();
 }

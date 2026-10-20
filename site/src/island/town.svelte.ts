@@ -1,6 +1,7 @@
 // What one town page reads, kept as reactive state for the blocks to share.
 import { follow, type Env, type Follower, type Reading } from '#lib/data/refresh.ts';
 import { forecastFile, nowFile, statusFile } from '#lib/data/source.ts';
+import { pageState, type PageState } from '#lib/data/states.ts';
 import type { ForecastFile, NowFile } from '#lib/data/decode.ts';
 import type { Status } from '#gen/status.ts';
 
@@ -36,6 +37,10 @@ export class TownData {
   // The sources list reads status.json only when someone needs it.
   askStatus() {
     this.#status.ask();
+  }
+
+  get state(): PageState {
+    return pageState([this.now, this.forecast], this.forecast, this.clock);
   }
 
   get lastRead(): number | null {
