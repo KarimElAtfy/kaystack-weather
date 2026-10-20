@@ -26,7 +26,8 @@ calls.json in the folder, and the download stops at --budget.
 
 `build` writes curated/nwp_prev/ in the folder, one Parquet file per UTC day of valid
 time: Previous Runs values with their day k, and Single Runs values with their run
-start, their lead and day k = lead // 24.
+start, their lead and day k = lead // 24. `overlap` compares the Single Runs values
+with the live archive's nwp_hourly files for the same runs.
 """
 
 import argparse
@@ -314,6 +315,35 @@ def _block_rows(lake: FolderStore, first: date, last: date) -> Iterator[dict]:
             yield from previous_rows(raw, metadata, _model(name))
 
 
+# Live and backfilled values of the same run, point and hour. Temperatures come
+# rounded to 0.1 °C, so any difference shows as 0.1 or more.
+OVERLAP = """
+SELECT b.model, strftime(b.run_init, '%Y-%m-%dT%H:%MZ') AS run, count(*) AS n,
+       max(abs(b.temperature_2m - l.temperature_2m)) AS max_abs_t2m,
+       avg(abs(b.temperature_2m - l.temperature_2m)) AS mean_abs_t2m,
+       count(*) FILTER (WHERE abs(b.temperature_2m - l.temperature_2m) > 0.05) AS over_005
+FROM read_parquet($backfill) b
+JOIN read_parquet($live) l
+  ON l.point = b.point AND l.model = b.model AND l.run_init = b.run_init AND l.valid = b.valid
+WHERE b.source = 'single-runs'
+GROUP BY b.model, b.run_init
+ORDER BY b.model, b.run_init
+"""
+
+
+def overlap(folder: Path, live: Path, start: date, end: date) -> list[tuple]:
+    days = [start + timedelta(days=n) for n in range((end - start).days + 1)]
+    backfill = [folder / "curated" / compact.curated_name("nwp_prev", d) for d in days]
+    lives = sorted(live.rglob("*.parquet"))
+    with tempfile.TemporaryDirectory() as tmp:
+        con = compact.connect(Path(tmp))
+        params = {
+            "backfill": [p.as_posix() for p in backfill if p.is_file()],
+            "live": [p.as_posix() for p in lives],
+        }
+        return con.execute(OVERLAP, params).fetchall()
+
+
 def _days(start: date, end: date) -> Iterator[date]:
     day = start
     while day <= end:
@@ -323,20 +353,27 @@ def _days(start: date, end: date) -> Iterator[date]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(prog="python -m scripts.backfill_openmeteo")
-    parser.add_argument("what", choices=["single", "previous", "build"])
+    parser.add_argument("what", choices=["single", "previous", "build", "overlap"])
     parser.add_argument("--start", type=date.fromisoformat, required=True)
     parser.add_argument("--end", type=date.fromisoformat, required=True)
     parser.add_argument("--folder", type=Path, required=True)
     parser.add_argument("--model", action="append", help="single: required; previous: all")
     parser.add_argument("--hours", help="single: run hours such as 0,12; all the model's runs")
     parser.add_argument("--budget", type=float, default=5000, help="weighted calls a day")
+    parser.add_argument("--live", type=Path, help="overlap: a folder of nwp_hourly files")
     args = parser.parse_args()
     if args.what == "single" and not args.model:
         parser.error("single needs --model")
+    if args.what == "overlap" and not args.live:
+        parser.error("overlap needs --live")
 
     lake = FolderStore(args.folder)
     if args.what == "build":
         build(lake, args.start, args.end)
+        return
+    if args.what == "overlap":
+        for row in overlap(args.folder, args.live, args.start, args.end):
+            print(*row)
         return
 
     points = towns.forecast_points(towns.load(TOWNS))

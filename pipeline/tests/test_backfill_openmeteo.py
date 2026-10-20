@@ -1,11 +1,12 @@
 import json
 from datetime import UTC, date, datetime
 
+import duckdb
 import pytest
 from conftest import fixture, replaying
 from tables import read_table
 
-from meteo import openmeteo, towns
+from meteo import compact, openmeteo, towns
 from scripts import backfill_openmeteo as backfill
 
 RUN = datetime(2024, 3, 20, tzinfo=UTC)
@@ -143,3 +144,24 @@ def test_single_runs_are_filed_by_valid_day_with_their_lead(downloaded):
 
 def test_a_day_with_nothing_downloaded_has_no_file(downloaded):
     assert read_table(downloaded, "nwp_prev", date(2024, 3, 18)) == []
+
+
+def test_overlap_counts_values_that_differ_from_the_live_archive(downloaded, tmp_path):
+    files = [
+        (downloaded.root / "curated" / compact.curated_name("nwp_prev", date(2024, 3, d)))
+        for d in (20, 21)
+    ]
+    live = tmp_path / "live"
+    live.mkdir()
+    duckdb.connect().execute(
+        "COPY (SELECT point, model, run_init, valid, temperature_2m "
+        "+ CASE WHEN lead_h = 5 THEN 0.1 ELSE 0 END AS temperature_2m "
+        f"FROM read_parquet({[f.as_posix() for f in files]})) "
+        f"TO '{(live / 'nwp_hourly.parquet').as_posix()}' (FORMAT parquet)"
+    )
+
+    ((model, run, n, largest, _, over),) = backfill.overlap(
+        downloaded.root, live, date(2024, 3, 20), date(2024, 3, 21)
+    )
+    assert (model, run, n, over) == ("ecmwf_ifs", "2024-03-20T00:00Z", 4 * 48, 4)
+    assert largest == pytest.approx(0.1, abs=1e-4)
