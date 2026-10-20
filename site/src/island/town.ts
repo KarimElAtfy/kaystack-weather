@@ -37,7 +37,14 @@ function sectionBar() {
 
 const main = document.querySelector<HTMLElement>('[data-town]');
 if (main?.dataset.town) {
-  const data = new TownData(JSON.parse(main.dataset.town) as TownInfo, browserEnv());
+  const town = JSON.parse(main.dataset.town) as TownInfo;
+  // The selector opens this town next time (static/remember.js).
+  try {
+    localStorage.setItem('meteo.town', town.slug);
+  } catch {
+    // Storage refused: the selector simply shows both towns.
+  }
+  const data = new TownData(town, browserEnv());
   const place = (id: string, block: Component<{ data: TownData }>) => {
     const target = document.getElementById(id);
     if (!target) return;
