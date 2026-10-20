@@ -106,6 +106,20 @@ resource "azurerm_role_definition" "name_check" {
   assignable_scopes = [data.azurerm_subscription.current.id]
 }
 
+# A custom domain on the Static Web App reports its progress on the
+# subscription, under the app's region, and azurerm polls it there.
+resource "azurerm_role_definition" "site_operations" {
+  name        = "Meteo site operations"
+  scope       = data.azurerm_subscription.current.id
+  description = "Read the status of Static Web App operations, which Azure keeps on the subscription."
+
+  permissions {
+    actions = ["Microsoft.Web/locations/staticSitesOperationStatuses/read"]
+  }
+
+  assignable_scopes = [data.azurerm_subscription.current.id]
+}
+
 resource "azurerm_role_assignment" "plan_prod" {
   scope              = azurerm_resource_group.env["prod"].id
   role_definition_id = azurerm_role_definition.plan_reader.role_definition_resource_id
@@ -146,6 +160,13 @@ resource "azurerm_role_assignment" "apply_prod" {
 resource "azurerm_role_assignment" "apply_name_check" {
   scope              = data.azurerm_subscription.current.id
   role_definition_id = azurerm_role_definition.name_check.role_definition_resource_id
+  principal_id       = azurerm_user_assigned_identity.ci["apply"].principal_id
+  principal_type     = "ServicePrincipal"
+}
+
+resource "azurerm_role_assignment" "apply_site_operations" {
+  scope              = data.azurerm_subscription.current.id
+  role_definition_id = azurerm_role_definition.site_operations.role_definition_resource_id
   principal_id       = azurerm_user_assigned_identity.ci["apply"].principal_id
   principal_type     = "ServicePrincipal"
 }
