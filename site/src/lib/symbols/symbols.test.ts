@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest';
 import { has } from '#lib/copy/t.ts';
 import { fromCover, fromMetar, pick } from './pick.ts';
-import { ICON_IDS, SYMBOL_IDS, sprite } from './sprite.ts';
+import { ICON_IDS, SYMBOL_IDS, favicon, sprite } from './sprite.ts';
 
 test('draws every symbol a pick can ask for', () => {
   const asked = new Set<string>();
@@ -57,6 +57,11 @@ test('writes one symbol per id with the page tokens as colours', () => {
   for (const id of [...SYMBOL_IDS, ...ICON_IDS.map((i) => `i-${i}`)]) {
     expect(svg).toContain(`<symbol id="${id}"`);
   }
-  expect(svg).toContain('var(--sym-sun)');
+  expect(svg).toContain('var(--sym-sun');
   expect(svg).not.toContain('style="');
+});
+
+test('draws a favicon that needs no page tokens', () => {
+  expect(favicon()).toContain('var(--sym-sun,#e9a10b)');
+  expect(favicon()).toContain('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">');
 });

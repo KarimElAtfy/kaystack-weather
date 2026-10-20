@@ -6,7 +6,7 @@ import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { compile, type JSONSchema } from 'json-schema-to-typescript';
 import { BANNED, parse, visible, type Entry } from '../src/lib/copy/parse.ts';
-import { sprite } from '../src/lib/symbols/sprite.ts';
+import { favicon, sprite } from '../src/lib/symbols/sprite.ts';
 
 const SCHEMA = '../schema';
 const OUT = 'src/generated';
@@ -55,6 +55,7 @@ function copy() {
 function icons() {
   const svg = sprite();
   writeFileSync('static/icons.svg', svg);
+  writeFileSync('static/favicon.svg', favicon());
   const hash = createHash('sha256').update(svg).digest('hex').slice(0, 10);
   writeFileSync(
     join(OUT, 'icons.ts'),

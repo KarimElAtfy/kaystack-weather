@@ -3,13 +3,15 @@
 // come from the page's tokens through the classes below, so one file serves both
 // themes and the symbols cost no JavaScript.
 
+// The second value of each var() is the light theme's, for the favicon, which a
+// browser draws outside the page and so without its tokens.
 const STYLE = `
-.s-sun{fill:var(--sym-sun)}
-.s-ray{stroke:var(--sym-sun);stroke-width:2;stroke-linecap:round}
+.s-sun{fill:var(--sym-sun,#e9a10b)}
+.s-ray{stroke:var(--sym-sun,#e9a10b);stroke-width:2;stroke-linecap:round}
 .s-moon{fill:var(--sym-moon)}
-.s-cloud{fill:var(--sym-cloud)}
+.s-cloud{fill:var(--sym-cloud,#e9ecf0)}
 .s-cloud-back{fill:var(--sym-cloud-back)}
-.s-edge{fill:var(--sym-cloud-edge)}
+.s-edge{fill:var(--sym-cloud-edge,#7f8996)}
 .s-rain{fill:var(--sym-rain)}
 .s-rain-line{fill:none;stroke:var(--sym-rain);stroke-width:1.6;stroke-linejoin:round}
 .s-fog{stroke:var(--sym-fog);stroke-width:2.4;stroke-linecap:round}
@@ -135,3 +137,8 @@ export function sprite(): string {
   );
   return `<svg xmlns="http://www.w3.org/2000/svg"><style>${STYLE}</style>${[...symbols, ...icons].join('')}</svg>\n`;
 }
+
+// The tab icon: the few_day symbol on its own.
+export const favicon = () =>
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><style>${STYLE}</style>${SYMBOLS['few-day']}</svg>
+`;
