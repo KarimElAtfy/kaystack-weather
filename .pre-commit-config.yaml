@@ -33,4 +33,5 @@ repos:
         entry: node site/node_modules/prettier/bin/prettier.cjs --write --ignore-unknown
         language: system
         files: ^site/
-        exclude: ^site/package-lock\.json$
+        # Fixtures stay byte for byte as the generator or the pipeline wrote them.
+        exclude: ^site/(package-lock\.json|tests/fixtures/)
