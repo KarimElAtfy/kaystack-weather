@@ -1,9 +1,10 @@
 resource "azurerm_static_web_app" "site" {
   name                = "stapp-meteo-${var.environment}"
   resource_group_name = data.azurerm_resource_group.env.name
-  # Microsoft.Web offers static sites in five regions and Italy North is not
-  # one of them. The files are served from the global edge either way.
-  location = "westeurope"
+  # Static sites are offered in five regions, Italy North is not one of them,
+  # and West Europe refused this subscription on 2026-10-20 (ADR 7). The region
+  # holds only the app's settings; the files are served from the global edge.
+  location = "eastus2"
   sku_tier = "Free"
   sku_size = "Free"
 
