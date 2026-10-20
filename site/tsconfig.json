@@ -4,6 +4,6 @@
     "strict": true,
     "noUncheckedIndexedAccess": true
   },
-  "include": ["src", "*.js"],
+  "include": ["src", "scripts", "*.js"],
   "exclude": ["src/service-worker"]
 }
