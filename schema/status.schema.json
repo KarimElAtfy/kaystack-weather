@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "Source": {
+      "properties": {
+        "checked_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "When the source was last reached in full; null if never."
+        },
+        "data_time": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The oldest of `parts`, or for model runs the newest."
+        },
+        "parts": {
+          "additionalProperties": {
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+            "type": "string"
+          },
+          "description": "The newest data time per station, sensor, point or model.",
+          "type": "object"
+        }
+      },
+      "required": [
+        "checked_at",
+        "data_time",
+        "parts"
+      ],
+      "title": "Source",
+      "type": "object"
+    }
+  },
+  "description": "When each source was last reached and how recent its data is.",
+  "properties": {
+    "schema": {
+      "const": "status/1",
+      "default": "status/1",
+      "type": "string"
+    },
+    "license": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "attribution": {
+      "description": "The credit the sources ask for.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+      "type": "string"
+    },
+    "sources": {
+      "additionalProperties": {
+        "$ref": "#/$defs/Source"
+      },
+      "type": "object"
+    }
+  },
+  "required": [
+    "schema",
+    "license",
+    "attribution",
+    "generated_at",
+    "sources"
+  ],
+  "title": "Status",
+  "type": "object"
+}

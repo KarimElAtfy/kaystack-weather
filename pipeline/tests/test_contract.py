@@ -1,11 +1,14 @@
 import copy
 import json
+from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
 
 from meteo import contract
 from meteo.contract import Forecast, Metar, Radar, RadarAtTown, Status, View
+
+SCHEMA = Path(__file__).resolve().parents[2] / "schema"
 
 FORECAST = {
     "schema": "forecast/1",
@@ -99,6 +102,11 @@ def forecast_with(path: str, value) -> dict:
         node = node[key]
     node[last] = value
     return data
+
+
+def test_committed_schemas_match_the_models():
+    committed = {p.name: p.read_text(encoding="utf-8") for p in SCHEMA.glob("*.json")}
+    assert committed == contract.schemas(), "regenerate: uv run python -m meteo.contract ../schema"
 
 
 def test_a_forecast_reads_back_as_written():

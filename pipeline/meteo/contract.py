@@ -10,8 +10,11 @@ it as optional.
 """
 
 import itertools
+import json
+import sys
 from datetime import UTC, date
-from typing import Annotated, ClassVar, Literal, Self
+from pathlib import Path
+from typing import Annotated, Any, ClassVar, Literal, Self
 from zoneinfo import ZoneInfo
 
 from pydantic import (
@@ -24,6 +27,9 @@ from pydantic import (
     WithJsonSchema,
     model_validator,
 )
+from pydantic.json_schema import GenerateJsonSchema
+
+DRAFT = "https://json-schema.org/draft/2020-12/schema"
 
 # UTC with a Z and whole seconds, as status.json has always written its times.
 # Fractions of a second are cut on the way in, so a file read back equals the one written.
@@ -370,3 +376,25 @@ FILES: dict[str, type[File]] = {
     "radar": Radar,
     "forecast": Forecast,
 }
+
+
+class NoFieldTitles(GenerateJsonSchema):
+    # A title on a field makes json-schema-to-typescript declare a named type for
+    # each one; the model titles are enough.
+    def field_title_should_be_set(self, schema: Any) -> bool:
+        return False
+
+
+def schemas() -> dict[str, str]:
+    texts = {}
+    for name, model in FILES.items():
+        body = model.model_json_schema(mode="serialization", schema_generator=NoFieldTitles)
+        text = json.dumps({"$schema": DRAFT, **body}, indent=2, ensure_ascii=False)
+        texts[f"{name}.schema.json"] = text + "\n"
+    return texts
+
+
+if __name__ == "__main__":
+    folder = Path(sys.argv[1])
+    for name, text in schemas().items():
+        (folder / name).write_text(text, encoding="utf-8", newline="\n")
