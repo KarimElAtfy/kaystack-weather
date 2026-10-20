@@ -186,6 +186,7 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npm run budget
+      - run: npm run e2e
 
   deps:
     needs: changes
