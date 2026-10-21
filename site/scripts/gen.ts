@@ -1,10 +1,12 @@
 // Writes the code the site is built from but the repo does not keep: the
-// TypeScript types of the public files, generated from ../schema, and the
-// Italian strings, read from src/lib/copy/it.md.
+// TypeScript types of the public files, generated from ../schema, the
+// Italian strings, read from src/lib/copy/it.md, and the symbol sprite.
+import { createHash } from 'node:crypto';
 import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { compile, type JSONSchema } from 'json-schema-to-typescript';
 import { BANNED, parse, visible, type Entry } from '../src/lib/copy/parse.ts';
+import { favicon, sprite } from '../src/lib/symbols/sprite.ts';
 
 const SCHEMA = '../schema';
 const OUT = 'src/generated';
@@ -49,6 +51,20 @@ function copy() {
   writeFileSync(join(OUT, 'long.ts'), module('long', long));
 }
 
+// The sprite's URL carries a hash of its content, so it can be cached for good.
+function icons() {
+  const svg = sprite();
+  writeFileSync('static/icons.svg', svg);
+  writeFileSync('static/favicon.svg', favicon());
+  const hash = createHash('sha256').update(svg).digest('hex').slice(0, 10);
+  writeFileSync(
+    join(OUT, 'icons.ts'),
+    `export const ICONS = '/icons.svg?v=${hash}';
+`
+  );
+}
+
 mkdirSync(OUT, { recursive: true });
 await types();
 copy();
+icons();

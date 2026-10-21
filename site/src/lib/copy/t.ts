@@ -20,3 +20,10 @@ export function t(key: Key, params?: Params): string {
 export function has(key: string): key is Key {
   return key in copy;
 }
+
+// A string cut around one placeholder, for pages that set its value apart,
+// such as the station name in bold.
+export function around(key: Key, name: string, params?: Params): [string, string] {
+  const [before = '', after = ''] = copy[key].split(`{${name}}`);
+  return [fill(before, params), fill(after, params)];
+}

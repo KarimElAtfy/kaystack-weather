@@ -2,6 +2,7 @@
 // value is shown muted with its time; an expired one is not shown at all.
 import type { Source as StatusSource } from '#gen/status.ts';
 import type { ForecastFile, NowFile } from './decode.ts';
+import type { Reading } from './refresh.ts';
 
 export type Freshness = 'fresh' | 'stale' | 'expired';
 
@@ -26,6 +27,26 @@ export const radarMapFreshness = (lastFrame: string, staleAfterMin: number, now:
 
 export const forecastFreshness = (forecast: ForecastFile, now: number) =>
   judge(age(forecast.issued_at, now), forecast.stale_after_min, forecast.expired_after_min);
+
+// The one state of the whole page that the status line shows, in the
+// designer's order: offline, unreachable, missing, old, stale, normal. The
+// forecast is judged at its last read, so the state changes with the data,
+// never with the clock alone.
+export type PageState = 'loading' | 'offline' | 'failed' | 'missing' | 'old' | 'stale' | 'ok';
+
+export function pageState(
+  reads: Reading<unknown>[],
+  forecast: Reading<ForecastFile>,
+  now: number
+): PageState {
+  if (reads.some((read) => read.problem === 'offline')) return 'offline';
+  if (reads.some((read) => read.problem === 'unavailable' || read.problem === 'invalid')) {
+    return 'failed';
+  }
+  if (!forecast.value) return forecast.problem ? 'missing' : 'loading';
+  const freshness = forecastFreshness(forecast.value, forecast.at ?? now);
+  return freshness === 'expired' ? 'old' : freshness === 'stale' ? 'stale' : 'ok';
+}
 
 export type SourceState = 'ok' | 'late' | 'down';
 

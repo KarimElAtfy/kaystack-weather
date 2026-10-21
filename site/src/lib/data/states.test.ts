@@ -1,9 +1,11 @@
 import { readFileSync } from 'node:fs';
 import { expect, test } from 'vitest';
-import { decodeForecast, decodeNow, decodeStatus } from './decode.ts';
+import { decodeForecast, decodeNow, decodeStatus, type ForecastFile } from './decode.ts';
+import type { Reading } from './refresh.ts';
 import {
   forecastFreshness,
   metarFreshness,
+  pageState,
   radarAtTownFreshness,
   radarMapFreshness,
   sourceState
@@ -50,4 +52,21 @@ test('tells a late source from one the pipeline cannot reach', () => {
   expect(sourceState('radar', old.radar!, NOW)).toBe('down');
   expect(sourceState('open-meteo', old['open-meteo']!, NOW)).toBe('down');
   expect(sourceState('metar', old.metar!, NOW)).toBe('late');
+});
+
+test('puts one state on the page, the most serious first', () => {
+  const fresh = decodeForecast(read('pioggia/v1/pedrengo/forecast.json'));
+  const issued = Date.parse(fresh.issued_at);
+  const ok: Reading<ForecastFile> = { value: fresh, at: NOW, problem: null };
+  const none: Reading<ForecastFile> = { value: null, at: null, problem: null };
+  const state = (now: Reading<unknown>, forecast: Reading<ForecastFile>) =>
+    pageState([now, forecast], forecast, NOW);
+  const late = (hours: number) => ({ ...ok, at: issued + hours * 60 * MIN });
+  expect(state(none, none)).toBe('loading');
+  expect(state(ok, ok)).toBe('ok');
+  expect(state(ok, late(4))).toBe('stale');
+  expect(state(ok, late(25))).toBe('old');
+  expect(state(ok, { ...none, problem: 'missing' })).toBe('missing');
+  expect(state({ ...none, problem: 'unavailable' }, late(25))).toBe('failed');
+  expect(state({ ...ok, problem: 'offline' }, { ...ok, problem: 'invalid' })).toBe('offline');
 });
