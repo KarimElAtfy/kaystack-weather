@@ -1,9 +1,10 @@
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime, timedelta
 
+import duckdb
 import pytest
 from conftest import TOWNS
 
-from meteo import jobs, status
+from meteo import compact, jobs, mos, status
 
 T = datetime(2026, 10, 16, 12, 0, tzinfo=UTC)
 
@@ -48,3 +49,36 @@ def test_yr_is_asked_on_its_hours_and_again_after_a_failed_slot(now, last_comple
     yr = {"checked_at": last_complete_fetch} if last_complete_fetch else {}
     current = {"sources": {"yr": yr}}
     assert jobs.yr_due(status.parse_stamp(now), current) is due
+
+
+def test_the_nightly_rewrites_the_coefficients_of_the_day(lake, all_towns):
+    day = date(2026, 10, 27)
+    first, last = mos.window(day)
+    con = duckdb.connect()
+    con.execute("SET TimeZone = 'UTC'")
+    observed = "12 + 4 * sin(2 * pi() * hour(t) / 24)"
+    tables = {
+        "nwp_hourly": f"""SELECT 'torre-boldone' AS point, 'icon_d2' AS model,
+            date_trunc('day', t - INTERVAL 1 HOUR) AS run_init, t AS valid,
+            date_diff('hour', date_trunc('day', t - INTERVAL 1 HOUR), t)::SMALLINT AS lead_h,
+            ({observed} + 1.5)::FLOAT AS temperature_2m""",
+        "obs_arpa_hourly": f"SELECT 889 AS station, t AS hour_end, ({observed})::FLOAT AS t_at_end",
+    }
+    for n in range((last - first).days + 1):
+        d = first + timedelta(days=n)
+        start = f"TIMESTAMPTZ '{d} 01:00:00+00'"
+        hours = f"range({start}, {start} + INTERVAL 1 DAY, INTERVAL 1 HOUR) r(t)"
+        for table, query in tables.items():
+            path = lake.root / "curated" / compact.curated_name(table, d)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            con.execute(f"COPY ({query} FROM {hours}) TO '{path.as_posix()}' (FORMAT parquet)")
+        path = lake.root / "curated" / compact.curated_name("obs_arpa_daily", d)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        daily = f"SELECT 889 AS station, DATE '{d}' AS date, 16.0 AS tmax, 8.0 AS tmin, 144 AS n_t"
+        con.execute(f"COPY ({daily}) TO '{path.as_posix()}' (FORMAT parquet)")
+
+    jobs.mean60_coefficients(lake, all_towns, day)
+
+    coefficients = mos.Coefficients.read(lake.read("curated", mos.name(day))[0])
+    assert coefficients.correct("torre-boldone", "icon_d2", "t2m", 0, 13, 20.0) == 18.5
+    assert coefficients.correct("ispra-jrc", "icon_d2", "t2m", 0, 13, 20.0) is None
