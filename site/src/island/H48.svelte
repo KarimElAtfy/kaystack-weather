@@ -1,7 +1,7 @@
 <script lang="ts">
   import { t } from '#lib/copy/t.ts';
   import { int, mm, models, pct, temp, wind } from '#lib/format.ts';
-  import { firstShown, lastFullHour, nextHour, summary } from '#lib/chart/h48.ts';
+  import { firstShown, lastFullHour, nextHour, observed, summary } from '#lib/chart/h48.ts';
   import Icon from '#lib/symbols/Icon.svelte';
   import { dayName, dstLabel, hm, weekdayLong, dayNumber } from '#lib/time.ts';
   import Meteogram from './Meteogram.svelte';
@@ -39,7 +39,12 @@
       : nextHour(times, data.clock)
   );
   const issued = $derived(forecast ? Date.parse(forecast.issued_at) : 0);
-  const sentence = $derived(hourly ? summary(hourly, data.clock) : null);
+  const sentence = $derived(
+    hourly ? summary(hourly, data.clock, observed(data.now.value?.radar, data.clock)) : null
+  );
+  // The summary starts with the radar, so the block waits for now.json as well:
+  // a sentence growing a moment later would move the page.
+  const nowRead = $derived(data.now.value !== null || data.now.problem !== null);
   const lastFull = $derived(hourly ? (times[lastFullHour(hourly)] ?? 0) : 0);
   const hasGap = $derived(hourly?.temperature_c.mean.some((v) => v === null) ?? false);
   const hasDst = $derived(times.some((_, i) => dstLabel(times, i) !== null));
@@ -98,7 +103,7 @@
   });
 </script>
 
-{#if !forecast || !hourly}
+{#if !forecast || !hourly || !nowRead}
   {#if data.forecast.problem}
     <p class="note bad"><Icon name="bad" /><span>{t('state.forecast_missing')}</span></p>
   {:else}
@@ -107,7 +112,10 @@
 {:else}
   <p class="sec-meta">{t('h48.meta', { ora: hm(issued), stazione: data.town.station })}</p>
   {#if sentence}
-    <p class="summary"><strong>{sentence.rain}</strong> {sentence.temp}</p>
+    <p class="summary">
+      {sentence.now ? `${sentence.now} ` : ''}<strong>{sentence.rain}</strong>
+      {sentence.temp}
+    </p>
   {/if}
   {#if hasDst}
     <p class="note info"><Icon name="info" /><span>{t('h48.dst_note')}</span></p>

@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { expect, test } from 'vitest';
-import { decodeForecast } from '#lib/data/decode.ts';
-import { firstShown, lastFullHour, nextHour, niceStep, summary } from './h48.ts';
+import { decodeForecast, decodeNow } from '#lib/data/decode.ts';
+import { firstShown, lastFullHour, nextHour, niceStep, observed, summary } from './h48.ts';
 
 const forecast = (scenario: string) =>
   decodeForecast(
@@ -19,6 +19,26 @@ test('says when most models give rain, by the hour it starts', () => {
   const s = summary(forecast('pioggia').hourly, NOW);
   expect(s.rain).toBe('Pioggia per la maggior parte dei modelli dalle 17:00.');
   expect(s.temp).toMatch(/^Nelle prossime 48 ore la temperatura va da -?\d+ °C a \d+ °C\.$/);
+});
+
+test('never says the models are right about now', () => {
+  const s = summary(forecast('pioggia').hourly, Date.parse('2026-10-24T15:10:00Z'));
+  expect(s.rain).toBe('Pioggia per la maggior parte dei modelli entro le 18:00.');
+  expect(s.now).toBe('');
+});
+
+test('lets a fresh radar say what is happening now, before the models', () => {
+  const radar = decodeNow(
+    JSON.parse(readFileSync('tests/fixtures/pioggia/v1/pedrengo/now.json', 'utf8'))
+  ).radar!;
+  const at = Date.parse(radar.frame_time);
+  expect(observed({ ...radar, rate_mm_h: 0 }, at)).toBe('dry');
+  expect(observed({ ...radar, rate_mm_h: 0.2 }, at)).toBe('rain');
+  expect(observed({ ...radar, rate_mm_h: 3 }, at + 16 * 60_000)).toBe(null);
+  expect(observed({ ...radar, no_data: true, rate_mm_h: null }, at)).toBe(null);
+  expect(observed(null, at)).toBe(null);
+  expect(summary(forecast('asciutto').hourly, NOW, 'dry').now).toBe('Adesso non piove sul paese.');
+  expect(summary(forecast('pioggia').hourly, NOW, 'rain').now).toBe('Adesso piove sul paese.');
 });
 
 test('says no model gives rain on a dry day', () => {
