@@ -47,6 +47,8 @@ python_version = "3.13"
 platform = "linux"
 check_untyped_defs = true
 warn_unused_ignores = true
+# Without it a field with a default and an alias, like `schema`, reads as required.
+plugins = ["pydantic.mypy"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
