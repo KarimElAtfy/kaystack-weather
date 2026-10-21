@@ -24,3 +24,9 @@ test('ignores the clock set in the address', async ({ page, baseURL }) => {
   await openState(page, 'pioggia', '/pedrengo?now=2026-10-26T09:00:00Z', baseURL ?? '');
   await expect(page.locator('#statusline')).toHaveText('Emessa alle 14:00, 1 h 10 min fa.');
 });
+
+test("ships none of Kit's data files, so no page has a folder twin", async ({ request }) => {
+  for (const url of ['/__data.json', '/pedrengo/__data.json', '/privacy/__data.json']) {
+    expect((await request.get(url)).status()).toBe(404);
+  }
+});
