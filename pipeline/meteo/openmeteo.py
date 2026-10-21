@@ -97,7 +97,9 @@ def _params(points: list[Station], variables: list[str], model: str) -> dict[str
         "models": model,
         # Runs that arrive late (UKMO 9 h, ECMWF 8 h) would otherwise lose their short leads.
         "past_hours": "12",
-        "forecast_hours": "240",
+        # Counted from the request. Day 10 of an issue ends up to 264 h after it, and
+        # the newest run of a model can have been fetched up to a day before.
+        "forecast_hours": "288",
         "timezone": "GMT",
         "wind_speed_unit": "ms",
     }
