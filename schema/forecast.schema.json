@@ -1,0 +1,312 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "Consensus": {
+      "description": "The plain mean of the models, uncorrected in v1.",
+      "properties": {
+        "corrected": {
+          "type": "boolean"
+        },
+        "mean": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "corrected",
+        "mean"
+      ],
+      "title": "Consensus",
+      "type": "object"
+    },
+    "Daily": {
+      "description": "Local days in Europe/Rome, 1 to 10 days after the day of the issue, so day 1 is\ntomorrow. Day D takes\nthe hours whose end falls in (D 00:00, D+1 00:00]. A model counts for a day only if\nit has every hour of it: 24, or 23 and 25 on the days the clocks change. A model\nthat stops partway through a day would pull Tmax down, Tmin up and rain counts down.",
+      "properties": {
+        "day": {
+          "items": {
+            "format": "date",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "tmax_c": {
+          "$ref": "#/$defs/Spread"
+        },
+        "tmin_c": {
+          "$ref": "#/$defs/Spread"
+        },
+        "rain": {
+          "$ref": "#/$defs/RainCount"
+        }
+      },
+      "required": [
+        "day",
+        "tmax_c",
+        "tmin_c",
+        "rain"
+      ],
+      "title": "Daily",
+      "type": "object"
+    },
+    "Hourly": {
+      "description": "Hours 0 to 48 after the issue. Instants are at `time`; rain and gusts cover the\nhour ending at it. The wind direction is that of the mean wind vector.",
+      "properties": {
+        "time": {
+          "items": {
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "temperature_c": {
+          "$ref": "#/$defs/Spread"
+        },
+        "dew_point_c": {
+          "$ref": "#/$defs/Consensus"
+        },
+        "wind_kmh": {
+          "$ref": "#/$defs/Consensus"
+        },
+        "wind_dir_deg": {
+          "$ref": "#/$defs/Consensus"
+        },
+        "gust_kmh": {
+          "$ref": "#/$defs/Consensus"
+        },
+        "cloud_pct": {
+          "$ref": "#/$defs/Consensus"
+        },
+        "precipitation_mm": {
+          "$ref": "#/$defs/Consensus"
+        },
+        "rain": {
+          "$ref": "#/$defs/RainCount"
+        }
+      },
+      "required": [
+        "time",
+        "temperature_c",
+        "dew_point_c",
+        "wind_kmh",
+        "wind_dir_deg",
+        "gust_kmh",
+        "cloud_pct",
+        "precipitation_mm",
+        "rain"
+      ],
+      "title": "Hourly",
+      "type": "object"
+    },
+    "RainCount": {
+      "properties": {
+        "threshold_mm": {
+          "description": "Included, so 0.2 counts at 0.2 mm.",
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "n_models": {
+          "description": "Models with at least threshold_mm.",
+          "items": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "type": "array"
+        },
+        "m_models": {
+          "description": "Models with a value for the step; for a day, only those with all its hours.",
+          "items": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "threshold_mm",
+        "n_models",
+        "m_models"
+      ],
+      "title": "RainCount",
+      "type": "object"
+    },
+    "Run": {
+      "properties": {
+        "model": {
+          "description": "The Open-Meteo model name.",
+          "type": "string"
+        },
+        "run_init": {
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "model",
+        "run_init"
+      ],
+      "title": "Run",
+      "type": "object"
+    },
+    "Spread": {
+      "description": "The mean of the models and the range between the lowest and the highest. The\nrange is the spread of the models, not a probability. When corrected is true every\nvalue is corrected: a step with no corrected model is null, never raw.",
+      "properties": {
+        "corrected": {
+          "type": "boolean"
+        },
+        "mean": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": "array"
+        },
+        "low": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": "array"
+        },
+        "high": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": "array"
+        },
+        "m_models": {
+          "description": "Models in the mean; 0 exactly when it is null.",
+          "items": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "type": "array"
+        },
+        "lead_band": {
+          "description": "The lead band of the bias applied, in days, at most 7. Hourly: per model floor((time - run_init) / 24 h), and the step takes the highest among the models in the mean. Daily: local days after the local day of the issue, 1 to 7.",
+          "items": {
+            "maximum": 7,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "corrected",
+        "mean",
+        "low",
+        "high",
+        "m_models",
+        "lead_band"
+      ],
+      "title": "Spread",
+      "type": "object"
+    }
+  },
+  "description": "The multi-model forecast for the town's reference station. The hourly job issues\nit every hour from the newest runs it holds, so issued_at moves on every hour even\nwhen no model has a new run; `models` gives the age of each run.",
+  "properties": {
+    "schema": {
+      "const": "forecast/1",
+      "default": "forecast/1",
+      "type": "string"
+    },
+    "license": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "attribution": {
+      "description": "The credit the sources ask for.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+      "type": "string"
+    },
+    "town": {
+      "pattern": "^[a-z]+(-[a-z]+)*$",
+      "type": "string"
+    },
+    "issued_at": {
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+      "type": "string"
+    },
+    "method": {
+      "const": "mean60-v1",
+      "type": "string"
+    },
+    "models": {
+      "description": "The run of each model in the mean, at any step.",
+      "items": {
+        "$ref": "#/$defs/Run"
+      },
+      "type": "array"
+    },
+    "stale_after_min": {
+      "default": 180,
+      "description": "Minutes after issued_at.",
+      "exclusiveMinimum": 0,
+      "type": "integer"
+    },
+    "expired_after_min": {
+      "default": 1440,
+      "description": "Minutes after issued_at.",
+      "exclusiveMinimum": 0,
+      "type": "integer"
+    },
+    "hourly": {
+      "$ref": "#/$defs/Hourly"
+    },
+    "daily": {
+      "$ref": "#/$defs/Daily"
+    }
+  },
+  "required": [
+    "schema",
+    "license",
+    "attribution",
+    "generated_at",
+    "town",
+    "issued_at",
+    "method",
+    "models",
+    "stale_after_min",
+    "expired_after_min",
+    "hourly",
+    "daily"
+  ],
+  "title": "Forecast",
+  "type": "object"
+}

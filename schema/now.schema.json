@@ -1,0 +1,267 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "Metar": {
+      "properties": {
+        "icao": {
+          "pattern": "^[A-Z]{4}$",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "distance_km": {
+          "description": "From the town centre.",
+          "minimum": 0,
+          "type": "number"
+        },
+        "observed_at": {
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+          "type": "string"
+        },
+        "temperature_c": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dew_point_c": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "wind_kmh": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "wind_dir_deg": {
+          "anyOf": [
+            {
+              "maximum": 360,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Null when variable."
+        },
+        "gust_kmh": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "visibility_m": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "9999 means 10 km or more."
+        },
+        "weather": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Present weather groups as reported, e.g. -RA BR."
+        },
+        "stale_after_min": {
+          "default": 90,
+          "description": "Minutes after observed_at.",
+          "exclusiveMinimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "icao",
+        "name",
+        "distance_km",
+        "observed_at",
+        "temperature_c",
+        "dew_point_c",
+        "wind_kmh",
+        "wind_dir_deg",
+        "gust_kmh",
+        "visibility_m",
+        "weather",
+        "stale_after_min"
+      ],
+      "title": "Metar",
+      "type": "object"
+    },
+    "RadarAtTown": {
+      "properties": {
+        "frame_time": {
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+          "type": "string"
+        },
+        "rate_mm_h": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "At the town centre's cell."
+        },
+        "max_5km_mm_h": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "max_10km_mm_h": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "no_data": {
+          "description": "The frame has no data within 10 km of the town.",
+          "type": "boolean"
+        },
+        "stale_after_min": {
+          "default": 15,
+          "description": "Minutes after frame_time.",
+          "exclusiveMinimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "frame_time",
+        "rate_mm_h",
+        "max_5km_mm_h",
+        "max_10km_mm_h",
+        "no_data",
+        "stale_after_min"
+      ],
+      "title": "RadarAtTown",
+      "type": "object"
+    },
+    "Reference": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "distance_km": {
+          "description": "From the town centre.",
+          "minimum": 0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "name",
+        "distance_km"
+      ],
+      "title": "Reference",
+      "type": "object"
+    }
+  },
+  "description": "The latest observation at the town. The METAR job and the radar job each write\ntheir own block, so either can be null until its job first runs.",
+  "properties": {
+    "schema": {
+      "const": "now/1",
+      "default": "now/1",
+      "type": "string"
+    },
+    "license": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "attribution": {
+      "description": "The credit the sources ask for.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+      "type": "string"
+    },
+    "town": {
+      "pattern": "^[a-z]+(-[a-z]+)*$",
+      "type": "string"
+    },
+    "reference": {
+      "$ref": "#/$defs/Reference",
+      "description": "The station the forecast is corrected against."
+    },
+    "metar": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Metar"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "radar": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/RadarAtTown"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "schema",
+    "license",
+    "attribution",
+    "generated_at",
+    "town",
+    "reference",
+    "metar",
+    "radar"
+  ],
+  "title": "Now",
+  "type": "object"
+}

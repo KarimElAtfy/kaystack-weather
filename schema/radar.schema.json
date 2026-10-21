@@ -1,0 +1,193 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "Bin": {
+      "properties": {
+        "index": {
+          "description": "The class in the sprite.",
+          "maximum": 6,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "from_mm_h": {
+          "description": "Included.",
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "to_mm_h": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Not included; null for the top class."
+        }
+      },
+      "required": [
+        "index",
+        "from_mm_h",
+        "to_mm_h"
+      ],
+      "title": "Bin",
+      "type": "object"
+    },
+    "Frame": {
+      "properties": {
+        "time": {
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+          "type": "string"
+        },
+        "missing": {
+          "description": "DPC has no frame for this time; its cell in the sprite is all hatch.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "time",
+        "missing"
+      ],
+      "title": "Frame",
+      "type": "object"
+    },
+    "Pixel": {
+      "properties": {
+        "x": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "y": {
+          "description": "From the top.",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ],
+      "title": "Pixel",
+      "type": "object"
+    },
+    "View": {
+      "description": "The area of a frame in metres on the DPC SRI grid, the same as the town file's.",
+      "properties": {
+        "west": {
+          "type": "integer"
+        },
+        "east": {
+          "type": "integer"
+        },
+        "south": {
+          "type": "integer"
+        },
+        "north": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "west",
+        "east",
+        "south",
+        "north"
+      ],
+      "title": "View",
+      "type": "object"
+    }
+  },
+  "description": "The last frames around the town, drawn one after the other into a single sprite.\n\nThe sprite is a lossless WebP that holds class indices rather than colours, so the\nsite colours them for each theme. Index i is the grey round(255 (i + 0.5) / 9), and\nfloor(grey * 9 / 256) gives it back. Index 0, no rain, is fully transparent; the\nothers are opaque. 1 to 6 are the classes in `scale`, 7 and 8 the no-data hatch:\nthe line where (x + y) mod 4 = 0 counting from the frame's top left pixel, the fill\nelsewhere. Read it pixel for pixel: any smoothing mixes the classes.",
+  "properties": {
+    "schema": {
+      "const": "radar/1",
+      "default": "radar/1",
+      "type": "string"
+    },
+    "license": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "attribution": {
+      "description": "The credit the sources ask for.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+      "type": "string"
+    },
+    "town": {
+      "pattern": "^[a-z]+(-[a-z]+)*$",
+      "type": "string"
+    },
+    "encoding": {
+      "const": "class-grey9/1",
+      "default": "class-grey9/1",
+      "type": "string"
+    },
+    "sprite": {
+      "description": "The image next to this file. It has a new name on every update and is written before this file, and the previous one stays at least 10 minutes, so a radar.json from the cache never meets a newer image.",
+      "type": "string"
+    },
+    "frame_width_px": {
+      "exclusiveMinimum": 0,
+      "type": "integer"
+    },
+    "frame_height_px": {
+      "exclusiveMinimum": 0,
+      "type": "integer"
+    },
+    "columns": {
+      "description": "Frames per sprite row.",
+      "exclusiveMinimum": 0,
+      "type": "integer"
+    },
+    "frames": {
+      "description": "Oldest first, in sprite order, row by row.",
+      "items": {
+        "$ref": "#/$defs/Frame"
+      },
+      "type": "array"
+    },
+    "view": {
+      "$ref": "#/$defs/View"
+    },
+    "km_per_px": {
+      "exclusiveMinimum": 0,
+      "type": "number"
+    },
+    "town_px": {
+      "$ref": "#/$defs/Pixel",
+      "description": "The town centre within a frame."
+    },
+    "scale": {
+      "description": "Lowest first. v1 writes six classes from 0.2, 1, 2, 6, 15 and 40 mm/h.",
+      "items": {
+        "$ref": "#/$defs/Bin"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema",
+    "license",
+    "attribution",
+    "generated_at",
+    "town",
+    "encoding",
+    "sprite",
+    "frame_width_px",
+    "frame_height_px",
+    "columns",
+    "frames",
+    "view",
+    "km_per_px",
+    "town_px",
+    "scale"
+  ],
+  "title": "Radar",
+  "type": "object"
+}
