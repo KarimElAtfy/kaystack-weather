@@ -6,7 +6,7 @@ import pytest
 from pydantic import ValidationError
 
 from meteo import contract
-from meteo.contract import Forecast, Metar, Radar, RadarAtTown, Status, View
+from meteo.contract import Forecast, Metar, Now, Radar, RadarAtTown, Status, View
 
 SCHEMA = Path(__file__).resolve().parents[2] / "schema"
 
@@ -211,3 +211,46 @@ def test_town_files_sit_under_v1_and_status_stays_at_the_root():
         "radar": "v1/pedrengo/radar.json",
         "forecast": "v1/pedrengo/forecast.json",
     }
+
+
+NOW = {
+    "schema": "now/1",
+    "license": "CC BY-SA 4.0",
+    "attribution": "NOAA Aviation Weather Center",
+    "generated_at": "2026-10-16T12:07:12Z",
+    "town": "pedrengo",
+    "reference": {"name": "Torre Boldone", "distance_km": 3.4},
+    "metar": {
+        "icao": "LIME",
+        "name": "Bergamo Orio al Serio",
+        "distance_km": 3.6,
+        "observed_at": "2026-10-16T11:50:00Z",
+        "temperature_c": 20.0,
+        "dew_point_c": 14.0,
+        "wind_kmh": 5.6,
+        "wind_dir_deg": None,
+        "gust_kmh": None,
+        "visibility_m": 6000,
+        "weather": None,
+        "stale_after_min": 90,
+    },
+    "radar": None,
+}
+
+
+def test_a_now_file_from_before_the_raw_report_still_reads():
+    metar = Now.model_validate(NOW).metar
+    assert metar is not None
+    assert (metar.raw, metar.cloud_cover) == (None, None)
+
+
+def test_an_unknown_cloud_code_is_refused():
+    with pytest.raises(ValidationError, match="cloud_cover"):
+        Metar.model_validate({**NOW["metar"], "cloud_cover": "BROKEN"})
+
+
+def test_a_field_added_to_v1_is_optional_in_the_schema():
+    metar = json.loads(contract.schemas()["now.schema.json"])["$defs"]["Metar"]
+    assert {"raw", "cloud_cover"} <= set(metar["properties"])
+    assert not {"raw", "cloud_cover"} & set(metar["required"])
+    assert "observed_at" in metar["required"]

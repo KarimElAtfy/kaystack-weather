@@ -11,7 +11,7 @@
           "type": "string"
         },
         "distance_km": {
-          "description": "From the town centre.",
+          "description": "From the town centre, in km to one decimal: haversine on the coordinates in the town file, R = 6371.0088 km.",
           "minimum": 0,
           "type": "number"
         },
@@ -101,6 +101,42 @@
           "description": "Minutes after observed_at.",
           "exclusiveMinimum": 0,
           "type": "integer"
+        },
+        "raw": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The report as received."
+        },
+        "cloud_cover": {
+          "anyOf": [
+            {
+              "enum": [
+                "FEW",
+                "SCT",
+                "BKN",
+                "OVC",
+                "VV",
+                "NSC",
+                "NCD",
+                "CAVOK",
+                "SKC",
+                "CLR"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The cloud group of the report: the most covered layer, VV for a sky hidden by fog, or the clear-sky code as reported. Null when it has none."
         }
       },
       "required": [
@@ -189,7 +225,7 @@
           "type": "string"
         },
         "distance_km": {
-          "description": "From the town centre.",
+          "description": "From the town centre, in km to one decimal: haversine on the coordinates in the town file, R = 6371.0088 km.",
           "minimum": 0,
           "type": "number"
         }

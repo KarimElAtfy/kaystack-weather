@@ -6,18 +6,26 @@ the newest instead: any fresh run means the forecasts are current.
 
 Every job updates only its own entry. Jobs run at the same time (on Flex each
 timer function scales on instances of its own), so the file is replaced only if
-nobody wrote it since it was read.
+nobody wrote it since it was read. It is written through the contract's Status, so
+a time not known yet is null rather than left out.
 """
 
 import json
 from collections.abc import Collection
 from datetime import UTC, datetime, timedelta
 
+from meteo.contract import Status
 from meteo.store import Store
 
-NAME = "status.json"
+NAME = Status.PATH
 CONTAINER = "public"
 NEWEST_WINS = {"open-meteo", "ensemble"}
+# Files written before the contract left out the times not known yet.
+UNKNOWN = {"checked_at": None, "data_time": None}
+LICENSE = "CC BY-SA 4.0"
+ATTRIBUTION = (
+    "Radar-DPC, Open-Meteo.com, NOAA Aviation Weather Center, ARPA Lombardia, DWD, MET Norway"
+)
 
 # Minutes since data_time and since checked_at. These make the hourly run fail,
 # which sends the alert. freshness.yml keeps a copy, so that the check from
@@ -69,8 +77,8 @@ def record(
     out of the town files stops holding data_time back."""
     for _ in range(5):
         body, etag = public.read_versioned(CONTAINER, NAME)
-        status = json.loads(body) if body else {"sources": {}}
-        entry = status["sources"].setdefault(source, {})
+        sources = json.loads(body)["sources"] if body else {}
+        entry = sources.setdefault(source, {})
         stored = entry.get("parts", {})
         parts = {k: parse_stamp(v) for k, v in stored.items() if k in expected}
         for part, t in newest.items():
@@ -78,15 +86,16 @@ def record(
                 parts[part] = max(t, parts[part]) if part in parts else t
         if checked_at is not None:
             entry["checked_at"] = stamp(checked_at)
-        if parts:
-            pick = max if source in NEWEST_WINS else min
-            entry["data_time"] = stamp(pick(parts.values()))
-        else:
-            entry.pop("data_time", None)
+        pick = max if source in NEWEST_WINS else min
+        entry["data_time"] = stamp(pick(parts.values())) if parts else None
         entry["parts"] = {k: stamp(v) for k, v in sorted(parts.items())}
-        status["generated_at"] = stamp(datetime.now(UTC))
-        data = json.dumps(status, indent=1, sort_keys=True).encode()
-        if public.swap(CONTAINER, NAME, data, etag, "application/json", "public, max-age=60"):
+        status = Status(
+            license=LICENSE,
+            attribution=ATTRIBUTION,
+            generated_at=datetime.now(UTC),
+            sources={k: UNKNOWN | v for k, v in sorted(sources.items())},
+        )
+        if public.swap(CONTAINER, NAME, status.body(), etag, "application/json", Status.CACHE):
             return
     raise RuntimeError(f"{NAME} kept changing under the {source} job")
 
@@ -96,6 +105,6 @@ def late_sources(status: dict, now: datetime) -> list[str]:
     for source, (data_minutes, checked_minutes) in LIMITS.items():
         entry = status["sources"].get(source, {})
         for key, minutes in (("data_time", data_minutes), ("checked_at", checked_minutes)):
-            if key not in entry or now - parse_stamp(entry[key]) > timedelta(minutes=minutes):
+            if entry.get(key) is None or now - parse_stamp(entry[key]) > timedelta(minutes=minutes):
                 late.append(f"{source} {key}")
     return late

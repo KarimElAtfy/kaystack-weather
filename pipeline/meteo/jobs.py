@@ -10,7 +10,20 @@ from pathlib import Path
 
 import requests
 
-from meteo import arpa, compact, metar, mosmix, openmeteo, radar, sprites, status, towns, web, yr
+from meteo import (
+    arpa,
+    compact,
+    metar,
+    mosmix,
+    now,
+    openmeteo,
+    radar,
+    sprites,
+    status,
+    towns,
+    web,
+    yr,
+)
 from meteo.store import Store
 from meteo.towns import Town
 
@@ -83,8 +96,8 @@ def _newest_frame(public: Store) -> datetime | None:
 def radar_frames(
     lake: Store, public: Store, env: Mapping[str, str], town_dir: Path, minutes: float
 ) -> None:
-    """New frames into the lake, then each town's sprite and radar.json, also after
-    a failed fetch: what did arrive is published."""
+    """New frames into the lake, then each town's sprite, radar.json and the radar
+    block of now.json, also after a failed fetch: what did arrive is published."""
     deadline = time.monotonic() + minutes * 60
     since = _newest_frame(public)
     http = _radar_session(env)
@@ -96,7 +109,9 @@ def radar_frames(
     ok = _collect(public, "radar", collect, {"sri"})
     latest = _newest_frame(public)
     if latest is not None:
-        sprites.publish(lake, public, towns.load(town_dir), latest)
+        all_towns = towns.load(town_dir)
+        sprites.publish(lake, public, all_towns, latest)
+        now.publish_radar(lake, public, all_towns, latest)
     if not ok:
         raise SourceFailed("radar")
 
@@ -118,9 +133,13 @@ def radar_repair(lake: Store, env: Mapping[str, str], day: date, minutes: float)
 
 
 def metar_reports(lake: Store, public: Store, env: Mapping[str, str], town_dir: Path) -> None:
-    icaos = [a.icao for a in towns.airports(towns.load(town_dir)) if a.icao]
+    """New reports into the lake, then the METAR block of each town's now.json."""
+    all_towns = towns.load(town_dir)
+    icaos = [a.icao for a in towns.airports(all_towns) if a.icao]
     http = web.session(env["USER_AGENT"])
-    if not _collect(public, "metar", lambda n: metar.collect(lake, http, icaos, n), icaos):
+    ok = _collect(public, "metar", lambda n: metar.collect(lake, http, icaos, n), icaos)
+    now.publish_metar(lake, public, all_towns, datetime.now(UTC))
+    if not ok:
         raise SourceFailed("metar")
 
 

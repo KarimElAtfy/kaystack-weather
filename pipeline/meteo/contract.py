@@ -4,9 +4,9 @@ These models are the source of the contract: every file is built from them, so i
 checked before it is written, and `schema/` is generated from them for the site.
 Within v1 a change may only add something. Anything else is a v2, under new paths.
 
-Every field is written every time, so the schema marks all of them required. A field
-added later in v1 is missing from files written before it, and the site has to treat
-it as optional.
+Every field is written every time, so the schema marks them required, except the
+ones in ADDED: a field added later in v1 is missing from files written before it, so
+the schema leaves it optional, and so does the site.
 """
 
 import itertools
@@ -47,6 +47,16 @@ Stamp = Annotated[
 ]
 Slug = Annotated[str, Field(pattern=r"^[a-z]+(-[a-z]+)*$")]
 Count = Annotated[int, Field(ge=0)]
+Distance = Annotated[
+    float,
+    Field(
+        ge=0,
+        description=(
+            "From the town centre, in km to one decimal: haversine on the coordinates in"
+            " the town file, R = 6371.0088 km."
+        ),
+    ),
+]
 
 # The Function image is not known to carry a zone database, so tzdata is a dependency.
 ROME = ZoneInfo("Europe/Rome")
@@ -108,13 +118,16 @@ class Status(File):
 
 class Reference(Model):
     name: str
-    distance_km: float = Field(ge=0, description="From the town centre.")
+    distance_km: Distance
+
+
+CloudCover = Literal["FEW", "SCT", "BKN", "OVC", "VV", "NSC", "NCD", "CAVOK", "SKC", "CLR"]
 
 
 class Metar(Model):
     icao: str = Field(pattern=r"^[A-Z]{4}$")
     name: str
-    distance_km: float = Field(ge=0, description="From the town centre.")
+    distance_km: Distance
     observed_at: Stamp
     temperature_c: float | None
     dew_point_c: float | None
@@ -124,6 +137,15 @@ class Metar(Model):
     visibility_m: int | None = Field(ge=0, description="9999 means 10 km or more.")
     weather: str | None = Field(description="Present weather groups as reported, e.g. -RA BR.")
     stale_after_min: int = Field(90, gt=0, description="Minutes after observed_at.")
+    # Added in v1 after the first files: missing from those.
+    raw: str | None = Field(None, description="The report as received.")
+    cloud_cover: CloudCover | None = Field(
+        None,
+        description=(
+            "The cloud group of the report: the most covered layer, VV for a sky hidden"
+            " by fog, or the clear-sky code as reported. Null when it has none."
+        ),
+    )
 
 
 class RadarAtTown(Model):
@@ -377,6 +399,9 @@ class Forecast(File):
         return self
 
 
+# Fields added to v1 after its first files, by model.
+ADDED = {"Metar": {"raw", "cloud_cover"}}
+
 FILES: dict[str, type[File]] = {
     "status": Status,
     "now": Now,
@@ -396,6 +421,8 @@ def schemas() -> dict[str, str]:
     texts = {}
     for name, model in FILES.items():
         body = model.model_json_schema(mode="serialization", schema_generator=NoFieldTitles)
+        for title, part in body.get("$defs", {}).items():
+            part["required"] = [f for f in part["required"] if f not in ADDED.get(title, ())]
         text = json.dumps({"$schema": DRAFT, **body}, indent=2, ensure_ascii=False)
         texts[f"{name}.schema.json"] = text + "\n"
     return texts
