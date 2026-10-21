@@ -102,7 +102,9 @@ def paint(frames: "list[np.ndarray]") -> bytes:
         sheet[top : top + height, left : left + width] = frame
     out = io.BytesIO()
     rgba = np.array(PALETTE, dtype=np.uint8)[sheet]
-    Image.fromarray(rgba).save(out, "WEBP", lossless=True, quality=100, method=6)
+    # Lossless quality and method set the effort. 50 and 4 take 25 to 40 ms for a
+    # sprite; 100 and 6 took about 3 s here to save 3 or 4 % of its size.
+    Image.fromarray(rgba).save(out, "WEBP", lossless=True, quality=50, method=4)
     return out.getvalue()
 
 
