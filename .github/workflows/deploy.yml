@@ -333,9 +333,14 @@ jobs:
           expect "/pedrengo/ location" "$(header location | sed -E 's#^https?://[^/]+##')" /pedrengo
           expect "/nope status" "$(get /nope)" 404
           expect "/nope is 404.html" "$(same 404.html)" same
-          for path in /.auth/login/github /.auth/login/aad /.auth/me; do
+          for path in /.auth/login/github /.auth/login/aad; do
             expect "$path status" "$(get "$path")" 404
           done
+          # /.auth/me belongs to the platform and no route closes it. With the
+          # sign-in routes closed it can only say that nobody is signed in.
+          expect "/.auth/me status" "$(get /.auth/me)" 200
+          expect "/.auth/me principal" "$(jq -c .clientPrincipal "$RUNNER_TEMP/body")" null
+          expect "/.auth/me sets no cookie" "$(header set-cookie)" ""
           for dir in _app/immutable island/assets; do
             file=$(cd "$site" && find "$dir" -type f -print -quit)
             expect "/$file status" "$(get "/$file")" 200
