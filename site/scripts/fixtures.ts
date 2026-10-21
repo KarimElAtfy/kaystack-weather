@@ -456,6 +456,8 @@ function sprite(list: { field: Float32Array; missing: boolean }[], columns: numb
 
 function scenario(name: string, w: Weather, o: Options) {
   const root = join('tests/fixtures', name);
+  // Only this scenario's folder: tests/fixtures also holds the stand-in maps.
+  rmSync(root, { recursive: true, force: true });
   const write = (path: string, body: unknown) => {
     mkdirSync(join(root, path, '..'), { recursive: true });
     writeFileSync(
@@ -571,7 +573,6 @@ const base: Options = {
   extras: true
 };
 
-rmSync('tests/fixtures', { recursive: true, force: true });
 scenario('pioggia', RAINY, base);
 scenario('asciutto', DRY, base);
 scenario('vecchi', RAINY, {

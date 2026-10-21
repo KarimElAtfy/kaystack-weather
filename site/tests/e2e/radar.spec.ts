@@ -21,6 +21,14 @@ test('shows the last frame first and paints its rain', async ({ page, baseURL })
   expect(painted).toBeGreaterThan(100);
 });
 
+test('never plays the radar by itself', async ({ page, baseURL }) => {
+  await open(page, 'pioggia', '/sesto-calende', baseURL ?? '');
+  await expect(page.locator('#radar .stamp')).toContainText('15:05');
+  await page.clock.runFor(30_000);
+  await expect(page.locator('#radar .stamp')).toContainText('15:05');
+  await expect(page.getByRole('button', { name: 'Avvia' })).toBeVisible();
+});
+
 test('plays only when asked and steps with the slider', async ({ page, baseURL }) => {
   await open(page, 'pioggia', '/pedrengo', baseURL ?? '');
   const play = page.getByRole('button', { name: 'Avvia' });

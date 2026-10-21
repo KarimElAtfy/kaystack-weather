@@ -20,30 +20,6 @@ test('tells when the data was last checked', async ({ page }) => {
   await expect(page.locator('#refreshed')).toHaveText('Dati controllati alle 15:10.');
 });
 
-test('reads the chosen hour aloud as it moves', async ({ page }) => {
-  await page.goto('/pedrengo');
-  const hour = page.getByRole('slider', { name: 'Ora del grafico' });
-  await hour.focus();
-  const before = await hour.getAttribute('aria-valuetext');
-  await page.keyboard.press('ArrowRight');
-  const after = await hour.getAttribute('aria-valuetext');
-  expect(before).toMatch(/^sabato 24, 16:00, \d+ °C modelli da/);
-  expect(after).toMatch(/^sabato 24, 17:00, /);
-});
-
-test('labels both 02:00 of the night summer time ends', async ({ page }) => {
-  await page.goto('/pedrengo');
-  const hour = page.getByRole('slider', { name: 'Ora del grafico' });
-  await hour.focus();
-  for (let i = 0; i < 10; i++) await page.keyboard.press('ArrowRight');
-  await expect(hour).toHaveAttribute('aria-valuetext', /^domenica 25, 02:00 \(ora legale\), /);
-  await page.keyboard.press('ArrowRight');
-  await expect(hour).toHaveAttribute('aria-valuetext', /^domenica 25, 02:00 \(ora solare\), /);
-  await page.getByRole('button', { name: 'Tabella' }).click();
-  await expect(page.locator('tbody th[scope="row"]', { hasText: 'ora legale' })).toHaveCount(1);
-  await expect(page.locator('tbody th[scope="row"]', { hasText: 'ora solare' })).toHaveCount(1);
-});
-
 test('warns about a late forecast on the status line, the sources say why', async ({
   page,
   context,

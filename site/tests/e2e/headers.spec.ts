@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { expect, test } from '@playwright/test';
-import { freezeClock, useScenario } from './fixtures.ts';
+import { freezeClock, useScenario, watch } from './fixtures.ts';
 
 const config = JSON.parse(readFileSync('build/staticwebapp.config.json', 'utf8')) as {
   globalHeaders: Record<string, string>;
@@ -25,19 +25,7 @@ for (const url of pages('build')) {
   test(`${url} loads under the policy with no violation`, async ({ page, context, baseURL }) => {
     await useScenario(context, 'pioggia', baseURL ?? '');
     await freezeClock(page);
-    const problems: string[] = [];
-    await page.exposeFunction('reportViolation', (text: string) => problems.push(text));
-    await page.addInitScript(() => {
-      document.addEventListener('securitypolicyviolation', (event) => {
-        const report = (window as unknown as { reportViolation: (text: string) => void })
-          .reportViolation;
-        report(`${event.violatedDirective} ${event.blockedURI}`);
-      });
-    });
-    page.on('console', (message) => {
-      if (message.type() === 'error') problems.push(message.text());
-    });
-    page.on('pageerror', (error) => problems.push(error.message));
+    const problems = await watch(page);
 
     const response = await page.goto(url, { waitUntil: 'networkidle' });
     expect(response?.status()).toBe(200);

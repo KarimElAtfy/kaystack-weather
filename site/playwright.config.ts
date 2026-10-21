@@ -5,6 +5,9 @@ const port = 4173;
 export default defineConfig({
   testDir: 'tests/e2e',
   forbidOnly: !!process.env.CI,
+  // The runner has four cores and Playwright takes half by default; the
+  // matrix keeps all four busy and the job inside its five minutes.
+  workers: process.env.CI ? 4 : undefined,
   reporter: process.env.CI ? 'line' : 'list',
   use: {
     baseURL: `http://localhost:${port}`,
