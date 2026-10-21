@@ -15,6 +15,9 @@
       <div>
         <nav aria-label={t('footer.nav_label')}>
           <ul>
+            <li><a href="/come-funziona">{t('footer.how')}</a></li>
+            <li><a href="/fonti-e-licenze">{t('footer.sources')}</a></li>
+            <li><a href="/privacy">{t('footer.privacy')}</a></li>
             <li>
               <a href="https://github.com/KarimElAtfy/kaystack-weather">{t('footer.code')}</a>
             </li>

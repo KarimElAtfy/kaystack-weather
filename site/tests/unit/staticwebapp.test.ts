@@ -66,3 +66,9 @@ test('caches only content-hashed files for good', () => {
   ]);
   expect(headers['Cache-Control']).toBe('no-cache');
 });
+
+test("answers a missing address with the site's 404 page", () => {
+  expect((config as { responseOverrides?: unknown }).responseOverrides).toEqual({
+    '404': { rewrite: '/404.html' }
+  });
+});
