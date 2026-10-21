@@ -11,7 +11,7 @@
           "type": "string"
         },
         "distance_km": {
-          "description": "From the town centre.",
+          "description": "From the town centre, in km to one decimal: haversine on the coordinates in the town file, R = 6371.0088 km.",
           "minimum": 0,
           "type": "number"
         },
@@ -189,7 +189,7 @@
           "type": "string"
         },
         "distance_km": {
-          "description": "From the town centre.",
+          "description": "From the town centre, in km to one decimal: haversine on the coordinates in the town file, R = 6371.0088 km.",
           "minimum": 0,
           "type": "number"
         }

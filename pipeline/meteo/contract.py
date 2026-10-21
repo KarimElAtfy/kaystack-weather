@@ -47,6 +47,16 @@ Stamp = Annotated[
 ]
 Slug = Annotated[str, Field(pattern=r"^[a-z]+(-[a-z]+)*$")]
 Count = Annotated[int, Field(ge=0)]
+Distance = Annotated[
+    float,
+    Field(
+        ge=0,
+        description=(
+            "From the town centre, in km to one decimal: haversine on the coordinates in"
+            " the town file, R = 6371.0088 km."
+        ),
+    ),
+]
 
 # The Function image is not known to carry a zone database, so tzdata is a dependency.
 ROME = ZoneInfo("Europe/Rome")
@@ -108,13 +118,13 @@ class Status(File):
 
 class Reference(Model):
     name: str
-    distance_km: float = Field(ge=0, description="From the town centre.")
+    distance_km: Distance
 
 
 class Metar(Model):
     icao: str = Field(pattern=r"^[A-Z]{4}$")
     name: str
-    distance_km: float = Field(ge=0, description="From the town centre.")
+    distance_km: Distance
     observed_at: Stamp
     temperature_c: float | None
     dew_point_c: float | None
