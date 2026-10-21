@@ -4,9 +4,9 @@ These models are the source of the contract: every file is built from them, so i
 checked before it is written, and `schema/` is generated from them for the site.
 Within v1 a change may only add something. Anything else is a v2, under new paths.
 
-Every field is written every time, so the schema marks all of them required. A field
-added later in v1 is missing from files written before it, and the site has to treat
-it as optional.
+Every field is written every time, so the schema marks them required, except the
+ones in ADDED: a field added later in v1 is missing from files written before it, so
+the schema leaves it optional, and so does the site.
 """
 
 import itertools
@@ -399,6 +399,9 @@ class Forecast(File):
         return self
 
 
+# Fields added to v1 after its first files, by model.
+ADDED = {"Metar": {"raw", "cloud_cover"}}
+
 FILES: dict[str, type[File]] = {
     "status": Status,
     "now": Now,
@@ -418,6 +421,8 @@ def schemas() -> dict[str, str]:
     texts = {}
     for name, model in FILES.items():
         body = model.model_json_schema(mode="serialization", schema_generator=NoFieldTitles)
+        for title, part in body.get("$defs", {}).items():
+            part["required"] = [f for f in part["required"] if f not in ADDED.get(title, ())]
         text = json.dumps({"$schema": DRAFT, **body}, indent=2, ensure_ascii=False)
         texts[f"{name}.schema.json"] = text + "\n"
     return texts

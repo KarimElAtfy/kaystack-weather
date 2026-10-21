@@ -151,9 +151,7 @@
         "gust_kmh",
         "visibility_m",
         "weather",
-        "stale_after_min",
-        "raw",
-        "cloud_cover"
+        "stale_after_min"
       ],
       "title": "Metar",
       "type": "object"

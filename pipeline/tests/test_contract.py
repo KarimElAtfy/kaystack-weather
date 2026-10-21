@@ -247,3 +247,10 @@ def test_a_now_file_from_before_the_raw_report_still_reads():
 def test_an_unknown_cloud_code_is_refused():
     with pytest.raises(ValidationError, match="cloud_cover"):
         Metar.model_validate({**NOW["metar"], "cloud_cover": "BROKEN"})
+
+
+def test_a_field_added_to_v1_is_optional_in_the_schema():
+    metar = json.loads(contract.schemas()["now.schema.json"])["$defs"]["Metar"]
+    assert {"raw", "cloud_cover"} <= set(metar["properties"])
+    assert not {"raw", "cloud_cover"} & set(metar["required"])
+    assert "observed_at" in metar["required"]
