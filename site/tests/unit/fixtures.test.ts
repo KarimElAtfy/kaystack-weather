@@ -24,7 +24,7 @@ function files(dir: string): string[] {
 const fixtures = files('tests/fixtures');
 
 test('covers every scenario and file', () => {
-  expect(fixtures.length).toBe(26);
+  expect(fixtures.length).toBe(33);
 });
 
 for (const file of fixtures) {

@@ -47,6 +47,8 @@
   const nowRead = $derived(data.now.value !== null || data.now.problem !== null);
   const lastFull = $derived(hourly ? (times[lastFullHour(hourly)] ?? 0) : 0);
   const hasGap = $derived(hourly?.temperature_c.mean.some((v) => v === null) ?? false);
+  // Without the correction the page says so, and never calls the values corrected.
+  const raw = $derived(hourly ? !hourly.temperature_c.corrected : false);
   const hasDst = $derived(times.some((_, i) => dstLabel(times, i) !== null));
 
   // Everything the readout shows, as one sentence for the hour control.
@@ -117,6 +119,9 @@
       {sentence.temp}
     </p>
   {/if}
+  {#if raw}
+    <p class="note info"><Icon name="info" /><span>{t('h48.note_raw')}</span></p>
+  {/if}
   {#if hasDst}
     <p class="note info"><Icon name="info" /><span>{t('h48.dst_note')}</span></p>
   {/if}
@@ -132,7 +137,9 @@
   </div>
   {#if view === 'chart'}
     <div class="legend" aria-hidden="true">
-      <span><i class="key line key-temp"></i>{t('h48.legend_mean')}</span>
+      <span
+        ><i class="key line key-temp"></i>{t(raw ? 'h48.legend_mean_raw' : 'h48.legend_mean')}</span
+      >
       <span><i class="key band key-band"></i>{t('h48.legend_range')}</span>
       <span><i class="key bar key-rain"></i>{t('h48.legend_rain')}</span>
       <span><i class="key line key-wind"></i>{t('h48.legend_wind')}</span>
@@ -192,8 +199,8 @@
     <Table48 {hourly} {first} lat={data.town.lat} lon={data.town.lon} />
   {/if}
   <div class="foot">
-    {#if hasGap}<p>{t('state.partial_hours')}</p>{/if}
-    <p>{t('h48.footnote')}</p>
+    {#if hasGap && !raw}<p>{t('state.partial_hours')}</p>{/if}
+    <p>{t(raw ? 'h48.footnote_raw' : 'h48.footnote')}</p>
     <p>
       {t('h48.models_note', {
         m: hourly.temperature_c.m_models[0] ?? 0,

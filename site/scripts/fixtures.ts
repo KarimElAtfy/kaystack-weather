@@ -175,6 +175,8 @@ type Options = {
   thin: boolean;
   // The forecast ends before day 10 does, so no model counts for that day.
   emptyLast: boolean;
+  // No coefficients for the correction: the temperatures are the plain mean.
+  raw: boolean;
   partial: boolean;
   noRadar: boolean;
   missingFrame: boolean;
@@ -291,7 +293,7 @@ function forecast(town: Town, w: Weather, o: Options) {
     hi: (number | null)[],
     models: number[]
   ) => ({
-    corrected: true,
+    corrected: !o.raw,
     mean: m,
     low: lo,
     high: hi,
@@ -336,7 +338,14 @@ function forecast(town: Town, w: Weather, o: Options) {
     expired_after_min: 1440,
     hourly: {
       time,
-      temperature_c: { corrected: true, mean, low, high, m_models: spreadModels, lead_band: band },
+      temperature_c: {
+        corrected: !o.raw,
+        mean,
+        low,
+        high,
+        m_models: spreadModels,
+        lead_band: band
+      },
       dew_point_c: { corrected: false, mean: dew },
       wind_kmh: { corrected: false, mean: speed },
       wind_dir_deg: { corrected: false, mean: direction },
@@ -585,6 +594,7 @@ const base: Options = {
   gap: false,
   thin: false,
   emptyLast: false,
+  raw: false,
   partial: false,
   noRadar: false,
   missingFrame: false,
@@ -610,3 +620,4 @@ scenario('mancanti', RAINY, {
   emptyLast: true,
   extras: false
 });
+scenario('non-corretto', RAINY, { ...base, raw: true });

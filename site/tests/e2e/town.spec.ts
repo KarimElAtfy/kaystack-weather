@@ -123,6 +123,33 @@ test('shows only the days the models reach, with no sky made up', async ({
   await expect(page.locator('#giorni-10 tbody .c-sky').first()).toHaveText('Dato non disponibile');
 });
 
+test('never calls a value corrected that did not get the correction', async ({
+  page,
+  context,
+  baseURL
+}) => {
+  await context.unrouteAll();
+  await useScenario(context, 'non-corretto', baseURL ?? '');
+  await page.goto('/pedrengo');
+  const h48 = page.locator('#ore-48');
+  await expect(h48.locator('.note').first()).toHaveText(
+    'Temperatura senza correzione: oggi la correzione non è disponibile.'
+  );
+  await expect(h48.locator('.legend')).toContainText('temperatura, media dei modelli');
+  await expect(h48.locator('.foot')).toContainText('Oggi nessun valore è corretto');
+  const d10 = page.locator('#giorni-10');
+  await expect(d10.locator('.note')).toHaveText(
+    'Minima e massima senza correzione: oggi la correzione non è disponibile.'
+  );
+  await expect(d10.locator('.foot')).toContainText('Minima e massima sono la media semplice');
+  // "Nessun valore è corretto" is allowed: it says the opposite.
+  const text = ((await page.locator('body').textContent()) ?? '').toLowerCase();
+  expect(text).not.toContain('corretta');
+  expect(text).not.toContain('corrette');
+  expect(text).not.toContain('la correzione è quella');
+  await expect(d10.locator('.sep .n')).toHaveText('Arrivano così lontano solo 3 modelli.');
+});
+
 test('reads the sources when the list is opened on fresh data', async ({ page }) => {
   await page.goto('/pedrengo');
   await page.getByText('Stato delle fonti').click();

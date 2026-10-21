@@ -2,7 +2,7 @@
   // Ten days as a table: minimum to maximum on one scale shared by every row,
   // the range between models as lighter ends, rain as models out of models.
   import { t } from '#lib/copy/t.ts';
-  import { daysShown } from '#lib/chart/d10.ts';
+  import { daysShown, rawNote } from '#lib/chart/d10.ts';
   import { deg, int, models } from '#lib/format.ts';
   import { pick } from '#lib/symbols/pick.ts';
   import Sky from '#lib/symbols/Sky.svelte';
@@ -64,6 +64,8 @@
       };
     });
   });
+  const note = $derived(daily ? rawNote(daily) : null);
+  const raw = $derived(daily ? !daily.tmin_c.corrected && !daily.tmax_c.corrected : false);
   const near = $derived(rows.filter((row) => !row.far));
   const far = $derived(rows.filter((row) => row.far));
   const width = (a: number, b: number, least: number) => Math.max(least, scale.at(b) - scale.at(a));
@@ -191,6 +193,9 @@
       </pattern>
     </defs>
   </svg>
+  {#if note}
+    <p class="note info"><Icon name="info" /><span>{t(note)}</span></p>
+  {/if}
   <table class="days">
     <caption class="vh">{t('d10.caption')}</caption>
     <thead>
@@ -215,7 +220,11 @@
         <tr class="sep">
           <th colspan="6" scope="rowgroup">
             <span class="t"><Icon name="warn" />{t('d10.less_reliable_h3')}</span>
-            <span class="n">{t('d10.less_reliable_note', { m: far[0]?.m ?? 0 })}</span>
+            <span class="n"
+              >{t(note ? 'd10.less_reliable_note_raw' : 'd10.less_reliable_note', {
+                m: far[0]?.m ?? 0
+              })}</span
+            >
           </th>
         </tr>
         {#each far as r (r.day)}{@render row(r)}{/each}
@@ -224,6 +233,6 @@
   </table>
   <div class="foot">
     <p>{t('d10.legend_bar')}</p>
-    <p>{t('d10.footnote', { stazione: data.town.station })}</p>
+    <p>{raw ? t('d10.footnote_raw') : t('d10.footnote', { stazione: data.town.station })}</p>
   </div>
 {/if}
