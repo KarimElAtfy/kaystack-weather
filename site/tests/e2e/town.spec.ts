@@ -15,6 +15,23 @@ test('says when the forecast was issued, in Rome time', async ({ page }) => {
   );
 });
 
+test('lets the radar speak for now, and the models for the hours ahead', async ({ page }) => {
+  await page.goto('/pedrengo');
+  await expect(page.locator('#ore-48 .summary')).toHaveText(
+    /^Adesso piove sul paese\. Pioggia per la maggior parte dei modelli dalle 17:00\. /
+  );
+  await page.goto('/sesto-calende');
+  await expect(page.locator('#ore-48 .summary')).toHaveText(/^Adesso non piove sul paese\. /);
+});
+
+test('says nothing about now when the radar is old', async ({ page, context, baseURL }) => {
+  await context.unrouteAll();
+  await useScenario(context, 'vecchi', baseURL ?? '');
+  await page.goto('/pedrengo');
+  await expect(page.locator('#ore-48 .summary')).toHaveText(/^Pioggia per /);
+  await expect(page.locator('#ore-48 .summary')).not.toContainText('Adesso');
+});
+
 test('tells when the data was last checked', async ({ page }) => {
   await page.goto('/sesto-calende');
   await expect(page.locator('#refreshed')).toHaveText('Dati controllati alle 15:10.');
@@ -87,6 +104,50 @@ test('shows what is missing instead of empty space', async ({ page, context, bas
   await page.goto('/sesto-calende');
   await expect(page.locator('#adesso')).toContainText('Il radar non è disponibile');
   await expect(page.locator('#ore-48 .foot')).toContainText('Mancano alcune ore');
+});
+
+test('shows only the days the models reach, with no sky made up', async ({
+  page,
+  context,
+  baseURL
+}) => {
+  await page.goto('/pedrengo');
+  await expect(page.locator('#h-giorni10')).toHaveText('Prossimi 10 giorni');
+  await expect(page.locator('#giorni-10 tbody svg.sym')).toHaveCount(10);
+  await context.unrouteAll();
+  await useScenario(context, 'mancanti', baseURL ?? '');
+  await page.goto('/pedrengo');
+  await expect(page.locator('#h-giorni10')).toHaveText('Prossimi 9 giorni');
+  await expect(page.locator('#giorni-10 tbody tr:not(.sep)')).toHaveCount(9);
+  await expect(page.locator('#giorni-10 tbody svg.sym')).toHaveCount(0);
+  await expect(page.locator('#giorni-10 tbody .c-sky').first()).toHaveText('Dato non disponibile');
+});
+
+test('never calls a value corrected that did not get the correction', async ({
+  page,
+  context,
+  baseURL
+}) => {
+  await context.unrouteAll();
+  await useScenario(context, 'non-corretto', baseURL ?? '');
+  await page.goto('/pedrengo');
+  const h48 = page.locator('#ore-48');
+  await expect(h48.locator('.note').first()).toHaveText(
+    'Temperatura senza correzione: oggi la correzione non è disponibile.'
+  );
+  await expect(h48.locator('.legend')).toContainText('temperatura, media dei modelli');
+  await expect(h48.locator('.foot')).toContainText('Oggi nessun valore è corretto');
+  const d10 = page.locator('#giorni-10');
+  await expect(d10.locator('.note')).toHaveText(
+    'Minima e massima senza correzione: oggi la correzione non è disponibile.'
+  );
+  await expect(d10.locator('.foot')).toContainText('Minima e massima sono la media semplice');
+  // "Nessun valore è corretto" is allowed: it says the opposite.
+  const text = ((await page.locator('body').textContent()) ?? '').toLowerCase();
+  expect(text).not.toContain('corretta');
+  expect(text).not.toContain('corrette');
+  expect(text).not.toContain('la correzione è quella');
+  await expect(d10.locator('.sep .n')).toHaveText('Arrivano così lontano solo 3 modelli.');
 });
 
 test('reads the sources when the list is opened on fresh data', async ({ page }) => {

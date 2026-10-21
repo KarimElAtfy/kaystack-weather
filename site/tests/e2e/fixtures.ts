@@ -7,7 +7,7 @@ import { expect, type BrowserContext, type Page } from '@playwright/test';
 
 export const ACCOUNT = 'https://stkaystackmeteopubprod.blob.core.windows.net';
 export const NOW = new Date('2026-10-24T13:10:00Z');
-export const SCENARIOS = ['pioggia', 'asciutto', 'vecchi', 'mancanti'] as const;
+export const SCENARIOS = ['pioggia', 'asciutto', 'vecchi', 'mancanti', 'non-corretto'] as const;
 export type Scenario = (typeof SCENARIOS)[number];
 // The fixture scenarios, plus a device gone offline after the first reads and
 // a page whose reads have not answered yet.

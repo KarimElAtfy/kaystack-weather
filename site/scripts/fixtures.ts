@@ -173,6 +173,10 @@ type Options = {
   metarAt: number;
   gap: boolean;
   thin: boolean;
+  // The forecast ends before day 10 does, so no model counts for that day.
+  emptyLast: boolean;
+  // No coefficients for the correction: the temperatures are the plain mean.
+  raw: boolean;
   partial: boolean;
   noRadar: boolean;
   missingFrame: boolean;
@@ -239,23 +243,33 @@ function forecast(town: Town, w: Weather, o: Options) {
   }
 
   const days: string[] = [];
-  const tmaxMean: number[] = [],
-    tmaxLow: number[] = [],
-    tmaxHigh: number[] = [],
-    tminMean: number[] = [],
-    tminLow: number[] = [],
-    tminHigh: number[] = [];
+  const tmaxMean: (number | null)[] = [],
+    tmaxLow: (number | null)[] = [],
+    tmaxHigh: (number | null)[] = [],
+    tminMean: (number | null)[] = [],
+    tminLow: (number | null)[] = [],
+    tminHigh: (number | null)[] = [];
   const dayRainy: number[] = [],
     dayCounted: number[] = [],
     dayBand: number[] = [],
-    dayCloud: number[] = [],
-    dayPrecip: number[] = [],
-    dayWind: number[] = [],
-    dayGust: number[] = [];
+    dayCloud: (number | null)[] = [],
+    dayPrecip: (number | null)[] = [],
+    dayWind: (number | null)[] = [],
+    dayGust: (number | null)[] = [];
   for (let d = 1; d <= 10; d++) {
     days.push(new Date(Date.parse('2026-10-24T10:00:00Z') + d * 24 * H).toISOString().slice(0, 10));
     const [tmin, tmax, rainN, rainMm, cl] = w.days[d]!;
-    const m = o.thin && d === 10 ? 2 : MODELS_BY_DAY[d - 1]!;
+    const last = o.emptyLast ? 9 : 10;
+    if (d > last) {
+      for (const list of [tminMean, tminLow, tminHigh, tmaxMean, tmaxLow, tmaxHigh])
+        list.push(null);
+      for (const list of [dayCloud, dayPrecip, dayWind, dayGust]) list.push(null);
+      dayRainy.push(0);
+      dayCounted.push(0);
+      dayBand.push(Math.min(d, 7));
+      continue;
+    }
+    const m = o.thin && d === last ? 2 : MODELS_BY_DAY[d - 1]!;
     const width = 0.8 + 0.35 * d + (d >= 8 ? 0.8 : 0);
     const a = (rnd() - 0.5) * 0.4;
     const shift = town.warmer > 0 ? 1 : 0;
@@ -273,8 +287,13 @@ function forecast(town: Town, w: Weather, o: Options) {
     dayWind.push(w.front && d === 1 ? 20 : 9 + (d % 3) * 2);
     dayGust.push(w.front && d === 1 ? 41 : 20 + (d % 4) * 3);
   }
-  const spread = (m: number[], lo: number[], hi: number[], models: number[]) => ({
-    corrected: true,
+  const spread = (
+    m: (number | null)[],
+    lo: (number | null)[],
+    hi: (number | null)[],
+    models: number[]
+  ) => ({
+    corrected: !o.raw,
     mean: m,
     low: lo,
     high: hi,
@@ -319,7 +338,14 @@ function forecast(town: Town, w: Weather, o: Options) {
     expired_after_min: 1440,
     hourly: {
       time,
-      temperature_c: { corrected: true, mean, low, high, m_models: spreadModels, lead_band: band },
+      temperature_c: {
+        corrected: !o.raw,
+        mean,
+        low,
+        high,
+        m_models: spreadModels,
+        lead_band: band
+      },
       dew_point_c: { corrected: false, mean: dew },
       wind_kmh: { corrected: false, mean: speed },
       wind_dir_deg: { corrected: false, mean: direction },
@@ -567,6 +593,8 @@ const base: Options = {
   metarAt: NOW - 20 * MIN,
   gap: false,
   thin: false,
+  emptyLast: false,
+  raw: false,
   partial: false,
   noRadar: false,
   missingFrame: false,
@@ -589,5 +617,7 @@ scenario('mancanti', RAINY, {
   radarAt: NOW - 3 * H,
   gap: true,
   thin: true,
+  emptyLast: true,
   extras: false
 });
+scenario('non-corretto', RAINY, { ...base, raw: true });

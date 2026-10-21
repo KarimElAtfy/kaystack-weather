@@ -94,6 +94,22 @@ test('skips to the content, then follows the section bar', async ({ page, baseUR
   await expect(page.locator('.sections a[href="#ore-48"]')).toHaveAttribute('aria-current', 'true');
 });
 
+test('reaches the radar controls from the 48 ore range on a phone', async ({ page, baseURL }) => {
+  await page.setViewportSize({ width: 360, height: 800 });
+  await openState(page, 'pioggia', '/pedrengo', baseURL ?? '');
+  await page.getByRole('slider', { name: 'Ora del grafico' }).focus();
+  const names: string[] = [];
+  for (let i = 0; i < 6; i++) {
+    await page.keyboard.press('Tab');
+    names.push((await focused(page))?.name ?? '');
+  }
+  expect(names).toContain('Avvia');
+  await expect(page.getByRole('button', { name: 'Avvia' })).not.toHaveAttribute(
+    'aria-disabled',
+    'true'
+  );
+});
+
 test('plays and stops the radar from the keyboard', async ({ page, baseURL }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await openState(page, 'pioggia', '/sesto-calende', baseURL ?? '');

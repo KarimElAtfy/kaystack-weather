@@ -232,12 +232,16 @@
     grid-area: latest;
   }
 }
-.btn[disabled] {
+.btn[aria-disabled='true'] {
   color: var(--text-3);
   cursor: default;
 }
-.btn[disabled]:hover {
+.btn[aria-disabled='true']:hover {
   background: var(--surface);
+}
+.controls input[aria-disabled='true'] {
+  opacity: 0.5;
+  cursor: default;
 }
 .ftime {
   font-variant-numeric: tabular-nums;

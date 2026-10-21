@@ -1,7 +1,7 @@
 <script lang="ts">
   import { t } from '#lib/copy/t.ts';
   import { int, mm, models, pct, temp, wind } from '#lib/format.ts';
-  import { firstShown, lastFullHour, nextHour, summary } from '#lib/chart/h48.ts';
+  import { firstShown, lastFullHour, nextHour, observed, summary } from '#lib/chart/h48.ts';
   import Icon from '#lib/symbols/Icon.svelte';
   import { dayName, dstLabel, hm, weekdayLong, dayNumber } from '#lib/time.ts';
   import Meteogram from './Meteogram.svelte';
@@ -39,9 +39,16 @@
       : nextHour(times, data.clock)
   );
   const issued = $derived(forecast ? Date.parse(forecast.issued_at) : 0);
-  const sentence = $derived(hourly ? summary(hourly, data.clock) : null);
+  const sentence = $derived(
+    hourly ? summary(hourly, data.clock, observed(data.now.value?.radar, data.clock)) : null
+  );
+  // The summary starts with the radar, so the block waits for now.json as well:
+  // a sentence growing a moment later would move the page.
+  const nowRead = $derived(data.now.value !== null || data.now.problem !== null);
   const lastFull = $derived(hourly ? (times[lastFullHour(hourly)] ?? 0) : 0);
   const hasGap = $derived(hourly?.temperature_c.mean.some((v) => v === null) ?? false);
+  // Without the correction the page says so, and never calls the values corrected.
+  const raw = $derived(hourly ? !hourly.temperature_c.corrected : false);
   const hasDst = $derived(times.some((_, i) => dstLabel(times, i) !== null));
 
   // Everything the readout shows, as one sentence for the hour control.
@@ -98,7 +105,7 @@
   });
 </script>
 
-{#if !forecast || !hourly}
+{#if !forecast || !hourly || !nowRead}
   {#if data.forecast.problem}
     <p class="note bad"><Icon name="bad" /><span>{t('state.forecast_missing')}</span></p>
   {:else}
@@ -107,7 +114,13 @@
 {:else}
   <p class="sec-meta">{t('h48.meta', { ora: hm(issued), stazione: data.town.station })}</p>
   {#if sentence}
-    <p class="summary"><strong>{sentence.rain}</strong> {sentence.temp}</p>
+    <p class="summary">
+      {sentence.now ? `${sentence.now} ` : ''}<strong>{sentence.rain}</strong>
+      {sentence.temp}
+    </p>
+  {/if}
+  {#if raw}
+    <p class="note info"><Icon name="info" /><span>{t('h48.note_raw')}</span></p>
   {/if}
   {#if hasDst}
     <p class="note info"><Icon name="info" /><span>{t('h48.dst_note')}</span></p>
@@ -124,7 +137,9 @@
   </div>
   {#if view === 'chart'}
     <div class="legend" aria-hidden="true">
-      <span><i class="key line key-temp"></i>{t('h48.legend_mean')}</span>
+      <span
+        ><i class="key line key-temp"></i>{t(raw ? 'h48.legend_mean_raw' : 'h48.legend_mean')}</span
+      >
       <span><i class="key band key-band"></i>{t('h48.legend_range')}</span>
       <span><i class="key bar key-rain"></i>{t('h48.legend_rain')}</span>
       <span><i class="key line key-wind"></i>{t('h48.legend_wind')}</span>
@@ -184,8 +199,8 @@
     <Table48 {hourly} {first} lat={data.town.lat} lon={data.town.lon} />
   {/if}
   <div class="foot">
-    {#if hasGap}<p>{t('state.partial_hours')}</p>{/if}
-    <p>{t('h48.footnote')}</p>
+    {#if hasGap && !raw}<p>{t('state.partial_hours')}</p>{/if}
+    <p>{t(raw ? 'h48.footnote_raw' : 'h48.footnote')}</p>
     <p>
       {t('h48.models_note', {
         m: hourly.temperature_c.m_models[0] ?? 0,

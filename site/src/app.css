@@ -1064,7 +1064,7 @@ table.days thead th {
   padding-top: 0;
 }
 table.days .c-day {
-  width: 56px;
+  width: 60px;
 }
 table.days .c-sky {
   width: 34px;
@@ -1109,6 +1109,10 @@ table.days tbody th {
   font-weight: 600;
   font-size: var(--fs-sm);
   line-height: 1.25;
+}
+/* "Dom 25" on one line, the date under it when the month changes. */
+table.days tbody th[scope='row'] {
+  white-space: nowrap;
 }
 table.days tbody th .d {
   display: block;

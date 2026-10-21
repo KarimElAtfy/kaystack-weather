@@ -2,8 +2,9 @@
 // are shown, the summary sentence, and the steps of the axes.
 import { t } from '#lib/copy/t.ts';
 import { temp } from '#lib/format.ts';
+import { radarAtTownFreshness } from '#lib/data/states.ts';
 import { dayName, hm, HOUR_MS, ymd } from '#lib/time.ts';
-import type { ForecastFile } from '#lib/data/decode.ts';
+import type { ForecastFile, NowFile } from '#lib/data/decode.ts';
 
 type Hourly = ForecastFile['hourly'];
 
@@ -30,10 +31,26 @@ export function niceStep(range: number, target: number): number {
   return (m < 1.5 ? 1 : m < 3.5 ? 2 : m < 7.5 ? 5 : 10) * power;
 }
 
+// What the radar sees at the town, only while it is fresh enough to say what
+// is happening now; under its lightest class, 0,2 mm/h, it is not raining.
+export type Observed = 'dry' | 'rain' | null;
+
+export function observed(radar: NowFile['radar'] | undefined, now: number): Observed {
+  if (!radar || radar.no_data || radar.rate_mm_h === null) return null;
+  if (radarAtTownFreshness(radar, now) !== 'fresh') return null;
+  return radar.rate_mm_h < 0.2 ? 'dry' : 'rain';
+}
+
 // Fixed rules over the next 12 hours: when most models give rain, else when a
 // fifth do, then the temperature range of the 48 hours. Rain counts the hour
-// ending at a step, so the sentence names the hour it starts.
-export function summary(hourly: Hourly, now: number): { rain: string; temp: string } {
+// ending at a step, so the sentence names the hour it starts. The models speak
+// only of the hours ahead: what is happening now comes first, from the radar,
+// and never from them.
+export function summary(
+  hourly: Hourly,
+  now: number,
+  seen: Observed = null
+): { now: string; rain: string; temp: string } {
   const times = hourly.time.map(Date.parse);
   let most = -1;
   let some = -1;
@@ -46,7 +63,8 @@ export function summary(hourly: Hourly, now: number): { rain: string; temp: stri
   });
   const when = (i: number) => {
     const start = (times[i] ?? now) - HOUR_MS;
-    if (start <= now) return t('h48.summary_now');
+    if (start <= now)
+      return t('h48.summary_by', { ora: hm((Math.floor(now / HOUR_MS) + 1) * HOUR_MS) });
     if (ymd(start) === ymd(now)) return t('h48.summary_from', { ora: hm(start) });
     return t('h48.summary_from_day', { giorno: dayName(start, now), ora: hm(start) });
   };
@@ -62,7 +80,9 @@ export function summary(hourly: Hourly, now: number): { rain: string; temp: stri
   const range = values.length
     ? t('h48.summary_temp', { min: temp(Math.min(...values)), max: temp(Math.max(...values)) })
     : '';
-  return { rain, temp: range };
+  const said =
+    seen === 'dry' ? t('h48.summary_obs_dry') : seen === 'rain' ? t('h48.summary_obs_rain') : '';
+  return { now: said, rain, temp: range };
 }
 
 // The last hour that still has every model of the first one, for the footnote.
