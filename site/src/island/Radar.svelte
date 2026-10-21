@@ -95,7 +95,12 @@
     chosen = next;
     timer = setTimeout(step, next === last ? 1400 : 450);
   }
+  // While the images load, and for Ultima on the last frame, the controls stay
+  // in the tab order with aria-disabled and ignore activation: disabled would
+  // take them out of it, and on a phone they load only once in view.
+  const idle = $derived(shown === last && !playing);
   function toggle() {
+    if (loading) return;
     if (playing) return stop();
     playing = true;
     step();
@@ -142,7 +147,7 @@
   </p>
 {/snippet}
 
-<div bind:this={root}>
+<div bind:this={root} onfocusin={() => data.seeRadar()}>
   {#if !radar && !data.radar.problem}
     <div class="skel skel-radar">{t('state.loading')}</div>
     <!-- The full credit from the start: only "Radar non disponibile" has no map. -->
@@ -236,7 +241,12 @@
       {/if}
     </div>
     <div class="controls">
-      <button class="btn play" type="button" disabled={loading} onclick={toggle}>
+      <button
+        class="btn play"
+        type="button"
+        aria-disabled={loading ? 'true' : undefined}
+        onclick={toggle}
+      >
         <Icon name={playing ? 'pause' : 'play'} />{playing ? t('radar.pause') : t('radar.play')}
       </button>
       <input
@@ -245,8 +255,12 @@
         max={last}
         step="1"
         value={shown}
-        disabled={loading}
+        aria-disabled={loading ? 'true' : undefined}
         oninput={(event) => {
+          if (loading) {
+            event.currentTarget.value = String(shown);
+            return;
+          }
           stop();
           chosen = Number(event.currentTarget.value);
         }}
@@ -263,8 +277,9 @@
       <button
         class="btn latest"
         type="button"
-        disabled={loading || (shown === last && !playing)}
+        aria-disabled={loading || idle ? 'true' : undefined}
         onclick={() => {
+          if (loading || idle) return;
           stop();
           chosen = null;
         }}>{t('radar.latest')}</button

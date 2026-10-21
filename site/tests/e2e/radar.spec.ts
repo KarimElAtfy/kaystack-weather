@@ -33,7 +33,10 @@ test('plays only when asked and steps with the slider', async ({ page, baseURL }
   await open(page, 'pioggia', '/pedrengo', baseURL ?? '');
   const play = page.getByRole('button', { name: 'Avvia' });
   await expect(play).not.toHaveAttribute('aria-pressed');
-  await expect(page.getByRole('button', { name: 'Ultima' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Ultima' })).toHaveAttribute(
+    'aria-disabled',
+    'true'
+  );
   const slider = page.getByRole('slider', { name: "Ora dell'immagine" });
   await expect(slider).toBeEnabled();
   await slider.focus();
@@ -79,7 +82,16 @@ test('veils the map until its images are drawn', async ({ page, context, baseURL
   await expect(page.locator('#radar .stamp')).toHaveCount(0);
   await expect(page.locator('#radar .ftime')).toHaveText('');
   const slider = page.getByRole('slider', { name: "Ora dell'immagine" });
-  await expect(slider).toBeDisabled();
+  // Still in the tab order, but doing nothing until the images are drawn.
+  await expect(slider).toHaveAttribute('aria-disabled', 'true');
+  await expect(page.getByRole('button', { name: 'Avvia' })).toHaveAttribute(
+    'aria-disabled',
+    'true'
+  );
+  await slider.focus();
+  await expect(slider).toBeFocused();
+  await page.keyboard.press('Home');
+  await expect(slider).toHaveAttribute('aria-valuetext', 'Carico le immagini');
   await expect(slider).toHaveAttribute('aria-valuetext', 'Carico le immagini');
   release();
   await expect(page.locator('#radar .veil')).toHaveCount(0);
