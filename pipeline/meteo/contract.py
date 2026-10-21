@@ -121,6 +121,9 @@ class Reference(Model):
     distance_km: Distance
 
 
+CloudCover = Literal["FEW", "SCT", "BKN", "OVC", "VV", "NSC", "NCD", "CAVOK", "SKC", "CLR"]
+
+
 class Metar(Model):
     icao: str = Field(pattern=r"^[A-Z]{4}$")
     name: str
@@ -134,6 +137,15 @@ class Metar(Model):
     visibility_m: int | None = Field(ge=0, description="9999 means 10 km or more.")
     weather: str | None = Field(description="Present weather groups as reported, e.g. -RA BR.")
     stale_after_min: int = Field(90, gt=0, description="Minutes after observed_at.")
+    # Added in v1 after the first files: missing from those.
+    raw: str | None = Field(None, description="The report as received.")
+    cloud_cover: CloudCover | None = Field(
+        None,
+        description=(
+            "The cloud group of the report: the most covered layer, VV for a sky hidden"
+            " by fog, or the clear-sky code as reported. Null when it has none."
+        ),
+    )
 
 
 class RadarAtTown(Model):
