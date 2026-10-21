@@ -1,0 +1,129 @@
+{
+ "schema": "radar/1",
+ "license": "CC BY-SA 4.0",
+ "attribution": "Radar-DPC (CC BY-SA 4.0)",
+ "generated_at": "2026-10-24T13:06:30Z",
+ "town": "pedrengo",
+ "encoding": "class-grey9/1",
+ "sprite": "radar-20261024T1305.png",
+ "frame_width_px": 120,
+ "frame_height_px": 120,
+ "columns": 4,
+ "frames": [
+  {
+   "time": "2026-10-24T12:10:00Z",
+   "missing": false,
+   "town_mm_h": 0,
+   "max_10km_mm_h": 0
+  },
+  {
+   "time": "2026-10-24T12:15:00Z",
+   "missing": false,
+   "town_mm_h": 0,
+   "max_10km_mm_h": 0
+  },
+  {
+   "time": "2026-10-24T12:20:00Z",
+   "missing": false,
+   "town_mm_h": 0,
+   "max_10km_mm_h": 0
+  },
+  {
+   "time": "2026-10-24T12:25:00Z",
+   "missing": false,
+   "town_mm_h": 0,
+   "max_10km_mm_h": 0
+  },
+  {
+   "time": "2026-10-24T12:30:00Z",
+   "missing": false,
+   "town_mm_h": 0,
+   "max_10km_mm_h": 0
+  },
+  {
+   "time": "2026-10-24T12:35:00Z",
+   "missing": false,
+   "town_mm_h": 0,
+   "max_10km_mm_h": 0
+  },
+  {
+   "time": "2026-10-24T12:40:00Z",
+   "missing": false,
+   "town_mm_h": 0,
+   "max_10km_mm_h": 0
+  },
+  {
+   "time": "2026-10-24T12:45:00Z",
+   "missing": false,
+   "town_mm_h": 0,
+   "max_10km_mm_h": 0
+  },
+  {
+   "time": "2026-10-24T12:50:00Z",
+   "missing": false,
+   "town_mm_h": 0,
+   "max_10km_mm_h": 0
+  },
+  {
+   "time": "2026-10-24T12:55:00Z",
+   "missing": false,
+   "town_mm_h": 0,
+   "max_10km_mm_h": 0
+  },
+  {
+   "time": "2026-10-24T13:00:00Z",
+   "missing": false,
+   "town_mm_h": 0,
+   "max_10km_mm_h": 0
+  },
+  {
+   "time": "2026-10-24T13:05:00Z",
+   "missing": false,
+   "town_mm_h": 0,
+   "max_10km_mm_h": 0
+  }
+ ],
+ "view": {
+  "west": -275000,
+  "east": -155000,
+  "south": 354000,
+  "north": 474000
+ },
+ "km_per_px": 1,
+ "town_px": {
+  "x": 60,
+  "y": 60
+ },
+ "scale": [
+  {
+   "index": 1,
+   "from_mm_h": 0.2,
+   "to_mm_h": 1
+  },
+  {
+   "index": 2,
+   "from_mm_h": 1,
+   "to_mm_h": 2
+  },
+  {
+   "index": 3,
+   "from_mm_h": 2,
+   "to_mm_h": 6
+  },
+  {
+   "index": 4,
+   "from_mm_h": 6,
+   "to_mm_h": 15
+  },
+  {
+   "index": 5,
+   "from_mm_h": 15,
+   "to_mm_h": 40
+  },
+  {
+   "index": 6,
+   "from_mm_h": 40,
+   "to_mm_h": null
+  }
+ ]
+}

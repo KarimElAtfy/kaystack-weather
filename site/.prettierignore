@@ -3,3 +3,5 @@ build/
 package-lock.json
 test-results/
 playwright-report/
+src/generated/
+tests/fixtures/

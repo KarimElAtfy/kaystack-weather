@@ -5,12 +5,17 @@
   "engines": {
     "node": ">=22.18"
   },
+  "imports": {
+    "#lib/*": "./src/lib/*",
+    "#gen/*": "./src/generated/*"
+  },
   "scripts": {
-    "dev": "vite dev",
-    "build": "vite build",
+    "gen": "node scripts/gen.ts",
+    "dev": "npm run gen && vite dev",
+    "build": "npm run gen && vite build",
     "serve": "node scripts/serve.ts build",
-    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --fail-on-warnings",
-    "test": "vitest run",
+    "check": "npm run gen && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --fail-on-warnings",
+    "test": "npm run gen && vitest run",
     "e2e": "playwright test",
     "budget": "node scripts/budget.ts",
     "format": "prettier --write .",
@@ -22,6 +27,8 @@
     "@sveltejs/kit": "3.0.1",
     "@sveltejs/vite-plugin-svelte": "7.3.1",
     "@types/node": "24.19.2",
+    "ajv": "8.20.0",
+    "json-schema-to-typescript": "16.0.0",
     "prettier": "3.9.10",
     "prettier-plugin-svelte": "4.1.1",
     "svelte": "5.57.2",

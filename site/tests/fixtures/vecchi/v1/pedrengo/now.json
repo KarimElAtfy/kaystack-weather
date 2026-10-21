@@ -1,0 +1,35 @@
+{
+ "schema": "now/1",
+ "license": "CC BY-SA 4.0",
+ "attribution": "Radar-DPC (CC BY-SA 4.0); METAR: NOAA Aviation Weather Center",
+ "generated_at": "2026-10-24T12:21:00Z",
+ "town": "pedrengo",
+ "reference": {
+  "name": "Torre Boldone",
+  "distance_km": 3.4
+ },
+ "metar": {
+  "icao": "LIME",
+  "name": "Bergamo Orio al Serio",
+  "distance_km": 4.3,
+  "observed_at": "2026-10-24T10:20:00Z",
+  "temperature_c": 13,
+  "dew_point_c": 11,
+  "wind_kmh": 15,
+  "wind_dir_deg": 210,
+  "gust_kmh": null,
+  "visibility_m": 6000,
+  "weather": "-RA BR",
+  "stale_after_min": 90,
+  "raw": "LIME 241250Z 21008KT 6000 -RA BR FEW008 BKN015 OVC030 13/11 Q1009",
+  "cloud_cover": "OVC"
+ },
+ "radar": {
+  "frame_time": "2026-10-24T12:20:00Z",
+  "rate_mm_h": 1.4,
+  "max_5km_mm_h": 1.9,
+  "max_10km_mm_h": 2.1,
+  "no_data": false,
+  "stale_after_min": 15
+ }
+}
