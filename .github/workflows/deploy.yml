@@ -8,6 +8,8 @@ on:
       - "!pipeline/tests/**"
       - "!pipeline/scripts/**"
       - "towns/**"
+      - "site/**"
+      - "schema/**"
       - ".github/workflows/deploy.yml"
   workflow_dispatch:
 
@@ -18,7 +20,51 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # The Function and the site deploy apart: a push that touches only one of
+  # them leaves the other as it is.
+  changes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      function: ${{ steps.paths.outputs.function }}
+      site: ${{ steps.paths.outputs.site }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+
+      - id: paths
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT_NAME" = workflow_dispatch ]; then
+            printf 'function=true\nsite=true\n' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Pull requests reach main as merge commits, whose first parent is
+          # main before the merge.
+          changed=$(git diff --name-only HEAD^1 HEAD)
+          echo "$changed"
+
+          function=false
+          site=false
+          # The paths that deployed the Function before the site was added.
+          if grep -vE '^pipeline/(tests|scripts)/' <<< "$changed" | grep -qE '^(pipeline/|towns/)'; then
+            function=true
+          fi
+          # The site reads the town files at build time and takes its types from schema/.
+          if grep -qE '^(site/|schema/|towns/)' <<< "$changed"; then site=true; fi
+          # A change to this workflow deploys both, so both paths run.
+          if grep -qx '\.github/workflows/deploy\.yml' <<< "$changed"; then function=true; site=true; fi
+          printf 'function=%s\nsite=%s\n' "$function" "$site" >> "$GITHUB_OUTPUT"
+
   package:
+    needs: changes
+    if: needs.changes.outputs.function == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
@@ -142,3 +188,157 @@ jobs:
           done
           echo "The deployment was still running after 10 minutes."
           exit 1
+
+  # Built without any token. The deploy job below gets only the files.
+  site-build:
+    needs: changes
+    if: needs.changes.outputs.site == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      NODE_VERSION: 24.22.0
+      NODE_SHA256: cc2f601cee82d9a5a233302fe307abc600727035fd7d2c3a3571755989e95008
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # A folder of its own: unpacked over the runner's Node in /usr/local, npm
+      # mixes in files of the older npm and fails to start.
+      - name: Install Node
+        run: |
+          curl -fsSLo /tmp/node.tar.xz "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz"
+          echo "${NODE_SHA256}  /tmp/node.tar.xz" | sha256sum -c -
+          sudo mkdir /opt/node
+          sudo tar -xJf /tmp/node.tar.xz -C /opt/node --strip-components=1
+          echo /opt/node/bin >> "$GITHUB_PATH"
+
+      # .npmrc sets ignore-scripts, so no dependency runs code at install.
+      - run: npm ci
+      - run: npm run build
+      - run: npm run budget
+      - run: npm run guard
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: site
+          path: site/build
+          if-no-files-found: error
+          retention-days: 1
+
+  site-deploy:
+    needs: site-build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment: release
+    permissions:
+      id-token: write # OIDC sign-in as the deploy identity
+    env:
+      AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      RESOURCE_GROUP: rg-meteo-prod
+      STATIC_SITE: stapp-meteo-prod
+      # The upload client the SWA CLI downloads, pinned by build and checked
+      # here (ADR 6). Both values are listed at https://aka.ms/swalocaldeploy.
+      SWA_CLIENT_BUILD: 134664351bac2104cb9ec773226e5b3fc265675d
+      SWA_CLIENT_SHA256: 638cde5d1a249355e72c891a372953a84d09f897fa47691d81bc45ca8fc615b9
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: site
+          path: ${{ runner.temp }}/site
+
+      - name: Install the upload client
+        run: |
+          curl -fsSLo "$RUNNER_TEMP/StaticSitesClient" \
+            "https://swalocaldeployv2-bndtgugjgqc3dhdx.b01.azurefd.net/downloads/${SWA_CLIENT_BUILD}/linux/StaticSitesClient"
+          echo "${SWA_CLIENT_SHA256}  $RUNNER_TEMP/StaticSitesClient" | sha256sum -c -
+          chmod +x "$RUNNER_TEMP/StaticSitesClient"
+
+      - name: Sign in as deploy
+        run: |
+          token=$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://AzureADTokenExchange" | jq -r .value)
+          echo "::add-mask::$token"
+          az login --service-principal --username "$AZURE_CLIENT_ID" --tenant "$AZURE_TENANT_ID" \
+            --federated-token "$token" --allow-no-subscriptions --output none
+          az account set --subscription "$AZURE_SUBSCRIPTION_ID"
+
+      # The deployment token is read here, masked before anything could print
+      # it, and lives only in this step. The client gets the environment the
+      # SWA CLI 2.1.0 gives it for a production upload of built files: no
+      # DEPLOYMENT_ENVIRONMENT, and the files as the app location.
+      - name: Upload the site
+        run: |
+          token=$(az staticwebapp secrets list --name "$STATIC_SITE" --resource-group "$RESOURCE_GROUP" \
+            --query properties.apiKey -o tsv)
+          echo "::add-mask::$token"
+          [ -n "$token" ]
+          cd "$RUNNER_TEMP"
+          env DEPLOYMENT_TOKEN="$token" \
+            DEPLOYMENT_ACTION=upload \
+            DEPLOYMENT_PROVIDER=SwaCli \
+            REPOSITORY_BASE="$RUNNER_TEMP/site" \
+            APP_LOCATION="$RUNNER_TEMP/site" \
+            CONFIG_FILE_LOCATION="$RUNNER_TEMP/site" \
+            SKIP_APP_BUILD=true \
+            SKIP_API_BUILD=true \
+            VERBOSE=false \
+            "$RUNNER_TEMP/StaticSitesClient"
+
+      # What the documentation leaves open, checked on the live site against
+      # the files just uploaded: the headers, the closed sign-in routes, the
+      # page files, the trailing slash and the 404 page.
+      - name: Check the live site
+        run: |
+          host=$(az staticwebapp show --name "$STATIC_SITE" --resource-group "$RESOURCE_GROUP" \
+            --query defaultHostname -o tsv)
+          site="$RUNNER_TEMP/site"
+          get() { curl -sS -D "$RUNNER_TEMP/head.txt" -o "$RUNNER_TEMP/body" -w '%{http_code}' "https://$host$1"; }
+          header() { grep -i "^$1:" "$RUNNER_TEMP/head.txt" | head -1 | cut -d: -f2- | sed 's/^ *//; s/\r$//'; }
+          same() { cmp -s "$RUNNER_TEMP/body" "$site/$1" && echo same; }
+          failed=0
+          expect() {
+            if [ "$2" = "$3" ]; then echo "ok    $1"; else echo "FAIL  $1: got '$2', expected '$3'"; failed=1; fi
+          }
+
+          # The client returns once the upload is accepted, and the edge can
+          # take a moment more: wait until /pedrengo is this build's page.
+          for _ in $(seq 1 30); do
+            if [ "$(get /pedrengo)" = 200 ] && [ "$(same pedrengo.html)" = same ]; then break; fi
+            sleep 10
+          done
+
+          expect "/pedrengo status" "$(get /pedrengo)" 200
+          expect "/pedrengo is pedrengo.html" "$(same pedrengo.html)" same
+          expect "/pedrengo type" "$(header content-type | cut -d';' -f1)" text/html
+          expect "/pedrengo sets no cookie" "$(header set-cookie)" ""
+          checked=0
+          while IFS=$'\t' read -r name value; do
+            expect "/pedrengo $name" "$(header "$name")" "$value"
+            checked=$((checked + 1))
+          done < <(jq -r '.globalHeaders | to_entries[] | "\(.key)\t\(.value)"' "$site/staticwebapp.config.json")
+          expect "headers checked" "$checked" "$(jq '.globalHeaders | length' "$site/staticwebapp.config.json")"
+
+          expect "/ status" "$(get /)" 200
+          expect "/ sets no cookie" "$(header set-cookie)" ""
+          expect "/pedrengo/ status" "$(get /pedrengo/)" 301
+          expect "/pedrengo/ location" "$(header location | sed -E 's#^https?://[^/]+##')" /pedrengo
+          expect "/nope status" "$(get /nope)" 404
+          expect "/nope is 404.html" "$(same 404.html)" same
+          for path in /.auth/login/github /.auth/login/aad /.auth/me; do
+            expect "$path status" "$(get "$path")" 404
+          done
+          for dir in _app/immutable island/assets; do
+            file=$(cd "$site" && find "$dir" -type f -print -quit)
+            expect "/$file status" "$(get "/$file")" 200
+            expect "/$file cache" "$(header cache-control)" "public, max-age=31536000, immutable"
+          done
+          exit "$failed"
