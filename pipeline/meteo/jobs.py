@@ -13,6 +13,7 @@ import requests
 from meteo import (
     arpa,
     compact,
+    forecast,
     metar,
     mosmix,
     now,
@@ -167,9 +168,10 @@ def arpa_stations(lake: Store, public: Store, env: Mapping[str, str], town_dir: 
 def hourly_forecasts(
     lake: Store, public: Store, env: Mapping[str, str], town_dir: Path, minutes: float
 ) -> None:
-    """Model runs, best_match, MOSMIX and Yr, then the check that every source is
-    recent. One source failing does not stop the others; the run fails at the end,
-    and the failed run is what the alert watches."""
+    """Model runs, best_match, MOSMIX and Yr, then each town's forecast from the
+    newest runs, then the check that every source is recent. One source failing does
+    not stop the others; the run fails at the end, and the failed run is what the
+    alert watches."""
     deadline = time.monotonic() + minutes * 60
     all_towns = towns.load(town_dir)
     points = towns.forecast_points(all_towns)
@@ -200,6 +202,11 @@ def hourly_forecasts(
         for source, (collect, expected) in sources.items()
         if not _collect(public, source, collect, expected)
     ]
+    try:
+        forecast.publish(lake, public, all_towns, datetime.now(UTC))
+    except Exception:
+        log.exception("forecast failed")
+        failed.append("forecast")
 
     late = status.late_sources(status.read(public), datetime.now(UTC))
     if failed or late:
