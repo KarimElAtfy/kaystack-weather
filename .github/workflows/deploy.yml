@@ -292,3 +292,53 @@ jobs:
             SKIP_API_BUILD=true \
             VERBOSE=false \
             "$RUNNER_TEMP/StaticSitesClient"
+
+      # What the documentation leaves open, checked on the live site against
+      # the files just uploaded: the headers, the closed sign-in routes, the
+      # page files, the trailing slash and the 404 page.
+      - name: Check the live site
+        run: |
+          host=$(az staticwebapp show --name "$STATIC_SITE" --resource-group "$RESOURCE_GROUP" \
+            --query defaultHostname -o tsv)
+          site="$RUNNER_TEMP/site"
+          get() { curl -sS -D "$RUNNER_TEMP/head.txt" -o "$RUNNER_TEMP/body" -w '%{http_code}' "https://$host$1"; }
+          header() { grep -i "^$1:" "$RUNNER_TEMP/head.txt" | head -1 | cut -d: -f2- | sed 's/^ *//; s/\r$//'; }
+          same() { cmp -s "$RUNNER_TEMP/body" "$site/$1" && echo same; }
+          failed=0
+          expect() {
+            if [ "$2" = "$3" ]; then echo "ok    $1"; else echo "FAIL  $1: got '$2', expected '$3'"; failed=1; fi
+          }
+
+          # The client returns once the upload is accepted, and the edge can
+          # take a moment more: wait until /pedrengo is this build's page.
+          for _ in $(seq 1 30); do
+            if [ "$(get /pedrengo)" = 200 ] && [ "$(same pedrengo.html)" = same ]; then break; fi
+            sleep 10
+          done
+
+          expect "/pedrengo status" "$(get /pedrengo)" 200
+          expect "/pedrengo is pedrengo.html" "$(same pedrengo.html)" same
+          expect "/pedrengo type" "$(header content-type | cut -d';' -f1)" text/html
+          expect "/pedrengo sets no cookie" "$(header set-cookie)" ""
+          checked=0
+          while IFS=$'\t' read -r name value; do
+            expect "/pedrengo $name" "$(header "$name")" "$value"
+            checked=$((checked + 1))
+          done < <(jq -r '.globalHeaders | to_entries[] | "\(.key)\t\(.value)"' "$site/staticwebapp.config.json")
+          expect "headers checked" "$checked" "$(jq '.globalHeaders | length' "$site/staticwebapp.config.json")"
+
+          expect "/ status" "$(get /)" 200
+          expect "/ sets no cookie" "$(header set-cookie)" ""
+          expect "/pedrengo/ status" "$(get /pedrengo/)" 301
+          expect "/pedrengo/ location" "$(header location | sed -E 's#^https?://[^/]+##')" /pedrengo
+          expect "/nope status" "$(get /nope)" 404
+          expect "/nope is 404.html" "$(same 404.html)" same
+          for path in /.auth/login/github /.auth/login/aad /.auth/me; do
+            expect "$path status" "$(get "$path")" 404
+          done
+          for dir in _app/immutable island/assets; do
+            file=$(cd "$site" && find "$dir" -type f -print -quit)
+            expect "/$file status" "$(get "/$file")" 200
+            expect "/$file cache" "$(header cache-control)" "public, max-age=31536000, immutable"
+          done
+          exit "$failed"
