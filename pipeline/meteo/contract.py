@@ -74,6 +74,13 @@ class File(Model):
     def path(cls, slug: str = "") -> str:
         return cls.PATH.format(slug=slug)
 
+    def body(self) -> bytes:
+        """The file as it is written, read back through its model first, so that a
+        file the site would refuse never reaches the public container."""
+        data = self.model_dump_json().encode()
+        type(self).model_validate_json(data)
+        return data
+
 
 class Source(Model):
     checked_at: Stamp | None = Field(

@@ -49,7 +49,8 @@ timers = func.Blueprint()
     schedule="0 4,9,14,19,24,29,34,39,44,49,54,59 * * * *", arg_name="timer", use_monitor=False
 )
 def radar(timer: func.TimerRequest) -> None:
-    run(jobs.radar_frames, store("LAKE_ACCOUNT"), store("PUBLIC_ACCOUNT"), os.environ, minutes=4)
+    lake, public = store("LAKE_ACCOUNT"), store("PUBLIC_ACCOUNT")
+    run(jobs.radar_frames, lake, public, os.environ, TOWNS, minutes=4)
 
 
 # Reports are made at :20 and :50 and reach AWC 5 to 14 minutes later.
