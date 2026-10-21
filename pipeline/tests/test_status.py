@@ -2,6 +2,7 @@ import json
 from datetime import UTC, datetime, timedelta
 
 from meteo import status
+from meteo.contract import Status
 
 T = datetime(2026, 10, 16, 12, 0, tzinfo=UTC)
 AIRPORTS = ("LIME", "LIMC")
@@ -46,12 +47,25 @@ def test_a_failed_check_keeps_the_last_good_one(lake):
     assert radar["data_time"] == "2026-10-16T11:55:00Z"
 
 
-def test_status_json_has_the_shape_freshness_reads(lake):
+def test_status_json_is_the_contract_file_freshness_reads(lake):
     status.record(lake, "yr", T, {"lime": T}, {"lime"})
-    body = json.loads(lake.read_versioned("public", "status.json")[0])
-    assert set(body) == {"generated_at", "sources"}
-    assert body["generated_at"].endswith("Z")
-    assert status.parse_stamp(body["sources"]["yr"]["data_time"]) == T
+    body = lake.read_versioned("public", "status.json")[0]
+    assert Status.model_validate_json(body).schema_ == "status/1"
+    assert status.parse_stamp(json.loads(body)["sources"]["yr"]["data_time"]) == T
+
+
+def test_a_source_never_reached_has_null_times(lake):
+    status.record(lake, "mosmix", None, {}, {"16076"})
+    assert entry(lake, "mosmix") == {"checked_at": None, "data_time": None, "parts": {}}
+    assert "mosmix data_time" in status.late_sources(status.read(lake), T)
+
+
+def test_a_file_written_before_the_contract_is_carried_over(lake):
+    old = {"generated_at": "2026-10-16T11:00:00Z", "sources": {"yr": {"parts": {}}}}
+    lake.put("public", "status.json", json.dumps(old).encode(), "application/json")
+    status.record(lake, "radar", T, {"sri": T}, {"sri"})
+    assert entry(lake, "yr") == {"checked_at": None, "data_time": None, "parts": {}}
+    assert entry(lake, "radar")["data_time"] == "2026-10-16T12:00:00Z"
 
 
 def test_late_sources_by_data_and_by_check():
