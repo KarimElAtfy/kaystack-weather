@@ -26,6 +26,9 @@ package = false
 required-version = ">=0.13.0,<0.14"
 # New releases wait a week before they reach the lock file.
 exclude-newer = "7 days"
+# Except certifi 2026.10.19, which drops the emSign root whose intermediate keys
+# leaked (GHSA-6q48-6c7w-9gw2). Remove this once that release is a week old.
+exclude-newer-package = { certifi = "2026-10-21T00:00:00Z" }
 
 [tool.ruff]
 line-length = 100
