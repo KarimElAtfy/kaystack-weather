@@ -5,6 +5,7 @@ service (If-None-Match: *), and for radar frames, MOSMIX issues and model runs,
 whose names carry the source's own time, that refusal is the deduplication.
 """
 
+import contextlib
 import hashlib
 import json
 from datetime import UTC, date, datetime
@@ -57,12 +58,26 @@ class AzureStore:
             return False
         return True
 
-    def put(self, container: str, name: str, data: bytes, content_type: str) -> None:
+    def put(
+        self,
+        container: str,
+        name: str,
+        data: bytes,
+        content_type: str,
+        cache_control: str | None = None,
+    ) -> None:
         from azure.storage.blob import ContentSettings
 
+        settings = ContentSettings(content_type=content_type, cache_control=cache_control)
         self._service.get_blob_client(container, name).upload_blob(
-            data, overwrite=True, content_settings=ContentSettings(content_type=content_type)
+            data, overwrite=True, content_settings=settings
         )
+
+    def delete(self, container: str, name: str) -> None:
+        from azure.core.exceptions import ResourceNotFoundError
+
+        with contextlib.suppress(ResourceNotFoundError):
+            self._service.get_blob_client(container, name).delete_blob()
 
     def exists(self, container: str, name: str) -> bool:
         return self._service.get_blob_client(container, name).exists()
@@ -147,10 +162,20 @@ class FolderStore:
             meta.write_text(json.dumps(metadata), encoding="utf-8")
         return True
 
-    def put(self, container: str, name: str, data: bytes, content_type: str) -> None:
+    def put(
+        self,
+        container: str,
+        name: str,
+        data: bytes,
+        content_type: str,
+        cache_control: str | None = None,
+    ) -> None:
         path = self._path(container, name)
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(data)
+
+    def delete(self, container: str, name: str) -> None:
+        self._path(container, name).unlink(missing_ok=True)
 
     def exists(self, container: str, name: str) -> bool:
         return self._path(container, name).is_file()

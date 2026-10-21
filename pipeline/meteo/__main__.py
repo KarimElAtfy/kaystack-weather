@@ -62,7 +62,7 @@ def main() -> None:
         case "radar" if args.day:
             jobs.radar_repair(lake, env, args.day, minutes=60)
         case "radar":
-            jobs.radar_frames(lake, public, env, minutes=4)
+            jobs.radar_frames(lake, public, env, args.towns, minutes=4)
         case "metar":
             jobs.metar_reports(lake, public, env, args.towns)
         case "arpa":

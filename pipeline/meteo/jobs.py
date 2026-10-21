@@ -10,7 +10,7 @@ from pathlib import Path
 
 import requests
 
-from meteo import arpa, compact, metar, mosmix, openmeteo, radar, status, towns, web, yr
+from meteo import arpa, compact, metar, mosmix, openmeteo, radar, sprites, status, towns, web, yr
 from meteo.store import Store
 from meteo.towns import Town
 
@@ -75,17 +75,29 @@ def _radar_session(env: Mapping[str, str]) -> requests.Session:
     return web.session(env["USER_AGENT"], retry_on=(429, 502, 503, 504))
 
 
-def radar_frames(lake: Store, public: Store, env: Mapping[str, str], minutes: float) -> None:
-    deadline = time.monotonic() + minutes * 60
+def _newest_frame(public: Store) -> datetime | None:
     archived = status.read(public)["sources"].get("radar", {}).get("data_time")
-    since = status.parse_stamp(archived) if archived else None
+    return status.parse_stamp(archived) if archived else None
+
+
+def radar_frames(
+    lake: Store, public: Store, env: Mapping[str, str], town_dir: Path, minutes: float
+) -> None:
+    """New frames into the lake, then each town's sprite and radar.json, also after
+    a failed fetch: what did arrive is published."""
+    deadline = time.monotonic() + minutes * 60
+    since = _newest_frame(public)
     http = _radar_session(env)
     origin = env["RADAR_ORIGIN"]
 
     def collect(newest):
         radar.collect(lake, http, origin, since, deadline, newest)
 
-    if not _collect(public, "radar", collect, {"sri"}):
+    ok = _collect(public, "radar", collect, {"sri"})
+    latest = _newest_frame(public)
+    if latest is not None:
+        sprites.publish(lake, public, towns.load(town_dir), latest)
+    if not ok:
         raise SourceFailed("radar")
 
 

@@ -1,4 +1,5 @@
 import io
+import json
 from datetime import UTC, datetime, timedelta
 
 import numpy as np
@@ -8,6 +9,7 @@ from PIL import Image
 
 from meteo import radar, sprites
 from meteo.contract import Radar
+from meteo.store import raw_name
 
 FRAME = datetime(2026, 10, 15, 17, 0, tzinfo=UTC)
 REFERENCE = fixture("radar/SRI_15-10-2026-17-00.crop.u16.zlib")
@@ -27,6 +29,11 @@ def sprite_frames(sprite: bytes, file: Radar) -> list[np.ndarray]:
         site_index(pixels[k // file.columns * h :][:h, k % file.columns * w :][:, :w])
         for k in range(len(file.frames))
     ]
+
+
+def store_frames(lake, times):
+    for t in times:
+        lake.put_new("raw", raw_name("radar", t, "sri", "u16.zlib"), REFERENCE, "")
 
 
 def test_every_grey_reads_back_as_its_index():
@@ -81,3 +88,34 @@ def test_the_sprite_holds_the_frames_cell_for_cell(all_towns):
     assert (decoded[3] == sprites.hatch((120, 120))).all()
     assert [f.missing for f in file.frames] == [k == 3 for k in range(12)]
     assert file.sprite == "radar-20261015T170700Z.webp"
+
+
+def test_radar_json_is_written_after_its_sprite_and_names_it(lake, all_towns):
+    store_frames(lake, [FRAME - timedelta(minutes=5 * k) for k in range(12)])
+    sprites.publish(lake, lake, all_towns, FRAME)
+
+    for town in all_towns:
+        body, _ = lake.read_versioned("public", f"v1/{town.slug}/radar.json")
+        file = Radar.model_validate_json(body)
+        assert file.frames[-1].time == FRAME
+        assert lake.exists("public", f"v1/{town.slug}/{file.sprite}")
+        assert json.loads(body)["schema"] == "radar/1"
+
+
+def test_the_same_frames_are_not_published_twice(lake, all_towns):
+    store_frames(lake, [FRAME])
+    sprites.publish(lake, lake, all_towns, FRAME)
+    sprites.publish(lake, lake, all_towns, FRAME)
+    assert len(lake.names("public", "v1/pedrengo/radar-")) == 1
+
+
+def test_a_replaced_sprite_stays_until_its_successor_is_half_an_hour_old(lake):
+    names = [
+        "v1/pedrengo/radar-20261015T170000Z.webp",
+        "v1/pedrengo/radar-20261015T170500Z.webp",
+        "v1/pedrengo/radar-20261015T173000Z.webp",
+    ]
+    for name in names:
+        lake.put("public", name, b"", "image/webp")
+    sprites.prune(lake, "pedrengo", datetime(2026, 10, 15, 17, 35, tzinfo=UTC))
+    assert lake.names("public", "v1/pedrengo/radar-") == names[1:]
