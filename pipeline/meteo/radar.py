@@ -76,7 +76,9 @@ def crop(tiff: bytes) -> bytes:
     import numpy as np
     from PIL import Image
 
-    with Image.open(io.BytesIO(tiff)) as image:
+    # Only the TIFF decoder: whatever else the bytes claim to be never reaches
+    # Pillow's other parsers.
+    with Image.open(io.BytesIO(tiff), formats=["TIFF"]) as image:
         if image.mode != "F" or image.size != (1200, 1400):
             raise ValueError(f"unexpected SRI grid: mode {image.mode}, size {image.size}")
         rates = np.asarray(image, dtype="<f4")[ROW0 : ROW0 + ROWS, COL0 : COL0 + COLS]

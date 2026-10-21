@@ -7,7 +7,7 @@ from datetime import UTC, date, datetime, timedelta
 import numpy as np
 import pytest
 from conftest import fixture, replaying
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 from tables import compact_on_time, read_table
 
 from meteo import jobs, radar
@@ -37,6 +37,13 @@ def test_crop_matches_the_reference_encoding():
     crop = radar.crop(frame_tiff())
     assert crop == REFERENCE
     assert hashlib.sha256(crop).hexdigest() == EXPECTED["crop_sha256"]
+
+
+def test_crop_opens_nothing_but_tiff():
+    png = io.BytesIO()
+    Image.new("L", (1200, 1400)).save(png, format="PNG")
+    with pytest.raises(UnidentifiedImageError):
+        radar.crop(png.getvalue())
 
 
 @pytest.mark.parametrize("point", EXPECTED["points"])

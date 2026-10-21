@@ -26,6 +26,10 @@ package = false
 required-version = ">=0.13.0,<0.14"
 # New releases wait a week before they reach the lock file.
 exclude-newer = "7 days"
+# Except two security releases, each until it is a week old: certifi 2026.10.19
+# drops the emSign root whose intermediate keys leaked (GHSA-6q48-6c7w-9gw2),
+# and Pillow 13.0.0 fixes TIFF decoder overflows (GHSA-8g5g-8vmr-9782 and others).
+exclude-newer-package = { certifi = "2026-10-21T00:00:00Z", pillow = "2026-10-21T00:00:00Z" }
 
 [tool.ruff]
 line-length = 100
