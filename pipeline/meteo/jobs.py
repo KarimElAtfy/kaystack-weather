@@ -96,8 +96,8 @@ def _newest_frame(public: Store) -> datetime | None:
 def radar_frames(
     lake: Store, public: Store, env: Mapping[str, str], town_dir: Path, minutes: float
 ) -> None:
-    """New frames into the lake, then each town's sprite and radar.json, also after
-    a failed fetch: what did arrive is published."""
+    """New frames into the lake, then each town's sprite, radar.json and the radar
+    block of now.json, also after a failed fetch: what did arrive is published."""
     deadline = time.monotonic() + minutes * 60
     since = _newest_frame(public)
     http = _radar_session(env)
@@ -109,7 +109,9 @@ def radar_frames(
     ok = _collect(public, "radar", collect, {"sri"})
     latest = _newest_frame(public)
     if latest is not None:
-        sprites.publish(lake, public, towns.load(town_dir), latest)
+        all_towns = towns.load(town_dir)
+        sprites.publish(lake, public, all_towns, latest)
+        now.publish_radar(lake, public, all_towns, latest)
     if not ok:
         raise SourceFailed("radar")
 

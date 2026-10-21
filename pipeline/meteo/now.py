@@ -11,9 +11,9 @@ import math
 import re
 from datetime import UTC, datetime, timedelta
 
-from meteo import metar
+from meteo import metar, radar
 from meteo.contract import Metar, Now, RadarAtTown, Reference
-from meteo.store import Store, day_prefix
+from meteo.store import Store, day_prefix, raw_name
 from meteo.towns import Town
 
 log = logging.getLogger(__name__)
@@ -99,6 +99,31 @@ def newest_reports(lake: Store, now: datetime) -> dict[str, dict]:
     return newest
 
 
+def radar_block(town: Town, grid, frame_time: datetime) -> RadarAtTown:
+    """From the lake's crop of one frame: the town's own cell and the highest rate
+    within 5 and 10 km of it, counting cells whose centres are that close."""
+    import numpy as np
+
+    row, col = radar.grid_cell(town.lat, town.lon)
+    r, c = row - radar.ROW0, col - radar.COL0
+    y, x = np.indices(grid.shape)
+    distance = np.hypot(y - r, x - c)
+    valid = grid != radar.NODATA
+
+    def highest(km: float) -> float | None:
+        near = valid & (distance <= km)
+        return int(grid[near].max()) / 10 if near.any() else None
+
+    centre = int(grid[r, c])
+    return RadarAtTown(
+        frame_time=frame_time,
+        rate_mm_h=None if centre == radar.NODATA else centre / 10,
+        max_5km_mm_h=highest(5),
+        max_10km_mm_h=highest(10),
+        no_data=not (valid & (distance <= 10)).any(),
+    )
+
+
 def _write(public: Store, town: Town, block: str, value: Metar | RadarAtTown) -> None:
     """Replaces one block, unless it holds the same observation already."""
     path = Now.path(town.slug)
@@ -133,3 +158,9 @@ def publish_metar(lake: Store, public: Store, towns: list[Town], now: datetime) 
             log.warning("now: no report from %s for %s", town.airport.icao, town.slug)
             continue
         _write(public, town, "metar", metar_block(report, town))
+
+
+def publish_radar(lake: Store, public: Store, towns: list[Town], latest: datetime) -> None:
+    grid = radar.decode(lake.read("raw", raw_name("radar", latest, "sri", "u16.zlib"))[0])
+    for town in towns:
+        _write(public, town, "radar", radar_block(town, grid, latest))
