@@ -2,6 +2,7 @@
   // Ten days as a table: minimum to maximum on one scale shared by every row,
   // the range between models as lighter ends, rain as models out of models.
   import { t } from '#lib/copy/t.ts';
+  import { daysShown } from '#lib/chart/d10.ts';
   import { deg, int, models } from '#lib/format.ts';
   import { pick } from '#lib/symbols/pick.ts';
   import Sky from '#lib/symbols/Sky.svelte';
@@ -29,20 +30,17 @@
   const rows = $derived.by(() => {
     if (!forecast || !daily) return [];
     const issueDay = localDate(ymd(Date.parse(forecast.issued_at)));
-    return daily.day.map((day, k) => {
+    return daysShown(daily).map((k) => {
+      const day = daily.day[k] ?? '';
       const at = localDate(day);
       const ahead = Math.round((at - issueDay) / DAY);
       const previous = k > 0 ? localDate(daily.day[k - 1] ?? day) : at;
       const n = daily.rain.n_models[k] ?? 0;
       const m = daily.rain.m_models[k] ?? 0;
-      const sky = pick(
-        daily.cloud_pct?.mean[k],
-        n,
-        m,
-        daily.precipitation_mm?.mean[k],
-        false,
-        true
-      );
+      // No cloud cover, no sky: a symbol would be a forecast nobody made.
+      const cloud = daily.cloud_pct?.mean[k];
+      const sky =
+        cloud == null ? null : pick(cloud, n, m, daily.precipitation_mm?.mean[k], false, true);
       const weekday = weekdayShort(at);
       return {
         day,
@@ -77,7 +75,13 @@
     <th scope="row" class="c-day"
       >{r.name}{#if r.sub}<span class="d">{r.sub}</span>{/if}</th
     >
-    <td class="c-sky"><Sky sky={r.sky} size={28} label={skyAlt(r.sky, r.n, r.m)} /></td>
+    <td class="c-sky">
+      {#if r.sky}
+        <Sky sky={r.sky} size={28} label={skyAlt(r.sky, r.n, r.m)} />
+      {:else}
+        <span class="vh">{t('state.nodata_title')}</span>
+      {/if}
+    </td>
     <td class="c-t min">{r.min.mean == null ? t('state.nodata') : deg(r.min.mean)}</td>
     <td class="c-bar">
       <svg

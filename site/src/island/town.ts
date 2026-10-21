@@ -6,6 +6,7 @@ import { TownData, type TownInfo } from './town.svelte.ts';
 import Adesso from './Adesso.svelte';
 import Announce from './Announce.svelte';
 import D10 from './D10.svelte';
+import D10Heading from './D10Heading.svelte';
 import H48 from './H48.svelte';
 import Radar from './Radar.svelte';
 import Refreshed from './Refreshed.svelte';
@@ -58,6 +59,7 @@ if (main?.dataset.town) {
   place('refreshed', Refreshed);
   place('adesso-body', Adesso);
   place('ore48-body', H48);
+  place('h-giorni10', D10Heading);
   place('giorni10-body', D10);
   place('radar-body', Radar);
   place('sources', Sources);

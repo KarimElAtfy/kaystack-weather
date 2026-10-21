@@ -106,6 +106,23 @@ test('shows what is missing instead of empty space', async ({ page, context, bas
   await expect(page.locator('#ore-48 .foot')).toContainText('Mancano alcune ore');
 });
 
+test('shows only the days the models reach, with no sky made up', async ({
+  page,
+  context,
+  baseURL
+}) => {
+  await page.goto('/pedrengo');
+  await expect(page.locator('#h-giorni10')).toHaveText('Prossimi 10 giorni');
+  await expect(page.locator('#giorni-10 tbody svg.sym')).toHaveCount(10);
+  await context.unrouteAll();
+  await useScenario(context, 'mancanti', baseURL ?? '');
+  await page.goto('/pedrengo');
+  await expect(page.locator('#h-giorni10')).toHaveText('Prossimi 9 giorni');
+  await expect(page.locator('#giorni-10 tbody tr:not(.sep)')).toHaveCount(9);
+  await expect(page.locator('#giorni-10 tbody svg.sym')).toHaveCount(0);
+  await expect(page.locator('#giorni-10 tbody .c-sky').first()).toHaveText('Dato non disponibile');
+});
+
 test('reads the sources when the list is opened on fresh data', async ({ page }) => {
   await page.goto('/pedrengo');
   await page.getByText('Stato delle fonti').click();
