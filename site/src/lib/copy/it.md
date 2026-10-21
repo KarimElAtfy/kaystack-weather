@@ -35,12 +35,11 @@ Numbers, dates and times are formatted by the code in Italian (comma decimals, 2
 
 ## Pagina iniziale (selettore)
 
-| chiave       | dove                                 | max  | testo                                                                                                                                                       |
-| ------------ | ------------------------------------ | ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `home.h1`    | titolo                               | 40   | Che tempo fa?                                                                                                                                               |
-| `home.intro` | sotto il titolo                      | riga | Previsioni per due paesi della Lombardia, corrette ogni giorno sulla stazione ARPA più vicina. Il sito ricorda l'ultimo paese che hai scelto, senza cookie. |
-| `home.ref`   | sotto il nome di ogni paese          | 60   | Stazione di riferimento: {stazione}, a {km}                                                                                                                 |
-| `home.last`  | sopra il paese scelto l'ultima volta | 20   | Ultimo visto                                                                                                                                                |
+| chiave       | dove                        | max  | testo                                                                                                                                                       |
+| ------------ | --------------------------- | ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `home.h1`    | titolo                      | 40   | Che tempo fa?                                                                                                                                               |
+| `home.intro` | sotto il titolo             | riga | Previsioni per due paesi della Lombardia, corrette ogni giorno sulla stazione ARPA più vicina. Il sito ricorda l'ultimo paese che hai scelto, senza cookie. |
+| `home.ref`   | sotto il nome di ogni paese | 60   | Stazione di riferimento: {stazione}, a {km}                                                                                                                 |
 
 ## Navigazione della pagina del paese
 
@@ -54,12 +53,10 @@ Numbers, dates and times are formatted by the code in Italian (comma decimals, 2
 
 ## Riga di fiducia (sotto il nome del paese)
 
-| chiave             | dove                                                 | max  | testo                                                                  |
-| ------------------ | ---------------------------------------------------- | ---- | ---------------------------------------------------------------------- |
-| `trust.station`    | prima frase                                          | riga | Previsione fatta per la stazione ARPA di {stazione}, a {km} dal paese. |
-| `trust.issued`     | seconda frase                                        | riga | Emessa alle {ora}, {fa}.                                               |
-| `trust.issued_day` | seconda frase, se la previsione è di un altro giorno | riga | Emessa {giorno} alle {ora}, {fa}.                                      |
-| `trust.why`        | link alla spiegazione                                | 30   | Perché una stazione?                                                   |
+| chiave          | dove                  | max  | testo                                                                  |
+| --------------- | --------------------- | ---- | ---------------------------------------------------------------------- |
+| `trust.station` | prima frase           | riga | Previsione fatta per la stazione ARPA di {stazione}, a {km} dal paese. |
+| `trust.why`     | link alla spiegazione | 30   | Perché una stazione?                                                   |
 
 ## Riga di stato (sotto la riga di fiducia)
 
@@ -134,11 +131,8 @@ One line under the station sentence, always the same height (two lines reserved)
 | `h48.view_chart`        | pulsante                                                             | 12   | Grafico                                                                                                                          |
 | `h48.view_table`        | pulsante                                                             | 12   | Tabella                                                                                                                          |
 | `h48.panel_temp`        | titolo del pannello                                                  | 40   | Temperatura (°C)                                                                                                                 |
-| `h48.panel_temp_note`   | sotto il titolo del pannello                                         | riga | Corretta sulla stazione. La fascia è l'intervallo tra i modelli.                                                                 |
 | `h48.panel_rain`        | titolo del pannello                                                  | 40   | Pioggia: quanti modelli la danno                                                                                                 |
-| `h48.panel_rain_note`   | sotto il titolo del pannello                                         | riga | Modelli con almeno 0,2 mm in un'ora. Non è una probabilità.                                                                      |
 | `h48.panel_wind`        | titolo del pannello                                                  | 40   | Vento (km/h)                                                                                                                     |
-| `h48.panel_wind_note`   | sotto il titolo del pannello                                         | riga | Media dei modelli, senza correzione.                                                                                             |
 | `h48.legend_mean`       | legenda del pannello temperatura                                     | 24   | temperatura corretta                                                                                                             |
 | `h48.legend_range`      | legenda del pannello temperatura                                     | 30   | intervallo tra i modelli                                                                                                         |
 | `h48.legend_rain`       | legenda del pannello pioggia                                         | 24   | modelli con pioggia                                                                                                              |
@@ -146,16 +140,12 @@ One line under the station sentence, always the same height (two lines reserved)
 | `h48.legend_gust`       | legenda del pannello vento                                           | 16   | raffiche                                                                                                                         |
 | `h48.axis_all`          | asse del pannello pioggia, in alto                                   | 8    | tutti                                                                                                                            |
 | `h48.axis_half`         | asse del pannello pioggia, a metà                                    | 8    | metà                                                                                                                             |
-| `h48.axis_none`         | asse del pannello pioggia, in basso                                  | 8    | nessuno                                                                                                                          |
-| `h48.now_marker`        | segno verticale dell'ora attuale                                     | 8    | ora                                                                                                                              |
 | `h48.dst_marker`        | segno del cambio d'ora nel grafico                                   | 20   | ora solare                                                                                                                       |
 | `h48.dst_note`          | nota sopra il giorno del cambio d'ora                                | riga | Questa notte torna l'ora solare: alle 3 si torna alle 2, e le ore dalle 2 alle 3 si ripetono.                                    |
 | `h48.readout_label`     | nome del riquadro dei valori dell'ora scelta                         | riga | Valori dell'ora scelta                                                                                                           |
 | `h48.readout_temp`      | riquadro dei valori, dopo la temperatura                             | riga | modelli da {min} a {max}                                                                                                         |
 | `h48.cell_range`        | tabella, sotto la temperatura                                        | 14   | da {min} a {max}                                                                                                                 |
-| `h48.readout_rain`      | riquadro dei valori                                                  | riga | Pioggia: {modelli}, {mm}                                                                                                         |
 | `h48.readout_mm`        | riquadro dei valori, dopo i modelli                                  | 30   | in media {mm}                                                                                                                    |
-| `h48.readout_wind`      | riquadro dei valori                                                  | riga | Vento {v} da {dir}, raffiche {g}                                                                                                 |
 | `h48.readout_cloud`     | riquadro dei valori                                                  | riga | Nuvole {pct}                                                                                                                     |
 | `h48.range_label`       | nome del cursore sotto il grafico, per tastiera e lettori di schermo | 24   | Ora del grafico                                                                                                                  |
 | `h48.chart_help`        | aiuto sotto il grafico e il cursore                                  | riga | Tocca o trascina sul grafico per vedere un'ora. Da tastiera usa il cursore qui sopra.                                            |
@@ -206,7 +196,7 @@ One line under the station sentence, always the same height (two lines reserved)
 | `radar.sub`               | sotto il titolo                                                       | riga | L'ultima ora osservata, un'immagine ogni 5 minuti.                    |
 | `radar.map_label`         | descrizione della mappa per lettori di schermo                        | riga | Mappa del radar intorno a {paese}, immagine delle {ora}. {sintesi}    |
 | `radar.observed`          | etichetta sull'immagine                                               | 12   | osservato                                                             |
-| `radar.forecast`          | etichetta sull'immagine, dalla v1.1                                   | 12   | previsto                                                              |
+| `radar.forecast`          | etichetta sull'immagine, dalla v1.1 (riservata)                       | 12   | previsto                                                              |
 | `radar.play`              | pulsante                                                              | 10   | Avvia                                                                 |
 | `radar.pause`             | pulsante                                                              | 10   | Ferma                                                                 |
 | `radar.latest`            | pulsante                                                              | 12   | Ultima                                                                |
@@ -229,10 +219,6 @@ One line under the station sentence, always the same height (two lines reserved)
 | `radar.sum_here_none`     | parte della frase sotto la mappa                                      | riga | sul paese non piove.                                                  |
 | `radar.sum_near`          | parte della frase sotto la mappa                                      | riga | Entro 10 km la pioggia più forte è {classe}.                          |
 | `radar.sum_near_none`     | parte della frase sotto la mappa                                      | riga | Entro 10 km non piove.                                                |
-| `radar.probe_hint`        | sotto la legenda                                                      | riga | Tocca la mappa per leggere la pioggia in un punto.                    |
-| `radar.probe`             | sotto la mappa, dopo aver toccato un punto                            | riga | A {km} a {dir} di {paese}: {valore}.                                  |
-| `radar.probe_town`        | sotto la mappa, punto sul paese                                       | riga | Su {paese}: {valore}.                                                 |
-| `radar.probe_dry`         | valore del punto toccato                                              | 16   | non piove                                                             |
 | `radar.credit`            | sotto l'immagine, sempre visibile                                     | riga | Radar: Dipartimento della Protezione Civile (Radar-DPC), CC BY-SA 4.0 |
 | `radar.basemap_credit`    | sotto l'immagine                                                      | riga | Mappa: Natural Earth.                                                 |
 | `radar.unavailable`       | al posto della mappa                                                  | riga | Radar non disponibile.                                                |
@@ -241,30 +227,22 @@ One line under the station sentence, always the same height (two lines reserved)
 
 ## Stati: caricamento, dati vecchi, dati mancanti, fuori linea
 
-| chiave                     | dove                                               | max  | testo                                                                                               |
-| -------------------------- | -------------------------------------------------- | ---- | --------------------------------------------------------------------------------------------------- |
-| `state.loading`            | al posto dei valori mentre arrivano                | 30   | Carico i dati                                                                                       |
-| `state.nodata`             | al posto di un singolo valore assente              | 6    | n.d.                                                                                                |
-| `state.nodata_title`       | spiegazione di n.d.                                | riga | Dato non disponibile                                                                                |
-| `state.stale_tag`          | etichetta accanto a un valore vecchio              | 16   | non aggiornato                                                                                      |
-| `state.metar_stale`        | Adesso, bollettino vecchio                         | riga | L'ultimo bollettino dell'aeroporto è delle {ora}, {fa}: i valori qui sotto non dicono com'è adesso. |
-| `state.metar_expired`      | Adesso, bollettino troppo vecchio per mostrarlo    | riga | Nessun bollettino dell'aeroporto dalle {ora}. Non mostriamo valori così vecchi.                     |
-| `state.metar_missing`      | Adesso, nessun bollettino                          | riga | I dati dell'aeroporto non sono disponibili.                                                         |
-| `state.radar_missing`      | Adesso, nessun dato radar                          | riga | Il radar non è disponibile, quindi non sappiamo se piove adesso.                                    |
-| `state.radar_nodata_here`  | Adesso, il radar non vede la zona del paese        | riga | Il radar non copre la zona del paese in questa immagine.                                            |
-| `state.forecast_stale`     | avviso in alto                                     | riga | La previsione è delle {ora}, {fa}. Di solito si aggiorna ogni ora.                                  |
-| `state.forecast_old`       | avviso in alto, previsione di più di un giorno     | riga | La previsione è vecchia: emessa {giorno} alle {ora}. Le ore già passate non sono mostrate.          |
-| `state.forecast_missing`   | al posto di 48 ore e 10 giorni                     | riga | La previsione non è disponibile in questo momento.                                                  |
-| `state.partial_hours`      | sotto il grafico, se mancano ore                   | riga | Mancano alcune ore: dove non c'è un modello corretto non mostriamo niente.                          |
-| `state.offline`            | avviso in alto                                     | riga | Sei offline. Vedi i dati scaricati alle {ora}.                                                      |
-| `state.fetch_failed`       | avviso in alto                                     | riga | Non riusciamo a scaricare i dati. Riproviamo tra un minuto.                                         |
-| `state.fetch_failed_since` | seconda frase dell'avviso                          | riga | Gli ultimi dati sono delle {ora}.                                                                   |
-| `state.cause_openmeteo`    | seconda frase dell'avviso sulla previsione vecchia | riga | Open-Meteo, da cui arrivano i modelli, non risponde dalle {ora}.                                    |
-| `state.down.radar`         | avviso in alto, radar fermo                        | riga | Il radar della Protezione Civile non risponde dalle {ora}: le immagini non si aggiornano.           |
-| `state.down.open-meteo`    | avviso in alto, modelli fermi                      | riga | Open-Meteo, da cui arrivano i modelli, non risponde dalle {ora}: la previsione non si aggiorna.     |
-| `state.down.metar`         | avviso in alto, bollettini fermi                   | riga | I bollettini degli aeroporti non arrivano dalle {ora}.                                              |
-| `state.noscript`           | se JavaScript è spento                             | riga | Per vedere i dati serve JavaScript: il sito li scarica dal nostro archivio ogni minuto.             |
-| `state.refreshed`          | piè di pagina                                      | riga | Dati controllati alle {ora}.                                                                        |
+| chiave                    | dove                                            | max  | testo                                                                                               |
+| ------------------------- | ----------------------------------------------- | ---- | --------------------------------------------------------------------------------------------------- |
+| `state.loading`           | al posto dei valori mentre arrivano             | 30   | Carico i dati                                                                                       |
+| `state.nodata`            | al posto di un singolo valore assente           | 6    | n.d.                                                                                                |
+| `state.nodata_title`      | spiegazione di n.d.                             | riga | Dato non disponibile                                                                                |
+| `state.stale_tag`         | etichetta accanto a un valore vecchio           | 16   | non aggiornato                                                                                      |
+| `state.metar_stale`       | Adesso, bollettino vecchio                      | riga | L'ultimo bollettino dell'aeroporto è delle {ora}, {fa}: i valori qui sotto non dicono com'è adesso. |
+| `state.metar_expired`     | Adesso, bollettino troppo vecchio per mostrarlo | riga | Nessun bollettino dell'aeroporto dalle {ora}. Non mostriamo valori così vecchi.                     |
+| `state.metar_missing`     | Adesso, nessun bollettino                       | riga | I dati dell'aeroporto non sono disponibili.                                                         |
+| `state.radar_missing`     | Adesso, nessun dato radar                       | riga | Il radar non è disponibile, quindi non sappiamo se piove adesso.                                    |
+| `state.radar_nodata_here` | Adesso, il radar non vede la zona del paese     | riga | Il radar non copre la zona del paese in questa immagine.                                            |
+| `state.forecast_missing`  | al posto di 48 ore e 10 giorni                  | riga | La previsione non è disponibile in questo momento.                                                  |
+| `state.partial_hours`     | sotto il grafico, se mancano ore                | riga | Mancano alcune ore: dove non c'è un modello corretto non mostriamo niente.                          |
+| `state.fetch_failed`      | avviso in alto                                  | riga | Non riusciamo a scaricare i dati. Riproviamo tra un minuto.                                         |
+| `state.noscript`          | se JavaScript è spento                          | riga | Per vedere i dati serve JavaScript: il sito li scarica dal nostro archivio ogni minuto.             |
+| `state.refreshed`         | piè di pagina                                   | riga | Dati controllati alle {ora}.                                                                        |
 
 ## Piè di pagina e stato delle fonti
 
@@ -283,8 +261,8 @@ One line under the station sentence, always the same height (two lines reserved)
 | `footer.credits`        | crediti, sempre visibili                                         | riga | Dati dei modelli: Open-Meteo.com, CC BY 4.0. Radar: Dipartimento della Protezione Civile (Radar-DPC), CC BY-SA 4.0. Osservazioni: METAR, NOAA Aviation Weather Center. Stazioni: ARPA Lombardia. |
 | `footer.how`            | link                                                             | 20   | Come funziona                                                                                                                                                                                    |
 | `footer.sources`        | link                                                             | 20   | Fonti e licenze                                                                                                                                                                                  |
-| `footer.score`          | link                                                             | 24   | Quanto ci prendiamo                                                                                                                                                                              |
-| `footer.score_soon`     | accanto al link                                                  | 16   | da fine novembre                                                                                                                                                                                 |
+| `footer.score`          | link, dalla S4 (riservata)                                       | 24   | Quanto ci prendiamo                                                                                                                                                                              |
+| `footer.score_soon`     | accanto al link, dalla S4 (riservata)                            | 16   | da fine novembre                                                                                                                                                                                 |
 | `footer.privacy`        | link                                                             | 12   | Privacy                                                                                                                                                                                          |
 | `footer.code`           | link al codice                                                   | 30   | Codice sorgente                                                                                                                                                                                  |
 | `footer.nav_label`      | nome della navigazione del piè di pagina, per lettori di schermo | riga | Pagine del sito                                                                                                                                                                                  |
@@ -420,7 +398,6 @@ The code reads each group of the METAR weather field (for example `-RA BR`) and 
 | `page.404.title`     | titolo della pagina 404 e della scheda | 40   | Pagina non trovata                    |
 | `page.404.p1`        | prima frase                            | riga | Questo indirizzo non esiste sul sito. |
 | `page.404.p2`        | prima dei link ai due paesi            | riga | Le previsioni sono qui:               |
-| `page.updated`       | sotto il titolo delle pagine di testo  | 40   | Aggiornato il {data}                  |
 
 ## Testi lunghi
 
