@@ -8,10 +8,11 @@ and the minimum of the local day (T12 in docs/time-conventions.md). A model with
 fewer than 45 pairs in a cell stays out of the mean there.
 
 The lead band of an hourly value is floor(lead / 24 h), at most 7. A model has
-several runs in a band at each valid hour and the pairs use the newest, which is
-what Open-Meteo Previous Runs serves as day k: the backfill and the live archive
-give the same pairs. The daily maximum and minimum of band k are taken over those
-values, on the local days the model has every hour of.
+several runs in a band at each valid hour and the pairs use the newest. Open-Meteo
+Previous Runs serves the same value as day k for most models; over 18-20 October
+2026 it did not for AIFS at day 0 (-0.19 °C on average), UKMO at day 2 (+0.12 °C)
+and ICON-EU at day 1 (+0.03 °C). The daily maximum and minimum of band k are taken
+over those values, on the local days the model has every hour of.
 
 At issue time a daily value is in band k when its local day is k days after the
 local day of the issue, and its hours come from one run with leads on both sides
