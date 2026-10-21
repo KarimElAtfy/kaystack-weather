@@ -308,15 +308,22 @@ jobs:
           expect() {
             if [ "$2" = "$3" ]; then echo "ok    $1"; else echo "FAIL  $1: got '$2', expected '$3'"; failed=1; fi
           }
+          # The client returns once the upload is accepted, and the edge rolls
+          # the files out unevenly: a page can be new while the 404 page or an
+          # asset is still the old one, or missing. So each content check asks
+          # again for up to three minutes, and the checks after it read the
+          # last answer. Headers are checked once, on that answer.
+          settle() {
+            local try
+            for try in $(seq 1 18); do
+              code=$(get "$1") || code=000
+              if [ "$code" = "$2" ] && [ "$(same "$3")" = same ]; then return 0; fi
+              if [ "$try" -lt 18 ]; then sleep 10; fi
+            done
+          }
 
-          # The client returns once the upload is accepted, and the edge can
-          # take a moment more: wait until /pedrengo is this build's page.
-          for _ in $(seq 1 30); do
-            if [ "$(get /pedrengo)" = 200 ] && [ "$(same pedrengo.html)" = same ]; then break; fi
-            sleep 10
-          done
-
-          expect "/pedrengo status" "$(get /pedrengo)" 200
+          settle /pedrengo 200 pedrengo.html
+          expect "/pedrengo status" "$code" 200
           expect "/pedrengo is pedrengo.html" "$(same pedrengo.html)" same
           expect "/pedrengo type" "$(header content-type | cut -d';' -f1)" text/html
           expect "/pedrengo sets no cookie" "$(header set-cookie)" ""
@@ -327,11 +334,14 @@ jobs:
           done < <(jq -r '.globalHeaders | to_entries[] | "\(.key)\t\(.value)"' "$site/staticwebapp.config.json")
           expect "headers checked" "$checked" "$(jq '.globalHeaders | length' "$site/staticwebapp.config.json")"
 
-          expect "/ status" "$(get /)" 200
+          settle / 200 index.html
+          expect "/ status" "$code" 200
+          expect "/ is index.html" "$(same index.html)" same
           expect "/ sets no cookie" "$(header set-cookie)" ""
           expect "/pedrengo/ status" "$(get /pedrengo/)" 301
           expect "/pedrengo/ location" "$(header location | sed -E 's#^https?://[^/]+##')" /pedrengo
-          expect "/nope status" "$(get /nope)" 404
+          settle /nope 404 404.html
+          expect "/nope status" "$code" 404
           expect "/nope is 404.html" "$(same 404.html)" same
           for path in /.auth/login/github /.auth/login/aad; do
             expect "$path status" "$(get "$path")" 404
@@ -343,7 +353,9 @@ jobs:
           expect "/.auth/me sets no cookie" "$(header set-cookie)" ""
           for dir in _app/immutable island/assets; do
             file=$(cd "$site" && find "$dir" -type f -print -quit)
-            expect "/$file status" "$(get "/$file")" 200
+            settle "/$file" 200 "$file"
+            expect "/$file status" "$code" 200
+            expect "/$file is the uploaded file" "$(same "$file")" same
             expect "/$file cache" "$(header cache-control)" "public, max-age=31536000, immutable"
           done
           exit "$failed"
