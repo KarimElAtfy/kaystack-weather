@@ -46,6 +46,22 @@
         },
         "rain": {
           "$ref": "#/$defs/RainCount"
+        },
+        "cloud_pct": {
+          "$ref": "#/$defs/Consensus",
+          "description": "The mean of each model's mean cover over the day."
+        },
+        "precipitation_mm": {
+          "$ref": "#/$defs/Consensus",
+          "description": "The mean of each model's total."
+        },
+        "wind_max_kmh": {
+          "$ref": "#/$defs/Consensus",
+          "description": "The mean of each model's highest hourly wind."
+        },
+        "gust_max_kmh": {
+          "$ref": "#/$defs/Consensus",
+          "description": "The mean of each model's highest gust."
         }
       },
       "required": [

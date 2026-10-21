@@ -61,6 +61,10 @@ FORECAST = {
             "lead_band": [1, 7],
         },
         "rain": {"threshold_mm": 1.0, "n_models": [0, 1], "m_models": [2, 1]},
+        "cloud_pct": {"corrected": False, "mean": [62.0, 40.5]},
+        "precipitation_mm": {"corrected": False, "mean": [0.4, 3.1]},
+        "wind_max_kmh": {"corrected": False, "mean": [14.0, 22.3]},
+        "gust_max_kmh": {"corrected": False, "mean": [31.5, None]},
     },
 }
 
@@ -254,3 +258,10 @@ def test_a_field_added_to_v1_is_optional_in_the_schema():
     assert {"raw", "cloud_cover"} <= set(metar["properties"])
     assert not {"raw", "cloud_cover"} & set(metar["required"])
     assert "observed_at" in metar["required"]
+    daily = json.loads(contract.schemas()["forecast.schema.json"])["$defs"]["Daily"]
+    assert daily["required"] == ["day", "tmax_c", "tmin_c", "rain"]
+
+
+def test_a_daily_amount_one_day_short_is_refused():
+    with pytest.raises(ValidationError, match="mean has 1 values for 2 steps"):
+        Forecast.model_validate(forecast_with("daily.precipitation_mm.mean", [0.4]))

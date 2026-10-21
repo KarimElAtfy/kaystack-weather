@@ -354,6 +354,11 @@ class Daily(Model):
     tmax_c: Spread
     tmin_c: Spread
     rain: RainCount
+    # Added in v1 after the temperatures.
+    cloud_pct: Consensus = Field(description="The mean of each model's mean cover over the day.")
+    precipitation_mm: Consensus = Field(description="The mean of each model's total.")
+    wind_max_kmh: Consensus = Field(description="The mean of each model's highest hourly wind.")
+    gust_max_kmh: Consensus = Field(description="The mean of each model's highest gust.")
 
     @model_validator(mode="after")
     def steps(self) -> Self:
@@ -400,7 +405,10 @@ class Forecast(File):
 
 
 # Fields added to v1 after its first files, by model.
-ADDED = {"Metar": {"raw", "cloud_cover"}}
+ADDED = {
+    "Metar": {"raw", "cloud_cover"},
+    "Daily": {"cloud_pct", "precipitation_mm", "wind_max_kmh", "gust_max_kmh"},
+}
 
 FILES: dict[str, type[File]] = {
     "status": Status,

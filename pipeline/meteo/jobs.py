@@ -3,6 +3,7 @@ them on Azure; `python -m meteo` runs them against a local folder."""
 
 import json
 import logging
+import tempfile
 import time
 from collections.abc import Callable, Collection, Mapping
 from datetime import UTC, date, datetime, timedelta
@@ -13,7 +14,9 @@ import requests
 from meteo import (
     arpa,
     compact,
+    forecast,
     metar,
+    mos,
     mosmix,
     now,
     openmeteo,
@@ -167,9 +170,10 @@ def arpa_stations(lake: Store, public: Store, env: Mapping[str, str], town_dir: 
 def hourly_forecasts(
     lake: Store, public: Store, env: Mapping[str, str], town_dir: Path, minutes: float
 ) -> None:
-    """Model runs, best_match, MOSMIX and Yr, then the check that every source is
-    recent. One source failing does not stop the others; the run fails at the end,
-    and the failed run is what the alert watches."""
+    """Model runs, best_match, MOSMIX and Yr, then each town's forecast from the
+    newest runs, then the check that every source is recent. One source failing does
+    not stop the others; the run fails at the end, and the failed run is what the
+    alert watches."""
     deadline = time.monotonic() + minutes * 60
     all_towns = towns.load(town_dir)
     points = towns.forecast_points(all_towns)
@@ -200,6 +204,11 @@ def hourly_forecasts(
         for source, (collect, expected) in sources.items()
         if not _collect(public, source, collect, expected)
     ]
+    try:
+        forecast.publish(lake, public, all_towns, datetime.now(UTC))
+    except Exception:
+        log.exception("forecast failed")
+        failed.append("forecast")
 
     late = status.late_sources(status.read(public), datetime.now(UTC))
     if failed or late:
@@ -220,8 +229,9 @@ def compact_day(
 def nightly(
     lake: Store, public: Store, env: Mapping[str, str], town_dir: Path, minutes: float, today: date
 ) -> None:
-    """Yesterday's radar repair, the 30-day ARPA pull, then compaction of the days
-    that are due. A failed step does not stop the next one; the run fails at the end."""
+    """Yesterday's radar repair, the 30-day ARPA pull, compaction of the days that
+    are due, then today's mean60 coefficients from what compaction left. A failed
+    step does not stop the next one; the run fails at the end."""
     deadline = time.monotonic() + minutes * 60
     all_towns = towns.load(town_dir)
     failed = []
@@ -234,5 +244,59 @@ def nightly(
         failed.append("30-day ARPA pull")
     for day in compact.days_due(lake, today):
         compact_day(lake, all_towns, day, deadline, today)
+    try:
+        mean60_coefficients(lake, all_towns, today)
+    except Exception:
+        log.exception("mean60 coefficients failed")
+        failed.append("mean60 coefficients")
     if failed:
-        raise SourceFailed(f"{', '.join(failed)} failed; compaction ran without it")
+        raise SourceFailed(f"{', '.join(failed)} failed")
+
+
+def _curated(lake: Store, tmp: Path, table: str, first: date, last: date) -> list[Path]:
+    """Copies the table's files from first to last into tmp; days without one are skipped."""
+    paths = []
+    for n in range((last - first).days + 1):
+        name = compact.curated_name(table, first + timedelta(days=n))
+        if lake.exists("curated", name):
+            path = tmp / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(lake.read("curated", name)[0])
+            paths.append(path)
+    return paths
+
+
+def mean60_coefficients(lake: Store, all_towns: list[Town], day: date) -> None:
+    """Rewrites the coefficients of `day` (mos.py) from the curated tables: model runs
+    of the 70 days before its window ends, the backfilled runs, and ARPA's hours and
+    days at the forecast points that have a station."""
+    stations = {
+        s.id: s.arpa_station
+        for t in all_towns
+        for s in (t.reference, t.inland)
+        if s is not None and s.arpa_station is not None
+    }
+    first, last = mos.window(day)
+    with tempfile.TemporaryDirectory() as folder:
+        tmp = Path(folder)
+        # A run started up to 10 days before the window still has valid times in it.
+        runs = _curated(lake, tmp, "nwp_hourly", first - timedelta(days=10), last)
+        backfill = _curated(lake, tmp, "nwp_prev", first, last)
+        hours = _curated(lake, tmp, "obs_arpa_hourly", first, last)
+        days = _curated(lake, tmp, "obs_arpa_daily", first, last)
+        if not (hours and days):
+            raise SourceFailed(f"no ARPA tables from {first} to {last}")
+        con = compact.connect(tmp)
+        mos.load(con, stations, hours, days, nwp_hourly=runs, nwp_prev=backfill)
+        body = mos.coefficients(con, day)
+        con.close()
+    lake.put("curated", mos.name(day), body, "application/json")
+    # The plan's 2048 MB question comes up if the nightly passes 400 MB with this step.
+    log.info(
+        "mean60: %s from %d run days, %d backfilled, %d ARPA days; peak memory %s MB",
+        day,
+        len(runs),
+        len(backfill),
+        len(days),
+        peak_mb(),
+    )
