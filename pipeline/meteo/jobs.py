@@ -313,7 +313,7 @@ def _curated(lake: Store, tmp: Path, table: str, first: date, last: date) -> lis
         if lake.exists("curated", name):
             path = tmp / name
             path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_bytes(lake.read("curated", name)[0])
+            lake.download("curated", name, path)
             paths.append(path)
     return paths
 

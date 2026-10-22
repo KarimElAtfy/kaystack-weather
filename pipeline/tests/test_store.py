@@ -34,3 +34,9 @@ def test_swap_refuses_a_stale_version(lake):
     assert lake.swap("public", "status.json", b"3", etag, "application/json", "")
     assert not lake.swap("public", "status.json", b"4", etag, "application/json", "")
     assert lake.read_versioned("public", "status.json")[0] == b"3"
+
+
+def test_a_download_lands_in_the_file(lake, tmp_path):
+    lake.put("curated", "nwp_hourly/2026/10/2026-10-20.parquet", b"PAR1", "")
+    lake.download("curated", "nwp_hourly/2026/10/2026-10-20.parquet", tmp_path / "a.parquet")
+    assert (tmp_path / "a.parquet").read_bytes() == b"PAR1"
