@@ -40,8 +40,8 @@ HOUR = timedelta(hours=1)
 RAIN_HOUR_MM = 0.2
 RAIN_DAY_MM = 1.0
 KMH_PER_MS = 3.6
-# The nightly writes the coefficients of the day at 01:30 UTC, so the issues before
-# it take the previous day's. Older than this, the nightly is broken.
+# The coefficients of the day are written at 02:20 UTC, so the issues at 00:45 and
+# 01:45 take the previous day's. Older than this, their timer is broken.
 COEFFICIENTS_DAYS = 3
 ISSUED = "forecasts"
 
@@ -79,9 +79,11 @@ def newest_runs(lake: Store, now: datetime) -> list[ModelRun]:
 
 def coefficients(lake: Store, day: date) -> mos.Coefficients | None:
     for back in range(COEFFICIENTS_DAYS + 1):
-        name = mos.name(day - timedelta(days=back))
-        if lake.exists("curated", name):
-            return mos.Coefficients.read(lake.read("curated", name)[0])
+        found = day - timedelta(days=back)
+        if lake.exists("curated", mos.name(found)):
+            if back:
+                log.info("forecast: no mean60 coefficients of %s yet, using %s", day, found)
+            return mos.Coefficients.read(lake.read("curated", mos.name(found))[0])
     return None
 
 
