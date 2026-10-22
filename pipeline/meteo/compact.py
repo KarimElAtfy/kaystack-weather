@@ -20,6 +20,7 @@ import types
 from collections.abc import Callable, Iterable
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
+from typing import Any
 
 from meteo import arpa, metar, mosmix, openmeteo, radar, yr
 from meteo.store import Store, day_prefix, name_time
@@ -72,10 +73,9 @@ def run(
     expiring = day < today - timedelta(days=85)
     with tempfile.TemporaryDirectory() as folder:
         tmp = Path(folder)
-        con = connect(tmp)
-        steps: list[tuple[str, Callable[[], object]]] = [
-            ("nwp", lambda: _nwp(con, lake, day, tmp)),
-            ("ensemble", lambda: _ensemble(con, lake, day, tmp)),
+        steps: list[tuple[str, Callable[[Any], object]]] = [
+            ("nwp", lambda con: _nwp(con, lake, day, tmp)),
+            ("ensemble", lambda con: _ensemble(con, lake, day, tmp)),
         ]
         if expiring:
             log.warning(
@@ -83,17 +83,20 @@ def run(
             )
             steps = []
         steps += [
-            ("arpa", lambda: _arpa(con, lake, day, tmp, sensors)),
-            ("metar", lambda: _metar(con, lake, day, tmp)),
-            ("mosmix", lambda: _mosmix(con, lake, day, tmp)),
-            ("yr", lambda: _yr(con, lake, day, tmp)),
-            ("radar", lambda: _radar(con, lake, day, tmp, radar_points, radar_towns)),
+            ("arpa", lambda con: _arpa(con, lake, day, tmp, sensors)),
+            ("metar", lambda con: _metar(con, lake, day, tmp)),
+            ("mosmix", lambda con: _mosmix(con, lake, day, tmp)),
+            ("yr", lambda con: _yr(con, lake, day, tmp)),
+            ("radar", lambda con: _radar(con, lake, day, tmp, radar_points, radar_towns)),
         ]
         counts: dict[str, object] = {"day": day.isoformat()}
         for source, step in steps:
             if time.monotonic() > deadline:
                 raise TimeoutError(f"compaction of {day} stopped before {source}")
-            counts[source] = step()
+            # A connection per source: the database is in memory, so the tables of
+            # one source would otherwise stay there, at the limit, under the next.
+            with connect(tmp) as con:
+                counts[source] = step(con)
             log.info("compacted %s %s", source, day)
     if expiring:
         return
