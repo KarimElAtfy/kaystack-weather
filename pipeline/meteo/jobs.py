@@ -150,7 +150,11 @@ def _arpa(
     lake: Store, public: Store, env: Mapping[str, str], all_towns: list[Town], variant: str
 ) -> bool:
     sensors = [s.id for s in towns.arpa_sensors(all_towns)]
-    http = web.session(env["USER_AGENT"])
+    # dati.lombardia.it turns most requests away in bursts and sends no Retry-After:
+    # on 21-22/10 four live pulls in seven failed after three tries in a minute.
+    # Six tries take about seven minutes, which the live job has; the nightly
+    # keeps three, since its 30-day pull can miss a night and compaction cannot.
+    http = web.session(env["USER_AGENT"], retries=6 if variant == "live" else 3)
     token = env.get("ARPA_APP_TOKEN")
     # An app setting whose Key Vault reference did not resolve keeps the reference text.
     if token and token.startswith("@Microsoft.KeyVault("):
