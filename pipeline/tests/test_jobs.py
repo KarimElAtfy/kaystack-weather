@@ -105,3 +105,12 @@ def test_each_step_logs_its_own_peak(caplog):
     assert peak
     if sys.platform == "linux":
         assert int(peak.group(1)) >= 30
+
+
+def test_a_failed_30_day_pull_does_not_fail_the_night(lake, monkeypatch, caplog):
+    monkeypatch.setattr(jobs, "radar_repair", lambda *a, **k: None)
+    monkeypatch.setattr(jobs, "_arpa", lambda *a, **k: False)
+    monkeypatch.setattr(compact, "days_due", lambda *a, **k: [])
+    with caplog.at_level(logging.WARNING):
+        jobs.nightly(lake, lake, {}, TOWNS, minutes=13, today=date(2026, 10, 22))
+    assert "30-day ARPA pull failed" in caplog.text

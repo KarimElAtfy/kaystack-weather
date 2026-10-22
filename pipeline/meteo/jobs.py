@@ -278,7 +278,10 @@ def nightly(
     lake: Store, public: Store, env: Mapping[str, str], town_dir: Path, minutes: float, today: date
 ) -> None:
     """Yesterday's radar repair, the 30-day ARPA pull, then compaction of the days
-    that are due. A failed step does not stop the next one; the run fails at the end."""
+    that are due. A failed step does not stop the next one; the run fails at the end,
+    except for the 30-day pull, which only picks up revisions and is asked again the
+    next night: dati.lombardia.it turns away many requests, and the live pull,
+    which carries the new data, still fails its own run."""
     deadline = time.monotonic() + minutes * 60
     all_towns = towns.load(town_dir)
     failed = []
@@ -290,7 +293,7 @@ def nightly(
         failed.append("radar repair")
     with step("30-day ARPA pull"):
         if not _arpa(lake, public, env, all_towns, "revision"):
-            failed.append("30-day ARPA pull")
+            log.warning("30-day ARPA pull failed; the next night asks again")
     for day in compact.days_due(lake, today):
         with step(f"compaction of {day}"):
             compact_day(lake, all_towns, day, deadline, today)
