@@ -4,17 +4,18 @@ from urllib3.util import Retry
 
 
 class _Retry(Retry):
-    # Waits 5, 15 and 45 s. urllib3's own backoff retries the first time at once,
-    # and Open-Meteo's "service is overloaded" 503 needs a few seconds to clear.
+    # Waits 5, 15 and 45 s, then 2 minutes at most. urllib3's own backoff retries
+    # the first time at once, and Open-Meteo's "service is overloaded" 503 needs a
+    # few seconds to clear.
     def get_backoff_time(self) -> float:
-        return 5.0 * 3 ** (len(self.history) - 1) if self.history else 0.0
+        return min(5.0 * 3 ** (len(self.history) - 1), 120.0) if self.history else 0.0
 
 
 def session(
-    user_agent: str, retry_on: tuple[int, ...] = (429, 500, 502, 503, 504)
+    user_agent: str, retry_on: tuple[int, ...] = (429, 500, 502, 503, 504), retries: int = 3
 ) -> requests.Session:
     retry = _Retry(
-        total=3,
+        total=retries,
         status_forcelist=retry_on,
         # The radar API hands out download links through a POST that is safe to repeat.
         allowed_methods=None,
