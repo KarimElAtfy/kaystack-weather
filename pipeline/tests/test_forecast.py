@@ -166,3 +166,14 @@ def test_the_issue_is_kept_before_it_is_published(lake, all_towns):
             if r["point"] == town.reference.id and r["valid"] == file.hourly.time[0]
         )
         assert file.hourly.temperature_c.mean[0] == round(raw_t - 0.5, 1)
+
+
+def test_an_issue_before_the_day_s_coefficients_takes_yesterday_s(lake, caplog):
+    body = {"method": "mean60-v1", "day": "2026-10-21", "window": [], "min_pairs": 45}
+    body |= {"columns": mos.COLUMNS, "rows": [[POINT, "icon_d2", "t2m", 0, 0, 0.5, 60]]}
+    lake.put("curated", mos.name(date(2026, 10, 21)), json.dumps(body).encode(), "")
+    with caplog.at_level("INFO", logger="meteo.forecast"):
+        found = forecast.coefficients(lake, date(2026, 10, 22))
+    assert found is not None and found.day == date(2026, 10, 21)
+    assert "no mean60 coefficients of 2026-10-22 yet, using 2026-10-21" in caplog.text
+    assert forecast.coefficients(lake, date(2026, 10, 26)) is None

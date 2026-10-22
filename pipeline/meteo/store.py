@@ -8,6 +8,7 @@ whose names carry the source's own time, that refusal is the deduplication.
 import contextlib
 import hashlib
 import json
+import shutil
 from datetime import UTC, date, datetime
 from pathlib import Path, PurePosixPath
 
@@ -85,6 +86,11 @@ class AzureStore:
     def read(self, container: str, name: str) -> tuple[bytes, dict[str, str]]:
         download = self._service.get_blob_client(container, name).download_blob()
         return download.readall(), dict(download.properties.metadata)
+
+    def download(self, container: str, name: str, path: Path) -> None:
+        """Into a file, a chunk at a time, so that the object is never all in memory."""
+        with path.open("wb") as f:
+            self._service.get_blob_client(container, name).download_blob().readinto(f)
 
     def names(self, container: str, prefix: str) -> list[str]:
         client = self._service.get_container_client(container)
@@ -184,6 +190,9 @@ class FolderStore:
         meta = self.root / f"{container}.meta" / f"{name}.json"
         metadata = json.loads(meta.read_text(encoding="utf-8")) if meta.is_file() else {}
         return self._path(container, name).read_bytes(), metadata
+
+    def download(self, container: str, name: str, path: Path) -> None:
+        shutil.copyfile(self._path(container, name), path)
 
     def names(self, container: str, prefix: str) -> list[str]:
         base = self.root / container

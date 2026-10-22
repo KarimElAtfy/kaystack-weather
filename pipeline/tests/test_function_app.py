@@ -35,7 +35,7 @@ def index(timers_enabled: str | None) -> dict:
     return json.loads(out.stdout)
 
 
-def test_five_timers_when_enabled():
+def test_six_timers_when_enabled():
     found = index("true")
     assert found["timers"] == {
         "radar": "0 4,9,14,19,24,29,34,39,44,49,54,59 * * * *",
@@ -43,6 +43,7 @@ def test_five_timers_when_enabled():
         "hourly": "0 45 * * * *",
         "arpa": "0 40 2,5,8,11,14,17,20,23 * * *",
         "nightly": "0 30 1 * * *",
+        "mean60": "0 20 2 * * *",
     }
     # Radar and METAR catch up by themselves; the others keep the host's schedule record.
     assert found["monitored"] == {
@@ -51,6 +52,7 @@ def test_five_timers_when_enabled():
         "hourly": None,
         "arpa": None,
         "nightly": None,
+        "mean60": None,
     }
 
 

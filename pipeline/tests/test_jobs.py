@@ -1,3 +1,6 @@
+import logging
+import re
+import sys
 from datetime import UTC, date, datetime, timedelta
 
 import duckdb
@@ -82,3 +85,23 @@ def test_the_nightly_rewrites_the_coefficients_of_the_day(lake, all_towns):
     coefficients = mos.Coefficients.read(lake.read("curated", mos.name(day))[0])
     assert coefficients.correct("torre-boldone", "icon_d2", "t2m", 0, 13, 20.0) == 18.5
     assert coefficients.correct("ispra-jrc", "icon_d2", "t2m", 0, 13, 20.0) is None
+
+
+# Recorded in WSL Ubuntu from /proc/self/status.
+STATUS = "Name:\tgrep\nVmPeak:\t    4272 kB\nVmSize:\t    4272 kB\nVmHWM:\t    2304 kB\n"
+
+
+def test_the_high_water_mark_is_read_in_mb():
+    assert jobs.high_water_mb(STATUS) == 2
+    assert jobs.high_water_mb("Name:\tgrep\n") is None
+
+
+def test_each_step_logs_its_own_peak(caplog):
+    with caplog.at_level(logging.INFO, logger="meteo.jobs"), jobs.step("compaction of 2026-10-20"):
+        held = bytearray(30_000_000)
+    del held
+    (line,) = [r.getMessage() for r in caplog.records if "step peak" in r.getMessage()]
+    peak = re.fullmatch(r"compaction of 2026-10-20: step peak (\d+|None) MB", line)
+    assert peak
+    if sys.platform == "linux":
+        assert int(peak.group(1)) >= 30

@@ -20,6 +20,7 @@ import types
 from collections.abc import Callable, Iterable
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
+from typing import Any
 
 from meteo import arpa, metar, mosmix, openmeteo, radar, yr
 from meteo.store import Store, day_prefix, name_time
@@ -72,10 +73,9 @@ def run(
     expiring = day < today - timedelta(days=85)
     with tempfile.TemporaryDirectory() as folder:
         tmp = Path(folder)
-        con = connect(tmp)
-        steps: list[tuple[str, Callable[[], object]]] = [
-            ("nwp", lambda: _nwp(con, lake, day, tmp)),
-            ("ensemble", lambda: _ensemble(con, lake, day, tmp)),
+        steps: list[tuple[str, Callable[[Any], object]]] = [
+            ("nwp", lambda con: _nwp(con, lake, day, tmp)),
+            ("ensemble", lambda con: _ensemble(con, lake, day, tmp)),
         ]
         if expiring:
             log.warning(
@@ -83,17 +83,23 @@ def run(
             )
             steps = []
         steps += [
-            ("arpa", lambda: _arpa(con, lake, day, tmp, sensors)),
-            ("metar", lambda: _metar(con, lake, day, tmp)),
-            ("mosmix", lambda: _mosmix(con, lake, day, tmp)),
-            ("yr", lambda: _yr(con, lake, day, tmp)),
-            ("radar", lambda: _radar(con, lake, day, tmp, radar_points, radar_towns)),
+            ("arpa", lambda con: _arpa(con, lake, day, tmp, sensors)),
+            ("metar", lambda con: _metar(con, lake, day, tmp)),
+            ("mosmix", lambda con: _mosmix(con, lake, day, tmp)),
+            ("yr", lambda con: _yr(con, lake, day, tmp)),
+            ("radar", lambda con: _radar(con, lake, day, tmp, radar_points, radar_towns)),
         ]
         counts: dict[str, object] = {"day": day.isoformat()}
         for source, step in steps:
             if time.monotonic() > deadline:
                 raise TimeoutError(f"compaction of {day} stopped before {source}")
-            counts[source] = step()
+            # A connection per source: the database is in memory, so the tables of
+            # one source would otherwise stay there, at the limit, under the next.
+            # Reading JSON goes past the limit. On a pessimistic day in Linux the day
+            # peaked at 236 to 268 MB with 256 MB and two threads, and at 210 MB in
+            # three runs with these, 1 or 2 s slower.
+            with connect(tmp, "160MB", threads=1, lean=True) as con:
+                counts[source] = step(con)
             log.info("compacted %s %s", source, day)
     if expiring:
         return
@@ -102,7 +108,7 @@ def run(
     lake.put("curated", completeness_name(day), body, "application/json")
 
 
-def connect(tmp: Path):
+def connect(tmp: Path, memory_limit: str = "256MB", threads: int = 2, lean: bool = False):
     # DuckDB imports __main__ on load to tell a script from a notebook, and the
     # Python 3.13 worker on Azure has none: the import fails with "initialization
     # failed". A module with a __file__ reads as a script.
@@ -116,10 +122,15 @@ def connect(tmp: Path):
     # DuckDB takes the machine's zone by default, and on a PC in Italy every
     # TIMESTAMPTZ would come back at +01 or +02.
     con.execute("SET TimeZone = 'UTC'")
-    # Half of the 512 MB instance; DuckDB spills to the temporary folder beyond it,
-    # and each thread keeps buffers of its own.
-    con.execute("SET memory_limit = '256MB'")
-    con.execute("SET threads = 2")
+    # Half of the 512 MB instance by default; DuckDB spills to the temporary folder
+    # beyond it, and each thread keeps buffers of its own.
+    con.execute(f"SET memory_limit = '{memory_limit}'")
+    con.execute(f"SET threads = {threads}")
+    if lean:
+        # DuckDB keeps up to 128 MiB it freed for its next task; given back at once,
+        # the memory of one step is not still held under the next.
+        con.execute("SET allocator_flush_threshold = '0MB'")
+        con.execute("SET allocator_bulk_deallocation_flush_threshold = '0MB'")
     con.execute(f"SET temp_directory = '{(tmp / 'duckdb').as_posix()}'")
     return con
 
@@ -138,11 +149,15 @@ def write_rows(path: Path, rows: Iterable[dict]) -> None:
 
 
 def _load(con, table: str, path: Path, columns: dict[str, str]) -> None:
+    """Makes `table` a view of the rows, kept as Parquet next to them. A table would
+    hold them all in memory: the members of a day's ensembles take 90 MB there."""
+    rows = path.with_suffix(".rows.parquet").as_posix()
     con.execute(
-        f"CREATE OR REPLACE TABLE {table} AS SELECT * FROM read_json(?, "
-        f"format = 'newline_delimited', columns = {_struct(columns)})",
+        f"COPY (SELECT * FROM read_json(?, format = 'newline_delimited', "
+        f"columns = {_struct(columns)})) TO '{rows}' (FORMAT parquet)",
         [path.as_posix()],
     )
+    con.execute(f"CREATE OR REPLACE VIEW {table} AS SELECT * FROM '{rows}'")
 
 
 def _struct(columns: dict[str, str]) -> str:
