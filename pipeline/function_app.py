@@ -79,6 +79,13 @@ def nightly(timer: func.TimerRequest) -> None:
     run(jobs.nightly, lake, public, os.environ, TOWNS, minutes=13, today=today)
 
 
+# After the nightly, which stops by 01:45 at the latest, and before the 02:45 issue,
+# the first to read today's coefficients; :20 falls between two radar runs.
+@timers.timer_trigger(schedule="0 20 2 * * *", arg_name="timer")
+def mean60(timer: func.TimerRequest) -> None:
+    run(jobs.mean60, store("LAKE_ACCOUNT"), TOWNS, today=datetime.now(UTC).date())
+
+
 app = func.FunctionApp()
 # In dev the app exists only for the spend-breaker drill. With no timer
 # registered the host sits idle and no job ever runs there.

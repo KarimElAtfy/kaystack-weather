@@ -277,9 +277,8 @@ def compact_day(
 def nightly(
     lake: Store, public: Store, env: Mapping[str, str], town_dir: Path, minutes: float, today: date
 ) -> None:
-    """Yesterday's radar repair, the 30-day ARPA pull, compaction of the days that
-    are due, then today's mean60 coefficients from what compaction left. A failed
-    step does not stop the next one; the run fails at the end."""
+    """Yesterday's radar repair, the 30-day ARPA pull, then compaction of the days
+    that are due. A failed step does not stop the next one; the run fails at the end."""
     deadline = time.monotonic() + minutes * 60
     all_towns = towns.load(town_dir)
     failed = []
@@ -295,14 +294,15 @@ def nightly(
     for day in compact.days_due(lake, today):
         with step(f"compaction of {day}"):
             compact_day(lake, all_towns, day, deadline, today)
-    try:
-        with step("mean60 coefficients"):
-            mean60_coefficients(lake, all_towns, today)
-    except Exception:
-        log.exception("mean60 coefficients failed")
-        failed.append("mean60 coefficients")
     if failed:
         raise SourceFailed(f"{', '.join(failed)} failed")
+
+
+def mean60(lake: Store, town_dir: Path, today: date) -> None:
+    """Today's mean60 coefficients, on a timer of their own after the nightly, so that
+    the compaction's memory is not still held while they are fitted."""
+    with step("mean60 coefficients"):
+        mean60_coefficients(lake, towns.load(town_dir), today)
 
 
 def _curated(lake: Store, tmp: Path, table: str, first: date, last: date) -> list[Path]:

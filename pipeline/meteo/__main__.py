@@ -9,7 +9,7 @@ r"""Runs one job by hand, against a local folder or the real lake.
     uv run python -m meteo mean60 --folder ../../meteo-dati/dryrun --today 2026-10-27
 
 `radar --day` fetches the frames of a past day that the lake lacks. `mean60` writes the
-coefficients of --today again from the curated tables, as the nightly does. `check` is the
+coefficients of --today again from the curated tables, as its 02:20 timer does. `check` is the
 "7 complete days" check: one line per day and source, exit status 1 on any FAIL.
 The folder holds one subfolder per container. With --lake the job signs in with
 the az CLI login; the timer jobs also need --public.
@@ -77,7 +77,7 @@ def main() -> None:
             deadline = time.monotonic() + 3600
             jobs.compact_day(lake, towns.load(args.towns), args.day, deadline, args.today)
         case "mean60":
-            jobs.mean60_coefficients(lake, towns.load(args.towns), args.today)
+            jobs.mean60(lake, args.towns, args.today)
         case "check":
             if not check.run(lake, env, towns.load(args.towns), args.first, args.last):
                 sys.exit(1)
