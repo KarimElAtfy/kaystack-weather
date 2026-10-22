@@ -95,7 +95,10 @@ def run(
                 raise TimeoutError(f"compaction of {day} stopped before {source}")
             # A connection per source: the database is in memory, so the tables of
             # one source would otherwise stay there, at the limit, under the next.
-            with connect(tmp) as con:
+            # Reading JSON goes past the limit. On a pessimistic day in Linux the day
+            # peaked at 236 to 268 MB with 256 MB and two threads, and at 210 MB in
+            # three runs with these, 1 or 2 s slower.
+            with connect(tmp, "160MB", threads=1, lean=True) as con:
                 counts[source] = step(con)
             log.info("compacted %s %s", source, day)
     if expiring:
@@ -105,7 +108,7 @@ def run(
     lake.put("curated", completeness_name(day), body, "application/json")
 
 
-def connect(tmp: Path):
+def connect(tmp: Path, memory_limit: str = "256MB", threads: int = 2, lean: bool = False):
     # DuckDB imports __main__ on load to tell a script from a notebook, and the
     # Python 3.13 worker on Azure has none: the import fails with "initialization
     # failed". A module with a __file__ reads as a script.
@@ -119,10 +122,15 @@ def connect(tmp: Path):
     # DuckDB takes the machine's zone by default, and on a PC in Italy every
     # TIMESTAMPTZ would come back at +01 or +02.
     con.execute("SET TimeZone = 'UTC'")
-    # Half of the 512 MB instance; DuckDB spills to the temporary folder beyond it,
-    # and each thread keeps buffers of its own.
-    con.execute("SET memory_limit = '256MB'")
-    con.execute("SET threads = 2")
+    # Half of the 512 MB instance by default; DuckDB spills to the temporary folder
+    # beyond it, and each thread keeps buffers of its own.
+    con.execute(f"SET memory_limit = '{memory_limit}'")
+    con.execute(f"SET threads = {threads}")
+    if lean:
+        # DuckDB keeps up to 128 MiB it freed for its next task; given back at once,
+        # the memory of one step is not still held under the next.
+        con.execute("SET allocator_flush_threshold = '0MB'")
+        con.execute("SET allocator_bulk_deallocation_flush_threshold = '0MB'")
     con.execute(f"SET temp_directory = '{(tmp / 'duckdb').as_posix()}'")
     return con
 

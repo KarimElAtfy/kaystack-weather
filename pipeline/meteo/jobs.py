@@ -338,10 +338,11 @@ def mean60_coefficients(lake: Store, all_towns: list[Town], day: date) -> None:
         days = _curated(lake, tmp, "obs_arpa_daily", first, last)
         if not (hours and days):
             raise SourceFailed(f"no ARPA tables from {first} to {last}")
-        con = compact.connect(tmp)
-        mos.load(con, stations, hours, days, nwp_hourly=runs, nwp_prev=backfill)
-        body = mos.coefficients(con, day)
-        con.close()
+        # On 70 run days of 94 fetches in Linux: 341 MB at 256 MB and two threads,
+        # 237 MB with these, in under 4 s instead of 2.
+        with compact.connect(tmp, "96MB", threads=1, lean=True) as con:
+            mos.load(con, stations, hours, days, nwp_hourly=runs, nwp_prev=backfill)
+            body = mos.coefficients(con, day)
     lake.put("curated", mos.name(day), body, "application/json")
     log.info(
         "mean60: %s from %d run days, %d backfilled, %d ARPA days",
