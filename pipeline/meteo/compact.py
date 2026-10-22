@@ -141,11 +141,15 @@ def write_rows(path: Path, rows: Iterable[dict]) -> None:
 
 
 def _load(con, table: str, path: Path, columns: dict[str, str]) -> None:
+    """Makes `table` a view of the rows, kept as Parquet next to them. A table would
+    hold them all in memory: the members of a day's ensembles take 90 MB there."""
+    rows = path.with_suffix(".rows.parquet").as_posix()
     con.execute(
-        f"CREATE OR REPLACE TABLE {table} AS SELECT * FROM read_json(?, "
-        f"format = 'newline_delimited', columns = {_struct(columns)})",
+        f"COPY (SELECT * FROM read_json(?, format = 'newline_delimited', "
+        f"columns = {_struct(columns)})) TO '{rows}' (FORMAT parquet)",
         [path.as_posix()],
     )
+    con.execute(f"CREATE OR REPLACE VIEW {table} AS SELECT * FROM '{rows}'")
 
 
 def _struct(columns: dict[str, str]) -> str:
