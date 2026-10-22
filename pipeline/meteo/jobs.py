@@ -1,11 +1,14 @@
 """The body of each timer, given the lake and the public store. function_app.py runs
 them on Azure; `python -m meteo` runs them against a local folder."""
 
+import contextlib
+import ctypes
+import gc
 import json
 import logging
 import tempfile
 import time
-from collections.abc import Callable, Collection, Mapping
+from collections.abc import Callable, Collection, Iterator, Mapping
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
@@ -55,6 +58,47 @@ def peak_mb() -> int | None:
         return None
     # ru_maxrss is in KiB on Linux.
     return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss // 1024
+
+
+def _release() -> None:
+    """Hands what the last step freed back to the system. glibc keeps freed blocks
+    for later, so without it the resident set stays near the last step's peak and
+    the next step starts from there."""
+    gc.collect()
+    with contextlib.suppress(OSError):
+        ctypes.CDLL("libc.so.6").malloc_trim(0)
+
+
+def _reset_peak() -> bool:
+    """Writing 5 to clear_refs sets the resident set's high-water mark (VmHWM) back
+    to the current size. False where there is no such file, as on Windows."""
+    try:
+        Path("/proc/self/clear_refs").write_text("5")
+    except OSError:
+        return False
+    return True
+
+
+def high_water_mb(status: str) -> int | None:
+    """VmHWM from the text of /proc/self/status, which gives it in kB."""
+    for line in status.splitlines():
+        if line.startswith("VmHWM:"):
+            return int(line.split()[1]) // 1024
+    return None
+
+
+@contextlib.contextmanager
+def step(name: str) -> Iterator[None]:
+    """Logs the step's own peak resident memory, unlike peak_mb, which keeps the
+    highest of the worker's whole life, earlier invocations on the instance included."""
+    _release()
+    reset = _reset_peak()
+    try:
+        yield
+    finally:
+        peak = high_water_mb(Path("/proc/self/status").read_text()) if reset else None
+        log.info("%s: step peak %s MB", name, peak)
+        _release()
 
 
 def _collect(
@@ -240,16 +284,20 @@ def nightly(
     all_towns = towns.load(town_dir)
     failed = []
     try:
-        radar_repair(lake, env, today - timedelta(days=1), REPAIR_MINUTES)
+        with step("radar repair"):
+            radar_repair(lake, env, today - timedelta(days=1), REPAIR_MINUTES)
     except Exception:
         log.exception("radar repair failed")
         failed.append("radar repair")
-    if not _arpa(lake, public, env, all_towns, "revision"):
-        failed.append("30-day ARPA pull")
+    with step("30-day ARPA pull"):
+        if not _arpa(lake, public, env, all_towns, "revision"):
+            failed.append("30-day ARPA pull")
     for day in compact.days_due(lake, today):
-        compact_day(lake, all_towns, day, deadline, today)
+        with step(f"compaction of {day}"):
+            compact_day(lake, all_towns, day, deadline, today)
     try:
-        mean60_coefficients(lake, all_towns, today)
+        with step("mean60 coefficients"):
+            mean60_coefficients(lake, all_towns, today)
     except Exception:
         log.exception("mean60 coefficients failed")
         failed.append("mean60 coefficients")
@@ -295,12 +343,10 @@ def mean60_coefficients(lake: Store, all_towns: list[Town], day: date) -> None:
         body = mos.coefficients(con, day)
         con.close()
     lake.put("curated", mos.name(day), body, "application/json")
-    # The plan's 2048 MB question comes up if the nightly passes 400 MB with this step.
     log.info(
-        "mean60: %s from %d run days, %d backfilled, %d ARPA days; peak memory %s MB",
+        "mean60: %s from %d run days, %d backfilled, %d ARPA days",
         day,
         len(runs),
         len(backfill),
         len(days),
-        peak_mb(),
     )
