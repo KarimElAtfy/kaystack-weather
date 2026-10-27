@@ -4,7 +4,7 @@ from datetime import UTC, date, datetime, timedelta
 import pytest
 from conftest import fixture, replaying
 
-from meteo import arpa, check, compact, radar
+from meteo import arpa, check, compact, openmeteo, radar
 from meteo.store import raw_name
 
 DAY = date(2026, 10, 14)
@@ -101,3 +101,34 @@ def test_a_day_without_compaction_fails_at_once(lake, all_towns):
     assert check.check_day(lake, ENV, all_towns, DAY + timedelta(days=1)) == [
         ("compaction", False, "no completeness/2026-10-15.json")
     ]
+
+
+def test_a_run_open_meteo_never_had_is_not_owed(day_in_the_lake, all_towns, monkeypatch):
+    sources(monkeypatch)
+    name = compact.completeness_name(DAY)
+    counts = json.loads(day_in_the_lake.read("curated", name)[0])
+    # As on 24/10: AROME 00Z, 03Z and 15Z stored, the other five never published.
+    counts["nwp"]["meteofrance_arome_france_hd"] = 3
+    counts["ensemble"]["ecmwf_ifs025_ensemble"] = 2
+    day_in_the_lake.put("curated", name, json.dumps(counts).encode(), "")
+    for hour in (6, 9, 12, 18):
+        run = datetime(2026, 10, 14, hour, tzinfo=UTC)
+        marker = openmeteo.missing_name(run, "meteofrance_arome_france_hd")
+        day_in_the_lake.put_new("raw", marker, b"{}", "application/json")
+
+    def rows():
+        return {s: (ok, d) for s, ok, d in check.check_day(day_in_the_lake, ENV, all_towns, DAY)}
+
+    assert rows()["open-meteo"] == (
+        False,
+        "meteofrance_arome_france_hd 3/4; absent upstream: meteofrance_arome_france_hd 4",
+    )
+    run = datetime(2026, 10, 14, 21, tzinfo=UTC)
+    marker = openmeteo.missing_name(run, "meteofrance_arome_france_hd")
+    day_in_the_lake.put_new("raw", marker, b"{}", "application/json")
+    assert rows()["open-meteo"] == (
+        True,
+        "73 published, all in; absent upstream: meteofrance_arome_france_hd 5",
+    )
+    # Open-Meteo keeps no ensemble runs, so one the lake lacks stays missing.
+    assert rows()["ensemble"] == (False, "ecmwf_ifs025_ensemble 2/4")
