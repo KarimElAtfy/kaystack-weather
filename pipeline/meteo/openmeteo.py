@@ -11,7 +11,8 @@ which meta.json read a moment before does not prove: gfs_global joins the 0.13 a
 deterministic runs are therefore asked from Single Runs by their start time, every
 one from the last archived to the newest, so a run that meta.json showed only
 between two hourly checks, or never, is still fetched. Open-Meteo keeps no runs of
-the ensembles, so for them the newest run is fetched.
+the ensembles, so for them the newest run is fetched and kept only if meta.json
+shows the same run before and after the request.
 """
 
 import gzip
@@ -230,7 +231,7 @@ def collect_runs(
                 step = timedelta(seconds=info["update_interval_seconds"])
                 _catch_up(lake, http, points, model, runs, latest, available, settled, step)
             elif settled and latest not in runs:
-                _fetch_newest(lake, http, points, model, latest, available)
+                _fetch_newest(lake, http, points, model, domain, latest, available)
                 runs[latest] = True
             stored = [run for run, kept in runs.items() if kept]
             if stored:
@@ -273,16 +274,29 @@ def _fetch_newest(
     http: requests.Session,
     points: list[Station],
     model: str,
+    domain: str,
     run_init: datetime,
     available: datetime,
 ) -> None:
-    name = raw_name("open-meteo", run_init, f"ens-{model}", "json.gz")
+    """The newest run of an ensemble, kept only if meta.json still shows it after the
+    request: a run that landed during it would be filed under the one before."""
+    params = _params(points, ENSEMBLE_VARIABLES, model)
+    response = http.get(ENSEMBLE, params=params, timeout=(5, 60))
+    response.raise_for_status()
+    after = meta(http, ENSEMBLE_HOST, domain)["last_run_initialisation_time"]
+    if datetime.fromtimestamp(after, UTC) != run_init:
+        raise requests.RequestException(f"{model} moved on from run {run_init} during the fetch")
     metadata = {
         "run_init": run_init.isoformat(),
         "run_available": available.isoformat(),
         "points": ",".join(p.id for p in points),
+        "request": response.url,
+        "fetched_at": datetime.now(UTC).isoformat(timespec="seconds"),
     }
-    _fetch(lake, http, ENSEMBLE, _params(points, ENSEMBLE_VARIABLES, model), name, metadata)
+    name = raw_name("open-meteo", run_init, f"ens-{model}", "json.gz")
+    lake.put_new(
+        "raw", name, gzip.compress(response.content, mtime=0), "application/gzip", metadata
+    )
     log.info("open-meteo: stored %s run %s", model, run_init)
 
 

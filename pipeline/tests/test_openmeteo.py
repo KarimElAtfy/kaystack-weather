@@ -191,6 +191,14 @@ def test_an_ensemble_run_is_kept_while_meta_json_shows_it(lake, all_towns):
     assert lake.read("raw", name)[1]["run_init"] == run.isoformat()
 
 
+def test_an_ensemble_run_that_moves_on_during_the_fetch_is_not_kept(lake, all_towns):
+    run = run_slot(3)
+    http, _ = replaying(ensemble_routes(run, run + THREE_HOURS))
+    with pytest.raises(RuntimeError, match="meteoswiss_icon_ch1_ensemble"):
+        collect(lake, all_towns, http, "ensemble")
+    assert lake.names("raw", "open-meteo/") == []
+
+
 def test_ensemble_members_include_the_control():
     raw = gzip.compress(fixture("open-meteo/ensemble-meteoswiss_icon_ch1_ensemble.json"))
     metadata = {
