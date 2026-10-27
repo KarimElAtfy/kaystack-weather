@@ -185,8 +185,16 @@ def _variant(name: str) -> str:
 
 
 def _model_runs(lake: Store, day: date) -> list[str]:
-    """The Open-Meteo runs of the day; a run Open-Meteo never had leaves a .missing.json."""
-    return [n for n in _raw(lake, "open-meteo", [day]) if n.endswith(".json.gz")]
+    """The Open-Meteo runs of the day, one object each. A run fetched again because
+    the first copy was wrong is kept as <name>.v2.json.gz next to the write-once
+    original and replaces it; a run Open-Meteo never had leaves a .missing.json."""
+    runs: dict[str, str] = {}
+    for name in _raw(lake, "open-meteo", [day]):
+        if name.endswith(".json.gz"):
+            run = name.split(".", 1)[0]
+            # Sorted names put x.v2.json.gz after x.json.gz.
+            runs[run] = name
+    return list(runs.values())
 
 
 TS = "TIMESTAMPTZ"

@@ -244,3 +244,25 @@ def test_nwp_and_ensemble_tables(lake, all_towns):
     completeness = json.loads(lake.read("curated", "completeness/2026-10-16.json")[0])
     assert completeness["nwp"] == {"icon_d2": 1}
     assert completeness["ensemble"] == {"meteoswiss_icon_ch1_ensemble": 1}
+
+
+def test_a_corrected_copy_replaces_the_run_it_follows(lake, all_towns):
+    day = "open-meteo/2026/10/16/20261016T090000Z-icon_d2"
+    body = gzip.compress(fixture("open-meteo/forecast-icon_d2-run.json"))
+    for suffix, fetched in (
+        (".json.gz", "2026-10-16T14:47:00+00:00"),
+        (".v2.json.gz", "2026-10-27T17:30:00+00:00"),
+    ):
+        metadata = {
+            "run_init": RUN_D2.isoformat(),
+            "fetched_at": fetched,
+            "points": "torre-boldone,lime,ispra-jrc,varano-borghi",
+        }
+        lake.put_new("raw", day + suffix, body, "application/gzip", metadata)
+    missing = openmeteo.missing_name(RUN_D2 + timedelta(hours=3), "icon_d2")
+    lake.put_new("raw", missing, b"{}", "application/json")
+    compact_on_time(lake, all_towns, date(2026, 10, 16))
+
+    nwp = read_table(lake, "nwp_hourly", date(2026, 10, 16))
+    assert {r["fetched_at"] for r in nwp} == {"2026-10-27T17:30:00Z"}
+    assert len(nwp) == len({(r["point"], r["valid"]) for r in nwp})
