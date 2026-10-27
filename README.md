@@ -19,4 +19,22 @@ Layout:
 - `docs/time-conventions.md` says what each source's timestamps mean, `docs/verification.md` which forecasts may be scored and when, and `docs/adr` holds the decisions behind this setup, one short file each.
 - `.github/workflows`: `ci.yml` checks every part on pull requests, `infra.yml` applies prod after approval, `deploy.yml` deploys the pipeline and the site, `freshness.yml` checks every hour from outside Azure that every source is recent, and `scheduled.yml` looks for drift and vulnerable dependencies every week.
 
+## Cost
+
+Measured over the first seven complete days of collection, 18 to 24 October 2026, from Azure Cost Management and the storage and Function metrics, then multiplied by 30/7. EUR before VAT.
+
+| Line | Week | Month |
+| --- | --- | --- |
+| Function host storage | 0.096 | 0.41 |
+| Public storage: status, site data, radar | 0.022 | 0.10 |
+| Data lake | 0.014 | 0.06 |
+| Key Vault and state | 0.002 | 0.01 |
+| Total | 0.135 | 0.58 |
+
+Compute, about 34,000 GB-s a month, and logs, about 0.14 GB a month, stay inside Azure's free grants. With VAT the month comes to about EUR 0.71.
+
+## First week of data
+
+On those seven days every radar frame, ARPA value, METAR, MOSMIX issue and Yr forecast was stored, checked against counts from the sources. Every deterministic model run Open-Meteo published is in the archive; some were first missed by the hourly job and fetched again from Open-Meteo's Single Runs. Five ensemble runs are missing and cannot be recovered, because Open-Meteo keeps no past ensemble runs: one ICON-CH1 and one ICON-CH2 run on 22 October, and three ECMWF IFS runs on 23 and 24 October. They fall where Open-Meteo published no deterministic run or cut the IFS ensemble to fewer runs a day, so they were probably never published.
+
 MIT license.
