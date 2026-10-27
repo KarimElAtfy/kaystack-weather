@@ -184,6 +184,11 @@ def _variant(name: str) -> str:
     return name.rsplit("/", 1)[1].split("-", 1)[1].split(".", 1)[0]
 
 
+def _model_runs(lake: Store, day: date) -> list[str]:
+    """The Open-Meteo runs of the day; a run Open-Meteo never had leaves a .missing.json."""
+    return [n for n in _raw(lake, "open-meteo", [day]) if n.endswith(".json.gz")]
+
+
 TS = "TIMESTAMPTZ"
 NWP_COLUMNS = {
     "point": "VARCHAR",
@@ -199,7 +204,7 @@ NWP_COLUMNS = {
 
 def _nwp(con, lake: Store, day: date, tmp: Path) -> dict[str, int]:
     def rows():
-        for name in _raw(lake, "open-meteo", [day]):
+        for name in _model_runs(lake, day):
             model = _variant(name)
             if model in openmeteo.MODELS or model == "best_match":
                 raw, metadata = lake.read("raw", name)
@@ -296,7 +301,7 @@ ORDER BY model, run_init, point, kind, start
 
 def _ensemble(con, lake: Store, day: date, tmp: Path) -> dict[str, int]:
     def rows():
-        for name in _raw(lake, "open-meteo", [day]):
+        for name in _model_runs(lake, day):
             variant = _variant(name)
             if variant.startswith("ens-"):
                 raw, metadata = lake.read("raw", name)
