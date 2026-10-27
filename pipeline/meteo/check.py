@@ -50,6 +50,30 @@ def _short(have: Mapping[str, int], want: Mapping[str, int]) -> list[str]:
     return [f"{k} {have.get(k, 0)}/{n}" for k, n in want.items() if have.get(k, 0) < n]
 
 
+def _model_runs(lake: Store, day: date, counts) -> Row:
+    """Runs started on the day against the ones each model should have. A run Open-Meteo
+    answered it never had, kept as .missing.json, is absent upstream and not owed.
+    Ensemble runs have no such answer: Open-Meteo keeps none of them, so a lacking one
+    cannot be told from one it never made, and the ensemble row counts it missing."""
+    absent: dict[str, int] = {}
+    for name in lake.names("raw", day_prefix("open-meteo", day)):
+        if name.endswith(".missing.json"):
+            model = name.rsplit("/", 1)[1].split("-", 1)[1].removesuffix(".missing.json")
+            absent[model] = absent.get(model, 0) + 1
+    have = counts.get("nwp", {})
+    short = [
+        f"{m} {have.get(m, 0)}/{n - absent.get(m, 0)}"
+        for m, n in RUNS.items()
+        if have.get(m, 0) + absent.get(m, 0) < n
+    ]
+    published = sum(RUNS.values()) - sum(absent.values())
+    detail = "; ".join(short) or f"{published} published, all in"
+    if absent:
+        upstream = ", ".join(f"{m} {n}" for m, n in sorted(absent.items()))
+        detail += f"; absent upstream: {upstream}"
+    return ("open-meteo", not short, detail)
+
+
 def _radar(lake: Store, http: requests.Session, origin: str, day: date) -> Row:
     start = datetime(day.year, day.month, day.day, tzinfo=UTC)
     stored = set(lake.names("raw", day_prefix("radar", day)))
@@ -139,9 +163,9 @@ def check_day(lake: Store, env: Mapping[str, str], all_towns: list[Town], day: d
         _radar(lake, radar_http, env["RADAR_ORIGIN"], day),
         _arpa(http, env.get("ARPA_APP_TOKEN"), sensors, day, counts),
         _metar(http, icaos, day, counts),
+        _model_runs(lake, day, counts),
     ]
     for source, have, want in (
-        ("open-meteo", counts.get("nwp", {}), RUNS),
         ("ensemble", counts.get("ensemble", {}), ENSEMBLE_RUNS),
         ("mosmix", counts.get("mosmix", {}), wmos),
         ("yr", counts.get("yr", {}), points),
