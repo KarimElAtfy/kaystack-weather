@@ -1,0 +1,7 @@
+# deepmerge is a build-time dependency of @sveltejs/vite-plugin-svelte, which
+# merges its own plugin options with it. Nothing from outside reaches that merge
+# and nothing of it ships to the browser. No release fixes the advisory yet.
+[[IgnoredVulns]]
+id = "GHSA-gcqx-w48m-w2h4"
+ignoreUntil = 2026-12-31
+reason = "deepmerge only merges the Svelte plugin's own build options; no fixed release exists yet"
