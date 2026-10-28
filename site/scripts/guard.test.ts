@@ -2,7 +2,7 @@ import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { expect, test } from 'vitest';
-import { problems } from './guard.ts';
+import { problems, styleProblems } from './guard.ts';
 
 const ORIGIN = 'https://account.example.net';
 const CONFIG = JSON.stringify({
@@ -66,5 +66,46 @@ test('fails a build in which no script reads the account', () => {
 test('fails an empty or missing build', () => {
   expect(problems(join(tmpdir(), 'guard-none'), fixtures)).toEqual([
     `${join(tmpdir(), 'guard-none')} holds no files`
+  ]);
+});
+
+const svelte = `<p>x</p>
+<style>
+  .t {
+    color: #fff;
+    font-size: 12px;
+  }
+  #ade {
+    color: var(--ink);
+  }
+</style>`;
+
+test('keeps colours in tokens.css and px out of font sizes', () => {
+  const root = folder({
+    'src/styles/tokens.css': ':root {\n  --ink: #1c1b18;\n}',
+    'src/island/Now.svelte': svelte,
+    'src/lib/x.css': '.a {\n  border: 1px solid rgba(0, 0, 0, 0.1);\n}'
+  });
+  expect(styleProblems(root, new Set())).toEqual([
+    'src/island/Now.svelte:4: a colour outside tokens.css',
+    'src/island/Now.svelte:5: a font size in px',
+    'src/lib/x.css:2: a colour outside tokens.css'
+  ]);
+});
+
+test('allows the agreed breakpoints in layout.css only', () => {
+  const root = folder({
+    'src/styles/layout.css': `@media (max-width: 44em) and (min-height: 32em) {
+}
+@media (min-width: 1024px) {
+}`,
+    'src/lib/y.css': `@media (min-width: 64em) {
+}
+@media (prefers-reduced-motion: reduce) {
+}`
+  });
+  expect(styleProblems(root, new Set())).toEqual([
+    'src/lib/y.css:1: (min-width: 64em) is not an agreed breakpoint',
+    'src/styles/layout.css:3: (min-width: 1024px) is not an agreed breakpoint'
   ]);
 });
