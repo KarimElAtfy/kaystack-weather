@@ -1,378 +1,342 @@
 /* The radar block. Its own file, loaded by the town pages only. */
 
-:root {
-  /* Rain classes on a light map: more rain, darker. */
-  --r1: #a9d1f5;
-  --r2: #5aa3ea;
-  --r3: #2a6fd0;
-  --r4: #1d4596;
-  --r5: #5b2a9a;
-  --r6: #7a0f4e;
-  --nodata: rgba(70, 78, 90, 0.55);
-  --map-land: #eef0eb;
-  --map-water: #c4dbef;
-  --map-river: #8fb9e2;
-  --map-border: #7d8590;
-  --map-ring: rgba(40, 48, 60, 0.55);
-  --map-label: #20252c;
-  --map-halo: rgba(255, 255, 255, 0.92);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* On a dark map: more rain, lighter. */
-    --r1: #1f4f86;
-    --r2: #2f73c4;
-    --r3: #4f9bf0;
-    --r4: #7fb3f5;
-    --r5: #d2b4fb;
-    --r6: #ffd0ea;
-    --nodata: rgba(200, 210, 222, 0.42);
-    --map-land: #1a1f26;
-    --map-water: #1e3550;
-    --map-river: #2e5a8c;
-    --map-border: #8f99a6;
-    --map-ring: rgba(220, 228, 238, 0.5);
-    --map-label: #e3e8ee;
-    --map-halo: rgba(15, 18, 22, 0.9);
+@layer blocks {
+  .map {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background: var(--map-land);
+    border: 1px solid var(--line);
   }
-}
-
-.map {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  background: var(--map-land);
-  border: 1px solid var(--line);
-}
-.map > svg,
-.map > canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-.map canvas {
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-}
-.map text {
-  font-family: var(--font);
-}
-/* The base map's classes, from pipeline/scripts/basemap.py; labels at its LABEL_PX. */
-.map-land {
-  fill: var(--map-land);
-}
-.map-water {
-  fill: var(--map-water);
-  stroke: var(--map-river);
-  stroke-width: 0.3;
-}
-.map-river {
-  fill: none;
-  stroke: var(--map-river);
-  stroke-width: 0.55;
-  stroke-linejoin: round;
-  stroke-linecap: round;
-}
-.map-border {
-  fill: none;
-  stroke: var(--map-border);
-  stroke-width: 0.5;
-  stroke-dasharray: 2 1.2;
-}
-.map-city {
-  fill: var(--map-label);
-  stroke: var(--map-halo);
-  stroke-width: 0.5;
-}
-.map-label {
-  font-family: var(--font);
-  font-size: 3.6px;
-  fill: var(--map-label);
-  stroke: var(--map-halo);
-  stroke-width: 1;
-  paint-order: stroke;
-}
-.map .ring {
-  fill: none;
-  stroke: var(--map-ring);
-  stroke-width: 0.35;
-}
-.map .label {
-  fill: var(--map-label);
-  stroke: var(--map-halo);
-  stroke-width: 1;
-  paint-order: stroke;
-}
-.map .town-halo {
-  fill: none;
-  stroke: var(--map-halo);
-  stroke-width: 1.6;
-}
-.map .town-ring {
-  fill: none;
-  stroke: var(--map-label);
-  stroke-width: 0.7;
-}
-.map .town-dot {
-  fill: var(--map-label);
-}
-.map .bar-back {
-  fill: var(--map-halo);
-}
-.map .bar {
-  stroke: var(--map-label);
-  stroke-width: 0.6;
-}
-.stamp {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 2px 8px;
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  display: flex;
-  gap: 6px;
-  align-items: baseline;
-}
-.stamp span {
-  font-weight: 500;
-  font-size: var(--fs-xs);
-  color: var(--text-2);
-}
-/* Over a frame with nothing painted, loading or missing: the no-data hatch,
-   under the rings and labels, and a box that says why. The box sits low so the
-   town at the centre stays in sight while scrubbing. */
-.map .veil {
-  position: absolute;
-  inset: 0;
-  opacity: 0.6;
-  background: repeating-linear-gradient(135deg, var(--nodata) 0 2px, transparent 2px 5px);
-}
-.map .veil-box {
-  position: absolute;
-  left: 10%;
-  right: 10%;
-  /* 8% is where the scale bar starts: a few pixels more leave a gap above it. */
-  bottom: calc(8% + 5px);
-  display: flex;
-  justify-content: center;
-  text-align: center;
-  pointer-events: none;
-}
-.map .veil-box p {
-  background: var(--surface);
-  padding: var(--sp-2) var(--sp-4);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--line);
-  font-weight: 600;
-  /* At 320 px the message takes two lines; kept tight so the town name above stays clear. */
-  line-height: 1.3;
-}
-@media (max-width: 399px) {
-  /* Smaller below 400 px, so the message keeps to one line and more of the map shows. */
-  .map .veil-box p {
+  .map > svg,
+  .map > canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .map canvas {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+  .map text {
+    font-family: var(--font);
+  }
+  /* The base map's classes, from pipeline/scripts/basemap.py; labels at its LABEL_PX. */
+  .map-land {
+    fill: var(--map-land);
+  }
+  .map-water {
+    fill: var(--map-water);
+    stroke: var(--map-river);
+    stroke-width: 0.3;
+  }
+  .map-river {
+    fill: none;
+    stroke: var(--map-river);
+    stroke-width: 0.55;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .map-border {
+    fill: none;
+    stroke: var(--map-border);
+    stroke-width: 0.5;
+    stroke-dasharray: 2 1.2;
+  }
+  .map-city {
+    fill: var(--map-label);
+    stroke: var(--map-halo);
+    stroke-width: 0.5;
+  }
+  .map-label {
+    font-family: var(--font);
+    font-size: 3.6px;
+    fill: var(--map-label);
+    stroke: var(--map-halo);
+    stroke-width: 1;
+    paint-order: stroke;
+  }
+  .map .ring {
+    fill: none;
+    stroke: var(--map-ring);
+    stroke-width: 0.35;
+  }
+  .map .label {
+    fill: var(--map-label);
+    stroke: var(--map-halo);
+    stroke-width: 1;
+    paint-order: stroke;
+  }
+  .map .town-halo {
+    fill: none;
+    stroke: var(--map-halo);
+    stroke-width: 1.6;
+  }
+  .map .town-ring {
+    fill: none;
+    stroke: var(--map-label);
+    stroke-width: 0.7;
+  }
+  .map .town-dot {
+    fill: var(--map-label);
+  }
+  .map .bar-back {
+    fill: var(--map-halo);
+  }
+  .map .bar {
+    stroke: var(--map-label);
+    stroke-width: 0.6;
+  }
+  .stamp {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 2px 8px;
     font-size: var(--fs-sm);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    display: flex;
+    gap: 6px;
+    align-items: baseline;
   }
-}
-@media (max-width: 359px) {
-  /* 80% of a 262 px map leaves 176 px inside the box for 191 px of text. */
+  .stamp span {
+    font-weight: 500;
+    font-size: var(--fs-xs);
+    color: var(--text-2);
+  }
+  /* Over a frame with nothing painted, loading or missing: the no-data hatch,
+     under the rings and labels, and a box that says why. The box sits low so the
+     town at the centre stays in sight while scrubbing. */
+  .map .veil {
+    position: absolute;
+    inset: 0;
+    opacity: 0.6;
+    background: repeating-linear-gradient(135deg, var(--nodata) 0 2px, transparent 2px 5px);
+  }
   .map .veil-box {
-    left: 6%;
-    right: 6%;
+    position: absolute;
+    left: 10%;
+    right: 10%;
+    /* 8% is where the scale bar starts: a few pixels more leave a gap above it. */
+    bottom: calc(8% + 5px);
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    pointer-events: none;
   }
-}
-.map-empty {
-  aspect-ratio: 1 / 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: var(--sp-5);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--line);
-  background: repeating-linear-gradient(135deg, var(--surface-2) 0 6px, var(--surface) 6px 12px);
-}
-.map-empty > div {
-  background: var(--surface);
-  padding: var(--sp-3) var(--sp-4);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--line);
-}
-.map-empty .title {
-  font-weight: 600;
-}
-.controls {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-2);
-  margin-top: var(--sp-3);
-}
-.btn {
-  font: inherit;
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-height: 44px;
-  min-width: 44px;
-  padding: 0 var(--sp-3);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--line-strong);
-  background: var(--surface);
-  color: var(--text);
-  cursor: pointer;
-}
-.btn:hover {
-  background: var(--surface-2);
-}
-.controls input[type='range'] {
-  flex: 1;
-  min-width: 0;
-  height: 44px;
-  accent-color: var(--accent);
-  background: transparent;
-  margin: 0;
-}
-/* Below 400 px the slider takes a full row, so each of the twelve frames gets
-   room to be reached by touch; the two buttons share the row below. */
-@media (max-width: 399px) {
+  .map .veil-box p {
+    background: var(--surface);
+    padding: var(--sp-2) var(--sp-4);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--line);
+    font-weight: 600;
+    /* At 320 px the message takes two lines; kept tight so the town name above stays clear. */
+    line-height: 1.3;
+  }
+  @media (max-width: 399px) {
+    /* Smaller below 400 px, so the message keeps to one line and more of the map shows. */
+    .map .veil-box p {
+      font-size: var(--fs-sm);
+    }
+  }
+  @media (max-width: 359px) {
+    /* 80% of a 262 px map leaves 176 px inside the box for 191 px of text. */
+    .map .veil-box {
+      left: 6%;
+      right: 6%;
+    }
+  }
+  .map-empty {
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--sp-5);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--line);
+    background: repeating-linear-gradient(135deg, var(--surface-2) 0 6px, var(--surface) 6px 12px);
+  }
+  .map-empty > div {
+    background: var(--surface);
+    padding: var(--sp-3) var(--sp-4);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--line);
+  }
+  .map-empty .title {
+    font-weight: 600;
+  }
   .controls {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    grid-template-areas:
-      'range range time'
-      'play . latest';
-    row-gap: var(--sp-2);
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    margin-top: var(--sp-3);
+  }
+  .btn {
+    font: inherit;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0 var(--sp-3);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--line-strong);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+  }
+  .btn:hover {
+    background: var(--surface-2);
   }
   .controls input[type='range'] {
-    grid-area: range;
+    flex: 1;
+    min-width: 0;
+    height: 44px;
+    accent-color: var(--accent);
+    background: transparent;
+    margin: 0;
   }
-  .controls .ftime {
-    grid-area: time;
+  /* Below 400 px the slider takes a full row, so each of the twelve frames gets
+     room to be reached by touch; the two buttons share the row below. */
+  @media (max-width: 399px) {
+    .controls {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      grid-template-areas:
+        'range range time'
+        'play . latest';
+      row-gap: var(--sp-2);
+    }
+    .controls input[type='range'] {
+      grid-area: range;
+    }
+    .controls .ftime {
+      grid-area: time;
+    }
+    .controls .play {
+      grid-area: play;
+    }
+    .controls .latest {
+      grid-area: latest;
+    }
   }
-  .controls .play {
-    grid-area: play;
+  .btn[aria-disabled='true'] {
+    color: var(--text-3);
+    cursor: default;
   }
-  .controls .latest {
-    grid-area: latest;
+  .btn[aria-disabled='true']:hover {
+    background: var(--surface);
   }
-}
-.btn[aria-disabled='true'] {
-  color: var(--text-3);
-  cursor: default;
-}
-.btn[aria-disabled='true']:hover {
-  background: var(--surface);
-}
-.controls input[aria-disabled='true'] {
-  opacity: 0.5;
-  cursor: default;
-}
-.ftime {
-  font-variant-numeric: tabular-nums;
-  font-weight: 600;
-  font-size: var(--fs-sm);
-  min-width: 44px;
-  text-align: right;
-}
-.rsum {
-  /* Room for the sentence from the first paint, before the images are read:
-     two lines, three below 400 px. */
-  min-height: 2.9em;
-  font-size: var(--fs-sm);
-  margin-top: var(--sp-3);
-  line-height: 1.45;
-}
-@media (max-width: 399px) {
+  .controls input[aria-disabled='true'] {
+    opacity: 0.5;
+    cursor: default;
+  }
+  .ftime {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    font-size: var(--fs-sm);
+    min-width: 44px;
+    text-align: right;
+  }
   .rsum {
-    min-height: 4.35em;
+    /* Room for the sentence from the first paint, before the images are read:
+       two lines, three below 400 px. */
+    min-height: 2.9em;
+    font-size: var(--fs-sm);
+    margin-top: var(--sp-3);
+    line-height: 1.45;
   }
-}
-.rlegend {
-  margin-top: var(--sp-3);
-}
-.rlegend h3 {
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  color: var(--text-2);
-  margin-bottom: var(--sp-2);
-}
-.rlegend ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px 4px;
-  font-size: var(--fs-xs);
-  line-height: 1.3;
-}
-.rlegend li {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-.rlegend b {
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-.rlegend .nd {
-  flex-direction: row;
-  align-items: center;
-  gap: var(--sp-2);
-  grid-column: 1 / -1;
-}
-.sw {
-  width: 100%;
-  height: 12px;
-  border-radius: 2px;
-  flex: none;
-}
-.rlegend .nd .sw {
-  width: 36px;
-  border: 1px solid var(--line);
-}
-.sw-1 {
-  background: var(--r1);
-}
-.sw-2 {
-  background: var(--r2);
-}
-.sw-3 {
-  background: var(--r3);
-}
-.sw-4 {
-  background: var(--r4);
-}
-.sw-5 {
-  background: var(--r5);
-}
-.sw-6 {
-  background: var(--r6);
-}
-.sw-nodata {
-  background: repeating-linear-gradient(135deg, var(--nodata) 0 2px, transparent 2px 5px);
-}
-.credit {
-  font-size: var(--fs-xs);
-  color: var(--text-2);
-  margin-top: var(--sp-2);
-  line-height: 1.45;
-}
-@media (forced-colors: active) {
-  .sw,
-  .map canvas {
-    forced-color-adjust: none;
+  @media (max-width: 399px) {
+    .rsum {
+      min-height: 4.35em;
+    }
+  }
+  .rlegend {
+    margin-top: var(--sp-3);
+  }
+  .rlegend h3 {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--text-2);
+    margin-bottom: var(--sp-2);
+  }
+  .rlegend ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px 4px;
+    font-size: var(--fs-xs);
+    line-height: 1.3;
+  }
+  .rlegend li {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+  .rlegend b {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .rlegend .nd {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--sp-2);
+    grid-column: 1 / -1;
+  }
+  .sw {
+    width: 100%;
+    height: 12px;
+    border-radius: 2px;
+    flex: none;
+  }
+  .rlegend .nd .sw {
+    width: 36px;
+    border: 1px solid var(--line);
+  }
+  .sw-1 {
+    background: var(--r1);
+  }
+  .sw-2 {
+    background: var(--r2);
+  }
+  .sw-3 {
+    background: var(--r3);
+  }
+  .sw-4 {
+    background: var(--r4);
+  }
+  .sw-5 {
+    background: var(--r5);
+  }
+  .sw-6 {
+    background: var(--r6);
+  }
+  .sw-nodata {
+    background: repeating-linear-gradient(135deg, var(--nodata) 0 2px, transparent 2px 5px);
+  }
+  .credit {
+    font-size: var(--fs-xs);
+    color: var(--text-2);
+    margin-top: var(--sp-2);
+    line-height: 1.45;
+  }
+  @media (forced-colors: active) {
+    .sw,
+    .map canvas {
+      forced-color-adjust: none;
+    }
   }
 }

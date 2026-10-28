@@ -1,0 +1,3 @@
+/* First in every stylesheet the pages load, so the order holds whichever
+   arrives first: a later layer wins over an earlier one, whatever the selector. */
+@layer reset, tokens, base, layout, blocks, utilities;

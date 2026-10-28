@@ -1,5 +1,6 @@
 // Mounts the data blocks into the prerendered town page.
 import { mount, type Component } from 'svelte';
+import '../styles/layers.css';
 import '#lib/radar/radar.css';
 import { browserEnv } from '#lib/data/source.ts';
 import { TownData, type TownInfo } from './town.svelte.ts';

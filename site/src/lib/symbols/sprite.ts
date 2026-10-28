@@ -1,6 +1,6 @@
 // The weather symbols and interface icons, drawn on a 32 x 32 grid for this
 // site, written at build time into one sprite that each town page carries in its
-// own HTML. app.css colours the classes with the page's tokens: WebKit and
+// own HTML. The page's stylesheet colours the classes with its tokens: WebKit and
 // Firefox do not pass the tokens into a sprite read from a file by <use>.
 
 // The favicon is drawn by the browser outside the page, so it has its own

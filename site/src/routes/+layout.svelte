@@ -1,5 +1,9 @@
 <script lang="ts">
-  import '../app.css';
+  import '../styles/layers.css';
+  import '../styles/tokens.css';
+  import '../styles/base.css';
+  import '../styles/layout.css';
+  import '../styles/legacy.css';
 
   let { children } = $props();
 </script>

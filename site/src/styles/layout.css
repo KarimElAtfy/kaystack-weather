@@ -1,0 +1,97 @@
+/* The page shell: columns, gutters, the section bar. The only file besides
+   tokens.css with media queries. */
+
+@layer layout {
+  html {
+    scroll-padding-top: calc(var(--bar) + 20px);
+  }
+  /* A column at least the screen tall, so the footer of a short page sits at the bottom. */
+  .app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+  }
+  .app > main {
+    flex: 1 0 auto;
+    width: 100%;
+  }
+  .wrap {
+    max-width: 1232px;
+    margin: 0 auto;
+    padding: 0 var(--sp-4);
+  }
+  /* Section bar. Sticky only where there is height to spare: on a landscape
+     phone or at 400% zoom it would cover half the screen. */
+  .sections {
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+  }
+  .sections .wrap {
+    display: flex;
+    gap: var(--sp-1);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .sections a {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--bar);
+    padding: 0 var(--sp-3);
+    color: var(--text-2);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: var(--fs-sm);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+  .sections a[aria-current='true'] {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+  }
+  @media (min-height: 500px) {
+    .sections {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+  }
+  @media (max-height: 499px) {
+    html {
+      scroll-padding-top: 16px;
+    }
+  }
+
+  /* Layout */
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--sp-5);
+    padding: var(--sp-5) 0 var(--sp-7);
+  }
+  .layout > * {
+    min-width: 0;
+  }
+  @media (min-width: 1024px) {
+    .layout {
+      grid-template-columns: minmax(0, 1fr) 392px;
+      align-items: start;
+      column-gap: var(--sp-6);
+    }
+    .layout > #adesso,
+    .layout > #ore-48,
+    .layout > #giorni-10 {
+      grid-column: 1;
+    }
+    .layout > #radar {
+      grid-column: 2;
+      grid-row: 1 / span 3;
+    }
+  }
+  @media (min-width: 1024px) and (min-height: 500px) {
+    .layout > #radar {
+      position: sticky;
+      top: calc(var(--bar) + 16px);
+    }
+  }
+}
