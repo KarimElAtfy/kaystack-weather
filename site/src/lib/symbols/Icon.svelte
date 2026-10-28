@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { ICONS } from '#gen/icons.ts';
-
   // Always next to text that says the same, so hidden from screen readers.
   let { name, size = 16 }: { name: string; size?: number } = $props();
 </script>
@@ -13,5 +11,5 @@
   aria-hidden="true"
   focusable="false"
 >
-  <use href="{ICONS}#i-{name}" />
+  <use href="#i-{name}" />
 </svg>

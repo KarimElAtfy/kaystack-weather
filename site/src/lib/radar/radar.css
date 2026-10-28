@@ -61,6 +61,41 @@
 .map text {
   font-family: var(--font);
 }
+/* The base map's classes, from pipeline/scripts/basemap.py; labels at its LABEL_PX. */
+.map-land {
+  fill: var(--map-land);
+}
+.map-water {
+  fill: var(--map-water);
+  stroke: var(--map-river);
+  stroke-width: 0.3;
+}
+.map-river {
+  fill: none;
+  stroke: var(--map-river);
+  stroke-width: 0.55;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.map-border {
+  fill: none;
+  stroke: var(--map-border);
+  stroke-width: 0.5;
+  stroke-dasharray: 2 1.2;
+}
+.map-city {
+  fill: var(--map-label);
+  stroke: var(--map-halo);
+  stroke-width: 0.5;
+}
+.map-label {
+  font-family: var(--font);
+  font-size: 3.6px;
+  fill: var(--map-label);
+  stroke: var(--map-halo);
+  stroke-width: 1;
+  paint-order: stroke;
+}
 .map .ring {
   fill: none;
   stroke: var(--map-ring);

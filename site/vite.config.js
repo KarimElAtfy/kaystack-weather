@@ -18,13 +18,6 @@ function data() {
     configureServer(server) {
       const scenario = resolve(FIXTURES, server.config.mode);
       if (!scenario.startsWith(FIXTURES + sep) || !existsSync(scenario)) return;
-      // The maps come from the pipeline (P1); until then the stand-ins in the fixtures.
-      server.middlewares.use('/radar', (request, response, next) => {
-        const file = resolve(FIXTURES, 'maps', `.${(request.url ?? '/').split('?')[0] ?? '/'}`);
-        if (!file.startsWith(resolve(FIXTURES, 'maps') + sep) || !existsSync(file)) return next();
-        response.setHeader('Content-Type', 'image/svg+xml');
-        response.end(readFileSync(file));
-      });
       server.middlewares.use('/data', (request, response) => {
         const file = resolve(
           scenario,

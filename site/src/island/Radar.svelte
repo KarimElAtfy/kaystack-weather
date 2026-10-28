@@ -172,7 +172,6 @@
     {@const height = radar.frame_height_px}
     {@const tx = radar.town_px.x + 0.5}
     {@const ty = radar.town_px.y + 0.5}
-    {@const map = `/radar/${data.town.slug}.svg`}
     {#if freshness === 'stale' && lastTime}
       <p class="note">
         <Icon name="warn" /><span>
@@ -193,12 +192,12 @@
       })}
     >
       <svg viewBox="0 0 {width} {height}" preserveAspectRatio="none" aria-hidden="true"
-        ><use href="{map}#under" /></svg
+        ><use href="#under" /></svg
       >
       <canvas bind:this={canvas} {width} {height}></canvas>
       {#if loading || frame?.missing}<div class="veil" aria-hidden="true"></div>{/if}
       <svg viewBox="0 0 {width} {height}" aria-hidden="true">
-        <use href="{map}#over" />
+        <use href="#over" />
         {#each rings as km (km)}
           {@const r = km / radar.km_per_px}
           <circle class="ring" cx={tx} cy={ty} {r} />

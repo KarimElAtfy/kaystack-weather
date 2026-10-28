@@ -15,18 +15,6 @@ export const STATES = [...SCENARIOS, 'offline', 'caricamento'] as const;
 export type State = (typeof STATES)[number];
 export const TOWNS = ['pedrengo', 'sesto-calende'] as const;
 
-// The radar maps come from the pipeline later; the stand-ins answer for them.
-async function useMaps(context: BrowserContext, origin: string) {
-  await context.route(`${origin}/radar/*.svg`, (route) =>
-    route.fulfill({
-      contentType: 'image/svg+xml',
-      body: readFileSync(
-        join('tests/fixtures/maps', new URL(route.request().url()).pathname.slice(7))
-      )
-    })
-  );
-}
-
 // `delay` holds each answer back, as the network does, so the swap from
 // placeholders to data happens after the first paint.
 export async function useScenario(
@@ -35,7 +23,6 @@ export async function useScenario(
   origin: string,
   delay = 0
 ) {
-  await useMaps(context, origin);
   await context.route(`${ACCOUNT}/public/**`, async (route) => {
     const path = new URL(route.request().url()).pathname.replace(/^\/public\//, '');
     const file = join('tests/fixtures', scenario, path);
@@ -61,7 +48,6 @@ export const freezeClock = (page: Page) => page.clock.install({ time: NOW });
 export async function openState(page: Page, state: State, url: string, origin: string) {
   const context = page.context();
   if (state === 'caricamento') {
-    await useMaps(context, origin);
     // Never answered: the requests stay pending for the whole test.
     await context.route(`${ACCOUNT}/public/**`, () => {});
   } else {

@@ -87,3 +87,5 @@
 </main>
 
 <Footer live />
+<!-- Built at prerender from the symbol code and the pipeline's map. -->
+<div class="sprite" aria-hidden="true">{@html data.sprites}</div>

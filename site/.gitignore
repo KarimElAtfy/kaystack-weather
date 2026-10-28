@@ -5,6 +5,5 @@ test-results/
 playwright-report/
 src/generated/
 static/island/
-static/icons.svg
 static/favicon.svg
 /shots/

@@ -1,23 +1,15 @@
 // The weather symbols and interface icons, drawn on a 32 x 32 grid for this
-// site, written at build time into one sprite the pages use with <use>. Colours
-// come from the page's tokens through the classes below, so one file serves both
-// themes and the symbols cost no JavaScript.
+// site, written at build time into one sprite that each town page carries in its
+// own HTML. app.css colours the classes with the page's tokens: WebKit and
+// Firefox do not pass the tokens into a sprite read from a file by <use>.
 
-// The second value of each var() is the light theme's, for the favicon, which a
-// browser draws outside the page and so without its tokens.
-const STYLE = `
-.s-sun{fill:var(--sym-sun,#e9a10b)}
-.s-ray{stroke:var(--sym-sun,#e9a10b);stroke-width:2;stroke-linecap:round}
-.s-moon{fill:var(--sym-moon)}
-.s-cloud{fill:var(--sym-cloud,#e9ecf0)}
-.s-cloud-back{fill:var(--sym-cloud-back)}
-.s-edge{fill:var(--sym-cloud-edge,#7f8996)}
-.s-rain{fill:var(--sym-rain)}
-.s-rain-line{fill:none;stroke:var(--sym-rain);stroke-width:1.6;stroke-linejoin:round}
-.s-fog{stroke:var(--sym-fog);stroke-width:2.4;stroke-linecap:round}
-.s-snow{fill:var(--sym-snow)}
-.i{fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-.i-dot{fill:currentColor}`;
+// The favicon is drawn by the browser outside the page, so it has its own
+// colours, the light theme's.
+const FAVICON_STYLE = `
+.s-sun{fill:#e9a10b}
+.s-ray{stroke:#e9a10b;stroke-width:2;stroke-linecap:round}
+.s-cloud{fill:#e9ecf0}
+.s-edge{fill:#7f8996}`;
 
 const n = (x: number) => Number(x.toFixed(2));
 
@@ -135,10 +127,10 @@ export function sprite(): string {
   const icons = Object.entries(ICONS).map(
     ([id, body]) => `<symbol id="i-${id}" viewBox="0 0 16 16">${body}</symbol>`
   );
-  return `<svg xmlns="http://www.w3.org/2000/svg"><style>${STYLE}</style>${[...symbols, ...icons].join('')}</svg>\n`;
+  return `<svg xmlns="http://www.w3.org/2000/svg">${[...symbols, ...icons].join('')}</svg>`;
 }
 
 // The tab icon: the few_day symbol on its own.
 export const favicon = () =>
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><style>${STYLE}</style>${SYMBOLS['few-day']}</svg>
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><style>${FAVICON_STYLE}</style>${SYMBOLS['few-day']}</svg>
 `;

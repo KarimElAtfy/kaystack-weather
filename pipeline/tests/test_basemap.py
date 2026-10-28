@@ -5,7 +5,7 @@ import pytest
 
 from scripts import basemap
 
-MAPS = Path(__file__).resolve().parents[2] / "site" / "static" / "radar"
+MAPS = Path(__file__).resolve().parents[2] / "site" / "src" / "lib" / "radar" / "maps"
 SVG = "{http://www.w3.org/2000/svg}"
 
 
