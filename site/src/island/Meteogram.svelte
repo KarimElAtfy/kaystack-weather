@@ -2,7 +2,6 @@
   // The 48 hours as one SVG: temperature with the range between models, the
   // share of models with rain, and wind. Hours sit at their UTC time, so the
   // night the clocks go back is 25 hours wide.
-  import { ICONS } from '#gen/icons.ts';
   import { t } from '#lib/copy/t.ts';
   import { int } from '#lib/format.ts';
   import { niceStep } from '#lib/chart/h48.ts';
@@ -292,8 +291,8 @@
           height={symbolSize}
           viewBox="0 0 32 32"
         >
-          <use href="{ICONS}#{s.base}" />
-          {#if s.drops}<use href="{ICONS}#{s.drops}" />{/if}
+          <use href="#{s.base}" />
+          {#if s.drops}<use href="#{s.drops}" />{/if}
         </svg>
       {/each}
       {#each segments as segment (segment[0])}

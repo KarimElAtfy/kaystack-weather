@@ -1,8 +1,8 @@
 r"""Draws the map under and over each town's radar frames, in the frames' own pixels,
-into the SVG files the site serves at /radar/<slug>.svg.
+into the SVG files the site copies into each town page.
 
     uv run python -m scripts.basemap --natural-earth ../../meteo-dati/natural-earth-5.1.2 \
-        --out ../site/static/radar
+        --out ../site/src/lib/radar/maps
 
 Land, lakes, rivers and the Swiss border come from Natural Earth 1:10m, public
 domain. The GeoJSON files are fetched into the folder when they are missing, from
@@ -66,16 +66,9 @@ CITIES = {
         ("Domodossola", 46.116111, 8.291111),  # Q23325
     ],
 }
-STYLE = (
-    ".land{fill:var(--map-land)}"
-    ".water{fill:var(--map-water);stroke:var(--map-river);stroke-width:.3}"
-    ".river{fill:none;stroke:var(--map-river);stroke-width:.55;stroke-linejoin:round;"
-    "stroke-linecap:round}"
-    ".border{fill:none;stroke:var(--map-border);stroke-width:.5;stroke-dasharray:2 1.2}"
-    ".city{fill:var(--map-label);stroke:var(--map-halo);stroke-width:.5}"
-    ".label{font-size:3.6px;fill:var(--map-label);stroke:var(--map-halo);stroke-width:1;"
-    "paint-order:stroke}"
-)
+# The site's radar.css colours the map's classes for each theme and sets labels
+# at LABEL_PX. The file carries no style of its own: WebKit and Firefox read a
+# style element in a file referenced by <use> without the page's tokens.
 LABEL_PX = 3.6
 # A generous average glyph width for the site's sans-serif, so that the estimated
 # box is never smaller than the drawn label.
@@ -258,7 +251,7 @@ def features(folder: Path, name: str) -> list[dict]:
 
 def draw(frame: Frame, folder: Path, town_name: str, cities: Iterable[City]) -> str:
     w, h = frame.width, frame.height
-    under = [f'<rect class="land" width="{w}" height="{h}"/>']
+    under = [f'<rect class="map-land" width="{w}" height="{h}"/>']
     for source in ("ne_10m_rivers_lake_centerlines", "ne_10m_rivers_europe"):
         for feature in features(folder, source):
             # A lake's centre line runs under the lake drawn over it.
@@ -266,26 +259,28 @@ def draw(frame: Frame, folder: Path, town_name: str, cities: Iterable[City]) -> 
                 continue
             for line in lines(feature["geometry"]):
                 for run in runs(frame, line):
-                    under.append(f'<polyline class="river" points="{coords(simplify(run))}"/>')
+                    under.append(f'<polyline class="map-river" points="{coords(simplify(run))}"/>')
     for source in ("ne_10m_lakes", "ne_10m_lakes_europe"):
         for feature in features(folder, source):
             for ring in lines(feature["geometry"]):
                 points = [frame.px(lon, lat) for lon, lat, *_ in ring]
                 if any(frame.near(p) for p in points):
-                    under.append(f'<polygon class="water" points="{coords(simplify(points))}"/>')
+                    lake = coords(simplify(points))
+                    under.append(f'<polygon class="map-water" points="{lake}"/>')
     over = []
     for feature in features(folder, "ne_10m_admin_0_boundary_lines_land"):
         for line in lines(feature["geometry"]):
             for run in runs(frame, line):
-                over.append(f'<polyline class="border" points="{coords(simplify(run))}"/>')
+                over.append(f'<polyline class="map-border" points="{coords(simplify(run))}"/>')
     for name, x, y, lx, ly, anchor in place_cities(frame, town_name, cities):
-        over.append(f'<circle class="city" cx="{_n(x)}" cy="{_n(y)}" r="{DOT_R}"/>')
+        over.append(f'<circle class="map-city" cx="{_n(x)}" cy="{_n(y)}" r="{DOT_R}"/>')
         over.append(
-            f'<text class="label" x="{_n(lx)}" y="{_n(ly)}" text-anchor="{anchor}">{name}</text>'
+            f'<text class="map-label" x="{_n(lx)}" y="{_n(ly)}" text-anchor="{anchor}">'
+            f"{name}</text>"
         )
     box = f'viewBox="0 0 {w} {h}"'
     return (
-        f'<svg xmlns="http://www.w3.org/2000/svg"><style>{STYLE}</style>'
+        f'<svg xmlns="http://www.w3.org/2000/svg">'
         f'<symbol id="under" {box}>{"".join(under)}</symbol>'
         f'<symbol id="over" {box}>{"".join(over)}</symbol></svg>\n'
     )

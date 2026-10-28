@@ -482,7 +482,7 @@ function sprite(list: { field: Float32Array; missing: boolean }[], columns: numb
 
 function scenario(name: string, w: Weather, o: Options) {
   const root = join('tests/fixtures', name);
-  // Only this scenario's folder: tests/fixtures also holds the stand-in maps.
+  // Only this scenario's folder, so the other scenarios stay.
   rmSync(root, { recursive: true, force: true });
   const write = (path: string, body: unknown) => {
     mkdirSync(join(root, path, '..'), { recursive: true });

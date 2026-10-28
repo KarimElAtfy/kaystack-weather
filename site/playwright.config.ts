@@ -11,15 +11,32 @@ export default defineConfig({
   reporter: process.env.CI ? 'line' : 'list',
   use: {
     baseURL: `http://localhost:${port}`,
-    // Installed browsers, so nothing is downloaded: the CI runner has Google
-    // Chrome and Windows has Edge.
-    channel: process.env.CI ? 'chrome' : 'msedge',
     locale: 'it-IT',
     timezoneId: 'America/Los_Angeles'
   },
-  webServer: {
-    command: `node scripts/serve.ts build ${port}`,
-    url: `http://localhost:${port}`,
-    reuseExistingServer: !process.env.CI
-  }
+  projects: [
+    // The installed browser, so nothing is downloaded for it: the CI runner has
+    // Google Chrome and Windows has Edge.
+    { name: 'chrome', use: { channel: process.env.CI ? 'chrome' : 'msedge' } },
+    // WebKit and Firefox paint what <use> clones their own way, so they run the
+    // specs about the radar and the symbols.
+    {
+      name: 'webkit',
+      use: { browserName: 'webkit', baseURL: `http://localhost:${port + 1}` },
+      testMatch: /(paint|radar)\.spec\.ts/
+    },
+    { name: 'firefox', use: { browserName: 'firefox' }, testMatch: /(paint|radar)\.spec\.ts/ }
+  ],
+  webServer: [
+    {
+      command: `node scripts/serve.ts build ${port}`,
+      url: `http://localhost:${port}`,
+      reuseExistingServer: !process.env.CI
+    },
+    {
+      command: `node scripts/serve.ts build ${port + 1} --http`,
+      url: `http://localhost:${port + 1}`,
+      reuseExistingServer: !process.env.CI
+    }
+  ]
 });

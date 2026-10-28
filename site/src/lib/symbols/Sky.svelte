@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { ICONS } from '#gen/icons.ts';
   import type { Sky } from './pick.ts';
 
   // Without a label the symbol is decorative: the same information is in text nearby.
@@ -17,6 +16,6 @@
   focusable="false"
 >
   {#if label}<title>{label}</title>{/if}
-  <use href="{ICONS}#{sky.base}" />
-  {#if sky.drops}<use href="{ICONS}#{sky.drops}" />{/if}
+  <use href="#{sky.base}" />
+  {#if sky.drops}<use href="#{sky.drops}" />{/if}
 </svg>
