@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { answer, matches, type Config } from './serve.ts';
+import { answer, matches, plainHttp, type Config } from './serve.ts';
 
 const config: Config = {
   trailingSlash: 'never',
@@ -56,5 +56,13 @@ test('sends the global headers with a 404', () => {
   expect(answer(config, '/nope', exists)).toMatchObject({
     status: 404,
     headers: { 'X-Frame-Options': 'DENY' }
+  });
+});
+
+test('drops only the https upgrade from the policy for plain http', () => {
+  const policy = "default-src 'none'; img-src 'self'; upgrade-insecure-requests";
+  const plain = plainHttp({ ...config, globalHeaders: { 'Content-Security-Policy': policy } });
+  expect(plain.globalHeaders).toEqual({
+    'Content-Security-Policy': "default-src 'none'; img-src 'self'"
   });
 });

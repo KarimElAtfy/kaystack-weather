@@ -57,9 +57,25 @@ export function answer(config: Config, path: string, exists: (file: string) => b
   return { status: 200, headers: { ...headers, ...route?.headers, 'Content-Type': type }, file };
 }
 
-export function serve(root: string, port: number) {
+// WebKit applies upgrade-insecure-requests to localhost as well and asks for
+// https://localhost, so for it the policy goes without that one directive.
+export function plainHttp(config: Config): Config {
+  const policy = config.globalHeaders?.['Content-Security-Policy'];
+  if (!policy) return config;
+  const kept = policy
+    .split(';')
+    .map((directive) => directive.trim())
+    .filter((directive) => directive && directive !== 'upgrade-insecure-requests');
+  return {
+    ...config,
+    globalHeaders: { ...config.globalHeaders, 'Content-Security-Policy': kept.join('; ') }
+  };
+}
+
+export function serve(root: string, port: number, http = false) {
   const base = resolve(root);
-  const config = JSON.parse(readFileSync(join(base, 'staticwebapp.config.json'), 'utf8')) as Config;
+  const read = JSON.parse(readFileSync(join(base, 'staticwebapp.config.json'), 'utf8')) as Config;
+  const config = http ? plainHttp(read) : read;
   const inside = (path: string) => {
     const full = resolve(base, `.${path}`);
     return full.startsWith(base + sep) && existsSync(full) && statSync(full).isFile();
@@ -76,6 +92,6 @@ export function serve(root: string, port: number) {
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const port = Number(process.argv[3] ?? 4173);
-  serve(process.argv[2] ?? 'build', port);
+  serve(process.argv[2] ?? 'build', port, process.argv[4] === '--http');
   console.log(`http://localhost:${port}`);
 }

@@ -187,6 +187,9 @@ jobs:
       - run: npm run build
       - run: npm run budget
       - run: npm run guard
+      # Chrome is on the runner; WebKit and Firefox come at the version this
+      # Playwright drives.
+      - run: npx playwright install --with-deps webkit firefox
       - run: npm run e2e
 
   deps:
