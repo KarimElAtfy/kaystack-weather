@@ -143,6 +143,70 @@
 
 <style>
   @layer blocks {
+    /* The block's height before and after it loads, so nothing under it moves
+       (CLS 0): the chart's lanes as in lib/chart/meteogram.ts, capped at 80svh
+       down to the chart's own floor, and the lines its texts wrap to at this width, in em so
+       they follow the text size. A note above the chart, on the two nights the
+       clocks change, still adds its line. */
+    :global(#ore-48) {
+      container-type: inline-size;
+    }
+    :global(#ore48-body) {
+      --line: calc(var(--text-xs) * 1.4 + 1px);
+      --icon: max(20px, var(--text-xs) * 1.8);
+      --plot: 218px;
+      /* Under the cap: no sky, no arrows, the plot at its 96 px floor. */
+      --plot-min: 154px;
+      --toggle-rows: 2;
+      --models-lines: 3;
+      --foot-lines: 6;
+      min-height: calc(
+        var(--toggle-rows) * var(--tap) + 2px + var(--space-3) +
+          max(
+            6 * var(--line) + var(--plot-min),
+            min(80svh, 6 * var(--line) + var(--icon) + var(--plot))
+          ) +
+          var(--models-lines) * 1.5 * var(--text-xs) + var(--tap) + var(--space-2) +
+          var(--space-3) + var(--foot-lines) * 1.5 * var(--text-s)
+      );
+    }
+    @container (min-width: 9.4em) {
+      :global(#ore48-body) {
+        --models-lines: 2;
+        --foot-lines: 4;
+      }
+    }
+    @container (min-width: 12.5em) {
+      :global(#ore48-body) {
+        --foot-lines: 3;
+      }
+    }
+    @container (min-width: 13.5em) {
+      :global(#ore48-body) {
+        --toggle-rows: 1;
+      }
+    }
+    @container (min-width: 18.5em) {
+      :global(#ore48-body) {
+        --models-lines: 1;
+      }
+    }
+    @container (min-width: 19em) {
+      :global(#ore48-body) {
+        --foot-lines: 2;
+      }
+    }
+    @container (min-width: 38em) {
+      :global(#ore48-body) {
+        --foot-lines: 1;
+      }
+    }
+    @container (min-width: 560px) {
+      :global(#ore48-body) {
+        --plot: 276px;
+        --plot-min: 162px;
+      }
+    }
     .toggle {
       display: inline-flex;
       flex-wrap: wrap;

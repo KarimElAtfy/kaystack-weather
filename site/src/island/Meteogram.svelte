@@ -511,8 +511,17 @@
 
 <style>
   @layer blocks {
+    /* Its height before the first frame measures it, from the lanes H48 sets on
+       the block, so the range and the note under it never move. */
     .meteogram {
       position: relative;
+      min-block-size: calc(
+        max(
+            6 * var(--line) + var(--plot-min),
+            min(80svh, 6 * var(--line) + var(--icon) + var(--plot))
+          ) +
+          var(--models-lines) * 1.5 * var(--text-xs)
+      );
       font-size: var(--text-xs);
       touch-action: pan-y;
     }
