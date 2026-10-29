@@ -16,30 +16,30 @@ Numbers, dates and times are formatted by the code in Italian (comma decimals, 2
 
 ## Sito e intestazione
 
-| chiave                        | dove                                                                  | max  | testo                                                                                                                                    |
-| ----------------------------- | --------------------------------------------------------------------- | ---- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `site.name`                   | intestazione, titolo della scheda                                     | 16   | Meteo                                                                                                                                    |
-| `site.beta`                   | etichetta accanto al nome                                             | 6    | beta                                                                                                                                     |
-| `site.beta_title`             | descrizione dell'etichetta beta per lettori di schermo e al passaggio | riga | Versione di prova: i dati possono mancare o essere sbagliati.                                                                            |
-| `site.skip`                   | link per saltare al contenuto (visibile solo da tastiera)             | 30   | Vai al contenuto                                                                                                                         |
-| `site.title_town`             | titolo della scheda del browser, pagina del paese                     | 60   | Meteo a {paese}: adesso, 48 ore, 10 giorni e radar                                                                                       |
-| `site.title_home`             | titolo della scheda, pagina iniziale                                  | 60   | Meteo per Pedrengo e Sesto Calende                                                                                                       |
-| `site.description`            | descrizione per i motori di ricerca                                   | 155  | Previsioni per Pedrengo e Sesto Calende corrette sulle stazioni ARPA vicine, con misure degli aeroporti e radar della Protezione Civile. |
-| `switch.label`                | nome del selettore del paese, per lettori di schermo                  | riga | Scegli il paese                                                                                                                          |
-| `switch.pedrengo`             | selettore del paese                                                   | 14   | Pedrengo                                                                                                                                 |
-| `switch.sesto-calende`        | selettore del paese                                                   | 14   | Sesto Calende                                                                                                                            |
-| `town.pedrengo`               | titolo della pagina                                                   | 30   | Pedrengo                                                                                                                                 |
-| `town.sesto-calende`          | titolo della pagina                                                   | 30   | Sesto Calende                                                                                                                            |
-| `town.province.pedrengo`      | accanto al titolo                                                     | 6    | BG                                                                                                                                       |
-| `town.province.sesto-calende` | accanto al titolo                                                     | 6    | VA                                                                                                                                       |
+| chiave                        | dove                                                                  | max  | testo                                                                                                                                |
+| ----------------------------- | --------------------------------------------------------------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `site.name`                   | intestazione, titolo della scheda                                     | 16   | Meteo                                                                                                                                |
+| `site.beta`                   | etichetta accanto al nome                                             | 6    | beta                                                                                                                                 |
+| `site.beta_title`             | descrizione dell'etichetta beta per lettori di schermo e al passaggio | riga | Versione di prova: i dati possono mancare o essere sbagliati.                                                                        |
+| `site.skip`                   | link per saltare al contenuto (visibile solo da tastiera)             | 30   | Vai al contenuto                                                                                                                     |
+| `site.title_town`             | titolo della scheda del browser, pagina del paese                     | 60   | Meteo a {paese}                                                                                                                      |
+| `site.title_home`             | titolo della scheda, pagina iniziale                                  | 60   | Meteo a Pedrengo e Sesto Calende                                                                                                     |
+| `site.description`            | descrizione per i motori di ricerca                                   | 155  | Previsioni per Pedrengo e Sesto Calende corrette sulle stazioni ARPA vicine. Misure degli aeroporti e radar della Protezione Civile. |
+| `switch.label`                | nome del selettore del paese, per lettori di schermo                  | riga | Scegli il paese                                                                                                                      |
+| `switch.pedrengo`             | selettore del paese                                                   | 14   | Pedrengo                                                                                                                             |
+| `switch.sesto-calende`        | selettore del paese                                                   | 14   | Sesto Calende                                                                                                                        |
+| `town.pedrengo`               | titolo della pagina                                                   | 30   | Pedrengo                                                                                                                             |
+| `town.sesto-calende`          | titolo della pagina                                                   | 30   | Sesto Calende                                                                                                                        |
+| `town.province.pedrengo`      | accanto al titolo                                                     | 6    | BG                                                                                                                                   |
+| `town.province.sesto-calende` | accanto al titolo                                                     | 6    | VA                                                                                                                                   |
 
 ## Pagina iniziale (selettore)
 
-| chiave       | dove                        | max  | testo                                                                                                                                                       |
-| ------------ | --------------------------- | ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `home.h1`    | titolo                      | 40   | Che tempo fa?                                                                                                                                               |
-| `home.intro` | sotto il titolo             | riga | Previsioni per due paesi della Lombardia, corrette ogni giorno sulla stazione ARPA più vicina. Il sito ricorda l'ultimo paese che hai scelto, senza cookie. |
-| `home.ref`   | sotto il nome di ogni paese | 60   | Stazione di riferimento: {stazione}, a {km}                                                                                                                 |
+| chiave       | dove                        | max  | testo                                               |
+| ------------ | --------------------------- | ---- | --------------------------------------------------- |
+| `home.h1`    | titolo                      | 40   | Che tempo fa?                                       |
+| `home.intro` | sotto il titolo             | riga | Previsioni corrette sulla stazione ARPA più vicina. |
+| `home.ref`   | sotto il nome di ogni paese | 60   | Stazione ARPA di {stazione}, a {km}                 |
 
 ## Navigazione della pagina del paese
 
@@ -53,10 +53,10 @@ Numbers, dates and times are formatted by the code in Italian (comma decimals, 2
 
 ## Riga di fiducia (sotto il nome del paese)
 
-| chiave          | dove                  | max  | testo                                                                  |
-| --------------- | --------------------- | ---- | ---------------------------------------------------------------------- |
-| `trust.station` | prima frase           | riga | Previsione fatta per la stazione ARPA di {stazione}, a {km} dal paese. |
-| `trust.why`     | link alla spiegazione | 30   | Perché una stazione?                                                   |
+| chiave          | dove                  | max  | testo                                                  |
+| --------------- | --------------------- | ---- | ------------------------------------------------------ |
+| `trust.station` | prima frase           | riga | Previsione per la stazione ARPA di {stazione}, a {km}. |
+| `trust.why`     | link alla spiegazione | 30   | Perché una stazione                                    |
 
 ## Riga di stato (sotto la riga di fiducia)
 
@@ -64,13 +64,13 @@ One line under the station sentence, always the same height (two lines reserved)
 
 | chiave               | dove                                                  | max | testo                                                          |
 | -------------------- | ----------------------------------------------------- | --- | -------------------------------------------------------------- |
-| `status.ok`          | riga di stato, normale (oggi)                         | 62  | Emessa alle {ora}, {fa}.                                       |
-| `status.ok_day`      | riga di stato, normale (altro giorno)                 | 62  | Emessa {giorno} alle {ora}, {fa}.                              |
-| `status.stale`       | riga di stato, previsione in ritardo (avviso)         | 62  | Emessa alle {ora}, {fa}: di solito si aggiorna ogni ora.       |
-| `status.old`         | riga di stato, previsione di più di un giorno (grave) | 62  | Previsione vecchia: emessa {giorno} alle {ora}.                |
+| `status.ok`          | riga di stato, normale (oggi)                         | 62  | Aggiornata alle {ora} ({fa}).                                  |
+| `status.ok_day`      | riga di stato, normale (altro giorno)                 | 62  | Aggiornata {giorno} alle {ora} ({fa}).                         |
+| `status.stale`       | riga di stato, previsione in ritardo (avviso)         | 62  | In ritardo: aggiornata alle {ora} ({fa}).                      |
+| `status.old`         | riga di stato, previsione di più di un giorno (grave) | 62  | Previsione vecchia, aggiornata {giorno} alle {ora}.            |
 | `status.missing`     | riga di stato, nessuna previsione                     | 62  | Previsione non disponibile in questo momento.                  |
 | `status.offline`     | riga di stato, dispositivo offline                    | 62  | Sei offline: dati scaricati alle {ora}.                        |
-| `status.failed`      | riga di stato, letture fallite con dati vecchi        | 62  | Non riusciamo a scaricare i dati: gli ultimi sono delle {ora}. |
+| `status.failed`      | riga di stato, letture fallite con dati vecchi        | 62  | Non riusciamo a scaricare i dati. Gli ultimi sono delle {ora}. |
 | `status.failed_none` | riga di stato, letture fallite senza dati             | 62  | Non riusciamo a scaricare i dati: riproviamo tra un minuto.    |
 | `announce.stale`     | annuncio nascosto                                     | 40  | La previsione non è aggiornata.                                |
 | `announce.old`       | annuncio nascosto                                     | 40  | La previsione è vecchia.                                       |
@@ -80,103 +80,125 @@ One line under the station sentence, always the same height (two lines reserved)
 
 ## Adesso
 
-| chiave               | dove                                                                                  | max  | testo                                                           |
-| -------------------- | ------------------------------------------------------------------------------------- | ---- | --------------------------------------------------------------- |
-| `now.h2`             | titolo della sezione                                                                  | 20   | Adesso                                                          |
-| `now.measured`       | etichetta accanto al titolo: distingue le misure dalle previsioni                     | 30   | misurato, non previsto                                          |
-| `now.measured_short` | etichetta accanto al titolo Radar                                                     | 12   | osservato                                                       |
-| `now.temp_label`     | nome della temperatura grande, per lettori di schermo                                 | riga | Temperatura misurata                                            |
-| `airport.LIME`       | nome breve dell'aeroporto in Adesso; un codice sconosciuto usa il nome del bollettino | 20   | Orio al Serio                                                   |
-| `airport.LIMC`       | nome breve dell'aeroporto in Adesso                                                   | 20   | Malpensa                                                        |
-| `now.source_metar`   | sotto la temperatura                                                                  | riga | Aeroporto di {aeroporto}, a {km}. Bollettino delle {ora}, {fa}. |
-| `now.wind`           | griglia dei valori                                                                    | 14   | Vento                                                           |
-| `now.gust`           | griglia dei valori                                                                    | 14   | Raffiche                                                        |
-| `now.humidity`       | griglia dei valori                                                                    | 14   | Umidità                                                         |
-| `now.humidity_short` | sotto il valore dell'umidità                                                          | 12   | calcolata                                                       |
-| `now.humidity_note`  | spiegazione dell'umidità (al passaggio e per lettori di schermo)                      | riga | Calcolata dalla temperatura e dal punto di rugiada.             |
-| `now.dewpoint`       | griglia dei valori                                                                    | 18   | Punto di rugiada                                                |
-| `now.visibility`     | griglia dei valori                                                                    | 14   | Visibilità                                                      |
-| `now.sky`            | griglia dei valori: nuvole viste dall'aeroporto                                       | 14   | Nuvole                                                          |
-| `now.weather_none`   | quando il bollettino non segnala fenomeni                                             | 30   | Nessun fenomeno segnalato                                       |
-| `now.no_gust`        | raffiche assenti nel bollettino                                                       | 14   | nessuna                                                         |
-| `now.rain_h3`        | titolo del blocco radar                                                               | 30   | Piove adesso?                                                   |
-| `now.rain_none`      | il radar non vede pioggia sul paese né entro 10 km                                    | riga | Non piove, e non piove entro 10 km.                             |
-| `now.rain_here_past` | piove sul paese, ma l'immagine è vecchia                                              | riga | Alle {ora} pioveva sul paese: pioggia {intensita}, {valore}.    |
-| `now.rain_none_past` | non piove, ma l'immagine è vecchia                                                    | riga | Alle {ora} non pioveva sul paese.                               |
-| `now.rain_none_near` | niente sul paese, ma qualcosa vicino                                                  | riga | Non piove sul paese.                                            |
-| `now.rain_here`      | piove sul paese                                                                       | riga | Sì: pioggia {intensita}, {valore}.                              |
-| `now.rain_5`         | entro 5 km                                                                            | riga | Entro 5 km: fino a {valore}.                                    |
-| `now.rain_10`        | entro 10 km                                                                           | riga | Entro 10 km: fino a {valore}.                                   |
-| `now.rain_5_none`    | entro 5 km, niente                                                                    | riga | Entro 5 km: niente.                                             |
-| `now.rain_10_none`   | entro 10 km, niente                                                                   | riga | Entro 10 km: niente.                                            |
-| `now.source_radar`   | sotto il blocco radar                                                                 | riga | Radar della Protezione Civile, immagine delle {ora}, {fa}.      |
-| `now.to_radar`       | link alla sezione radar                                                               | 30   | Guarda il radar                                                 |
-| `now.metar_raw`      | link per vedere il bollettino originale                                               | 40   | Bollettino METAR originale                                      |
+| chiave               | dove                                                                                  | max  | testo                                                             |
+| -------------------- | ------------------------------------------------------------------------------------- | ---- | ----------------------------------------------------------------- |
+| `now.h2`             | titolo della sezione                                                                  | 20   | Adesso                                                            |
+| `now.measured`       | etichetta accanto al titolo: distingue le misure dalle previsioni                     | 30   | misurato, non previsto                                            |
+| `now.measured_short` | etichetta accanto al titolo Radar                                                     | 12   | osservato                                                         |
+| `now.temp_label`     | nome della temperatura grande, per lettori di schermo                                 | riga | Temperatura misurata                                              |
+| `airport.LIME`       | nome breve dell'aeroporto in Adesso; un codice sconosciuto usa il nome del bollettino | 20   | Orio al Serio                                                     |
+| `airport.LIMC`       | nome breve dell'aeroporto in Adesso                                                   | 20   | Malpensa                                                          |
+| `now.source_metar`   | sotto la temperatura                                                                  | riga | Misurati all'aeroporto di {aeroporto}, a {km}, alle {ora} ({fa}). |
+| `now.wind`           | griglia dei valori                                                                    | 14   | Vento                                                             |
+| `now.gust`           | griglia dei valori                                                                    | 14   | Raffiche                                                          |
+| `now.humidity`       | griglia dei valori                                                                    | 14   | Umidità                                                           |
+| `now.humidity_short` | sotto il valore dell'umidità                                                          | 12   | calcolata                                                         |
+| `now.humidity_note`  | spiegazione dell'umidità (al passaggio e per lettori di schermo)                      | riga | Calcolata dalla temperatura e dal punto di rugiada.               |
+| `now.dewpoint`       | griglia dei valori                                                                    | 18   | Punto di rugiada                                                  |
+| `now.visibility`     | griglia dei valori                                                                    | 14   | Visibilità                                                        |
+| `now.sky`            | griglia dei valori: nuvole viste dall'aeroporto                                       | 14   | Nuvole                                                            |
+| `now.weather_none`   | quando il bollettino non segnala fenomeni                                             | 30   | Nessun fenomeno segnalato                                         |
+| `now.no_gust`        | raffiche assenti nel bollettino                                                       | 14   | nessuna                                                           |
+| `now.rain_h3`        | titolo del blocco radar                                                               | 30   | Piove adesso?                                                     |
+| `now.rain_none`      | il radar non vede pioggia sul paese né entro 10 km                                    | riga | Non piove, neanche nel raggio di 10 km.                           |
+| `now.rain_here_past` | piove sul paese, ma l'immagine è vecchia                                              | riga | Alle {ora} pioveva sul paese ({intensita}, {valore}).             |
+| `now.rain_none_past` | non piove, ma l'immagine è vecchia                                                    | riga | Alle {ora} non pioveva sul paese.                                 |
+| `now.rain_none_near` | niente sul paese, ma qualcosa vicino                                                  | riga | Non piove sul paese.                                              |
+| `now.rain_here`      | piove sul paese                                                                       | riga | Piove sul paese ({intensita}, {valore}).                          |
+| `now.rain_5`         | entro 5 km                                                                            | riga | Piove a meno di 5 km, fino a {valore}.                            |
+| `now.rain_10`        | entro 10 km                                                                           | riga | Piove a meno di 10 km, fino a {valore}.                           |
+| `now.rain_5_none`    | entro 5 km, niente                                                                    | riga | Entro 5 km: niente.                                               |
+| `now.rain_10_none`   | entro 10 km, niente                                                                   | riga | Entro 10 km: niente.                                              |
+| `now.source_radar`   | sotto il blocco radar                                                                 | riga | Radar delle {ora} ({fa}).                                         |
+| `now.to_radar`       | link alla sezione radar                                                               | 30   | Guarda il radar                                                   |
+| `now.metar_raw`      | link per vedere il bollettino originale                                               | 40   | Dettagli del bollettino                                           |
+| `now.line_wind`      | riga dei dettagli, dopo la temperatura                                                | 20   | Vento {v} {dir}                                                   |
+| `now.line_calm`      | riga dei dettagli, vento sotto 2 km/h                                                 | 20   | Calma di vento                                                    |
+| `now.line_gust`      | riga dei dettagli, solo se il bollettino le segnala                                   | 20   | raffiche {g}                                                      |
+| `now.line_humidity`  | riga dei dettagli                                                                     | 20   | umidità {pct}                                                     |
+| `now.line_vis`       | riga dei dettagli, solo sotto 5 km                                                    | 20   | visibilità {v}                                                    |
+
+## Verdetto, coppia e prossime 12 ore
+
+Under Adesso: one sentence on rain in the next 12 hours, two figures, and six cells every 2 hours. `{quando}` comes from `h48.summary_from`, `h48.summary_from_day` and `h48.summary_by`; `{modelli}` from `models.one` and `models.many`, so one model reads "1 modello su 10". Before 15:00 the pair is Oggi and Stanotte, from 15:00 Stanotte and Domani.
+
+| chiave              | dove                                                              | max  | testo                                                     |
+| ------------------- | ----------------------------------------------------------------- | ---- | --------------------------------------------------------- |
+| `verdict.rain_most` | verdetto: almeno metà dei modelli dà pioggia                      | riga | Pioggia {quando} per {modelli}.                           |
+| `verdict.rain_some` | verdetto: meno della metà                                         | riga | Pioggia {quando} solo per {modelli}.                      |
+| `verdict.rain_none` | verdetto: nessun modello                                          | riga | Nessuno dei {m} modelli dà pioggia nelle prossime 12 ore. |
+| `verdict.today`     | coppia sotto il verdetto, prima delle 15                          | 12   | Oggi {t}                                                  |
+| `verdict.tonight`   | coppia sotto il verdetto                                          | 12   | Stanotte {t}                                              |
+| `verdict.tomorrow`  | coppia sotto il verdetto, dalle 15                                | 12   | Domani {t}                                                |
+| `strip.label`       | nome della striscia delle prossime 12 ore, per lettori di schermo | riga | Prossime 12 ore                                           |
 
 ## Prossime 48 ore
 
-| chiave                  | dove                                                                                          | max  | testo                                                                                                                                  |
-| ----------------------- | --------------------------------------------------------------------------------------------- | ---- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `h48.h2`                | titolo della sezione                                                                          | 24   | Prossime 48 ore                                                                                                                        |
-| `h48.forecast`          | etichetta accanto al titolo                                                                   | 30   | previsto                                                                                                                               |
-| `h48.meta`              | accanto al titolo                                                                             | riga | Emessa alle {ora} per la stazione di {stazione}                                                                                        |
-| `h48.summary_rain_most` | frase di sintesi: la maggior parte dei modelli dà pioggia                                     | riga | Pioggia per la maggior parte dei modelli {quando}.                                                                                     |
-| `h48.summary_rain_some` | frase di sintesi: solo alcuni modelli                                                         | riga | Qualche modello dà pioggia {quando}, la maggior parte no.                                                                              |
-| `h48.summary_rain_none` | frase di sintesi: nessuna pioggia                                                             | riga | Nessun modello dà pioggia nelle prossime 12 ore.                                                                                       |
-| `h48.summary_from`      | parte della sintesi                                                                           | 30   | dalle {ora}                                                                                                                            |
-| `h48.summary_from_day`  | parte della sintesi, se è un altro giorno                                                     | 40   | {giorno} dalle {ora}                                                                                                                   |
-| `h48.summary_by`        | parte della sintesi, se la pioggia dei modelli è nell'ora in corso (al posto di "già adesso") | 30   | entro le {ora}                                                                                                                         |
-| `h48.summary_obs_dry`   | prima frase della sintesi, dal radar fresco: non piove sul paese                              | riga | Adesso non piove sul paese.                                                                                                            |
-| `h48.summary_obs_rain`  | prima frase della sintesi, dal radar fresco: piove sul paese                                  | riga | Adesso piove sul paese.                                                                                                                |
-| `h48.summary_temp`      | seconda frase di sintesi                                                                      | riga | Nelle prossime 48 ore la temperatura va da {min} a {max}.                                                                              |
-| `h48.view_label`        | nome del selettore grafico o tabella                                                          | riga | Come vedere le 48 ore                                                                                                                  |
-| `h48.view_chart`        | pulsante                                                                                      | 12   | Grafico                                                                                                                                |
-| `h48.view_table`        | pulsante                                                                                      | 12   | Tabella                                                                                                                                |
-| `h48.panel_temp`        | titolo del pannello                                                                           | 40   | Temperatura (°C)                                                                                                                       |
-| `h48.panel_rain`        | titolo del pannello                                                                           | 40   | Pioggia: quanti modelli la danno                                                                                                       |
-| `h48.panel_wind`        | titolo del pannello                                                                           | 40   | Vento (km/h)                                                                                                                           |
-| `h48.legend_mean`       | legenda del pannello temperatura                                                              | 24   | temperatura corretta                                                                                                                   |
-| `h48.legend_mean_raw`   | legenda, quando la temperatura non è corretta                                                 | 30   | temperatura, media dei modelli                                                                                                         |
-| `h48.note_raw`          | avviso sopra il grafico, quando la temperatura non è corretta                                 | riga | Temperatura senza correzione: oggi la correzione non è disponibile.                                                                    |
-| `h48.footnote_raw`      | al posto di h48.footnote, quando la temperatura non è corretta                                | riga | Oggi nessun valore è corretto: la correzione della temperatura non è disponibile, e tutti i valori sono la media semplice dei modelli. |
-| `h48.legend_range`      | legenda del pannello temperatura                                                              | 30   | intervallo tra i modelli                                                                                                               |
-| `h48.legend_rain`       | legenda del pannello pioggia                                                                  | 24   | modelli con pioggia                                                                                                                    |
-| `h48.legend_wind`       | legenda del pannello vento                                                                    | 16   | vento medio                                                                                                                            |
-| `h48.legend_gust`       | legenda del pannello vento                                                                    | 16   | raffiche                                                                                                                               |
-| `h48.axis_all`          | asse del pannello pioggia, in alto                                                            | 8    | tutti                                                                                                                                  |
-| `h48.axis_half`         | asse del pannello pioggia, a metà                                                             | 8    | metà                                                                                                                                   |
-| `h48.dst_marker`        | segno del cambio d'ora nel grafico                                                            | 20   | ora solare                                                                                                                             |
-| `h48.dst_note`          | nota sopra il giorno del cambio d'ora                                                         | riga | Questa notte torna l'ora solare: alle 3 si torna alle 2, e le ore dalle 2 alle 3 si ripetono.                                          |
-| `h48.readout_label`     | nome del riquadro dei valori dell'ora scelta                                                  | riga | Valori dell'ora scelta                                                                                                                 |
-| `h48.readout_temp`      | riquadro dei valori, dopo la temperatura                                                      | riga | modelli da {min} a {max}                                                                                                               |
-| `h48.cell_range`        | tabella, sotto la temperatura                                                                 | 14   | da {min} a {max}                                                                                                                       |
-| `h48.readout_mm`        | riquadro dei valori, dopo i modelli                                                           | 30   | in media {mm}                                                                                                                          |
-| `h48.readout_cloud`     | riquadro dei valori                                                                           | riga | Nuvole {pct}                                                                                                                           |
-| `h48.range_label`       | nome del cursore sotto il grafico, per tastiera e lettori di schermo                          | 24   | Ora del grafico                                                                                                                        |
-| `h48.chart_help`        | aiuto sotto il grafico e il cursore                                                           | riga | Tocca o trascina sul grafico per vedere un'ora. Da tastiera usa il cursore qui sopra.                                                  |
-| `h48.chart_aria`        | descrizione del grafico per lettori di schermo                                                | riga | Grafico delle prossime 48 ore. Temperatura da {min} a {max}. {pioggia} I valori sono anche nella tabella.                              |
-| `h48.footnote`          | sotto il grafico e la tabella                                                                 | riga | Solo la temperatura è corretta sulla stazione. Vento, raffiche, nuvole e quantità di pioggia sono la media semplice dei modelli.       |
-| `h48.models_note`       | sotto il grafico e la tabella                                                                 | riga | Modelli usati: {m} fino a {ora1}, poi meno, perché alcuni non arrivano così lontano.                                                   |
-| `h48.table_caption`     | titolo della tabella (per lettori di schermo)                                                 | riga | Previsione ora per ora per le prossime 48 ore                                                                                          |
-| `h48.col_time`          | intestazione della tabella                                                                    | 10   | Ora                                                                                                                                    |
-| `h48.col_sky`           | intestazione della tabella                                                                    | 10   | Cielo                                                                                                                                  |
-| `h48.col_temp`          | intestazione della tabella                                                                    | 8    | Temp.                                                                                                                                  |
-| `h48.col_temp_sub`      | sotto l'intestazione                                                                          | 14   | tra i modelli                                                                                                                          |
-| `h48.col_rain`          | intestazione della tabella                                                                    | 12   | Pioggia                                                                                                                                |
-| `h48.col_rain_sub`      | sotto l'intestazione                                                                          | 12   | modelli, mm                                                                                                                            |
-| `h48.col_wind`          | intestazione della tabella                                                                    | 12   | Vento                                                                                                                                  |
-| `h48.col_wind_sub`      | sotto l'intestazione                                                                          | 12   | km/h                                                                                                                                   |
-| `h48.col_cloud`         | sotto l'intestazione Cielo                                                                    | 10   | nuvole                                                                                                                                 |
-| `h48.cell_gust`         | cella del vento                                                                               | 16   | raffiche {g}                                                                                                                           |
-| `h48.cell_dst_before`   | sotto la prima delle due 02:00 del giorno del cambio                                          | 16   | ora legale                                                                                                                             |
-| `h48.cell_dst`          | accanto all'ora ripetuta nel giorno del cambio                                                | 16   | ora solare                                                                                                                             |
+| chiave                  | dove                                                                                          | max  | testo                                                                                                     |
+| ----------------------- | --------------------------------------------------------------------------------------------- | ---- | --------------------------------------------------------------------------------------------------------- |
+| `h48.h2`                | titolo della sezione                                                                          | 24   | Prossime 48 ore                                                                                           |
+| `h48.forecast`          | etichetta accanto al titolo                                                                   | 30   | previsto                                                                                                  |
+| `h48.meta`              | accanto al titolo                                                                             | riga | Emessa alle {ora} per la stazione di {stazione}                                                           |
+| `h48.summary_rain_most` | frase di sintesi: la maggior parte dei modelli dà pioggia                                     | riga | Pioggia per la maggior parte dei modelli {quando}.                                                        |
+| `h48.summary_rain_some` | frase di sintesi: solo alcuni modelli                                                         | riga | Qualche modello dà pioggia {quando}, la maggior parte no.                                                 |
+| `h48.summary_rain_none` | frase di sintesi: nessuna pioggia                                                             | riga | Nessun modello dà pioggia nelle prossime 12 ore.                                                          |
+| `h48.summary_from`      | parte della sintesi                                                                           | 30   | dalle {ora}                                                                                               |
+| `h48.summary_from_day`  | parte della sintesi, se è un altro giorno                                                     | 40   | {giorno} dalle {ora}                                                                                      |
+| `h48.summary_by`        | parte della sintesi, se la pioggia dei modelli è nell'ora in corso (al posto di "già adesso") | 30   | entro le {ora}                                                                                            |
+| `h48.summary_obs_dry`   | prima frase della sintesi, dal radar fresco: non piove sul paese                              | riga | Adesso non piove sul paese.                                                                               |
+| `h48.summary_obs_rain`  | prima frase della sintesi, dal radar fresco: piove sul paese                                  | riga | Adesso piove sul paese.                                                                                   |
+| `h48.summary_temp`      | seconda frase di sintesi                                                                      | riga | Nelle prossime 48 ore la temperatura va da {min} a {max}.                                                 |
+| `h48.view_label`        | nome del selettore grafico o tabella                                                          | riga | Come vedere le 48 ore                                                                                     |
+| `h48.view_chart`        | pulsante                                                                                      | 12   | Grafico                                                                                                   |
+| `h48.view_table`        | pulsante                                                                                      | 12   | Tabella                                                                                                   |
+| `h48.panel_temp`        | titolo del pannello                                                                           | 40   | Temperatura (°C)                                                                                          |
+| `h48.panel_rain`        | titolo del pannello                                                                           | 40   | Modelli con pioggia                                                                                       |
+| `h48.panel_wind`        | titolo del pannello                                                                           | 40   | Vento (km/h)                                                                                              |
+| `h48.legend_mean`       | legenda del pannello temperatura                                                              | 24   | temperatura corretta                                                                                      |
+| `h48.legend_mean_raw`   | legenda, quando la temperatura non è corretta                                                 | 30   | temperatura, media dei modelli                                                                            |
+| `h48.note_raw`          | avviso sopra il grafico, quando la temperatura non è corretta                                 | riga | Temperatura senza correzione: oggi la correzione non è disponibile.                                       |
+| `h48.footnote_raw`      | al posto di h48.footnote, quando la temperatura non è corretta                                | riga | Oggi la correzione non è disponibile: tutti i valori sono la media dei modelli.                           |
+| `h48.legend_range`      | legenda del pannello temperatura                                                              | 30   | intervallo tra i modelli                                                                                  |
+| `h48.legend_rain`       | legenda del pannello pioggia                                                                  | 24   | modelli con pioggia                                                                                       |
+| `h48.legend_wind`       | legenda del pannello vento                                                                    | 16   | vento medio                                                                                               |
+| `h48.legend_gust`       | legenda del pannello vento                                                                    | 16   | raffiche                                                                                                  |
+| `h48.axis_all`          | asse del pannello pioggia, in alto                                                            | 8    | tutti                                                                                                     |
+| `h48.axis_half`         | asse del pannello pioggia, a metà                                                             | 8    | metà                                                                                                      |
+| `h48.dst_marker`        | segno del cambio d'ora nel grafico                                                            | 20   | ora solare                                                                                                |
+| `h48.dst_note`          | nota sopra il giorno del cambio d'ora                                                         | riga | Stanotte torna l'ora solare: le ore tra le 2 e le 3 compaiono due volte.                                  |
+| `h48.readout_label`     | nome del riquadro dei valori dell'ora scelta                                                  | riga | Valori dell'ora scelta                                                                                    |
+| `h48.readout_temp`      | riquadro dei valori, dopo la temperatura                                                      | riga | modelli da {min} a {max}                                                                                  |
+| `h48.cell_range`        | tabella, sotto la temperatura                                                                 | 14   | da {min} a {max}                                                                                          |
+| `h48.readout_mm`        | riquadro dei valori, dopo i modelli                                                           | 30   | in media {mm}                                                                                             |
+| `h48.readout_cloud`     | riquadro dei valori                                                                           | riga | Nuvole {pct}                                                                                              |
+| `h48.range_label`       | nome del cursore sotto il grafico, per tastiera e lettori di schermo                          | 24   | Ora del grafico                                                                                           |
+| `h48.chart_help`        | aiuto sotto il grafico e il cursore                                                           | riga | Tocca o trascina sul grafico per vedere un'ora. Da tastiera usa il cursore qui sopra.                     |
+| `h48.chart_aria`        | descrizione del grafico per lettori di schermo                                                | riga | Grafico delle prossime 48 ore. Temperatura da {min} a {max}. {pioggia} I valori sono anche nella tabella. |
+| `h48.footnote`          | sotto il grafico e la tabella                                                                 | riga | Solo la temperatura è corretta sulla stazione; il resto è la media dei modelli.                           |
+| `h48.models_note`       | sotto il grafico e la tabella                                                                 | riga | {m} modelli fino a {ora1}, poi meno.                                                                      |
+| `h48.models_line`       | etichetta della linea dei modelli sotto l'asse delle ore; {ora1} porta il giorno              | riga | {m} modelli fino a {ora1}, poi {k}                                                                        |
+| `h48.label_at`          | dopo la temperatura nelle etichette di minime e massime del grafico                           | 10   | alle {ora}                                                                                                |
+| `rain48.none`           | corsia della pioggia, quando nessun modello dà pioggia in 48 ore                              | riga | Nessun modello dà pioggia nelle prossime 48 ore                                                           |
+| `h48.table_caption`     | titolo della tabella (per lettori di schermo)                                                 | riga | Previsione ora per ora per le prossime 48 ore                                                             |
+| `h48.col_time`          | intestazione della tabella                                                                    | 10   | Ora                                                                                                       |
+| `h48.col_sky`           | intestazione della tabella                                                                    | 10   | Cielo                                                                                                     |
+| `h48.col_temp`          | intestazione della tabella                                                                    | 8    | Temp.                                                                                                     |
+| `h48.col_temp_sub`      | sotto l'intestazione                                                                          | 14   | tra i modelli                                                                                             |
+| `h48.col_rain`          | intestazione della tabella                                                                    | 12   | Pioggia                                                                                                   |
+| `h48.col_rain_sub`      | sotto l'intestazione                                                                          | 12   | modelli, mm                                                                                               |
+| `h48.col_wind`          | intestazione della tabella                                                                    | 12   | Vento                                                                                                     |
+| `h48.col_wind_sub`      | sotto l'intestazione                                                                          | 12   | km/h                                                                                                      |
+| `h48.col_cloud`         | sotto l'intestazione Cielo                                                                    | 10   | nuvole                                                                                                    |
+| `h48.cell_gust`         | cella del vento                                                                               | 16   | raffiche {g}                                                                                              |
+| `h48.cell_dst_before`   | sotto la prima delle due 02:00 del giorno del cambio                                          | 16   | ora legale                                                                                                |
+| `h48.cell_dst`          | accanto all'ora ripetuta nel giorno del cambio                                                | 16   | ora solare                                                                                                |
 
 ## 10 giorni
 
 | chiave                       | dove                                                                | max  | testo                                                                                                                                                                           |
 | ---------------------------- | ------------------------------------------------------------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `d10.h2`                     | titolo della sezione                                                | 24   | Prossimi 10 giorni                                                                                                                                                              |
-| `d10.h2_n`                   | titolo della sezione, quando i giorni con dati sono meno di 10      | 24   | Prossimi {n} giorni                                                                                                                                                             |
+| `d10.h2`                     | titolo della sezione                                                | 24   | 10 giorni                                                                                                                                                                       |
+| `d10.h2_n`                   | titolo della sezione, quando i giorni con dati sono meno di 10      | 24   | {n} giorni                                                                                                                                                                      |
 | `d10.caption`                | titolo della tabella (per lettori di schermo)                       | riga | Minima, massima e pioggia per i prossimi 10 giorni                                                                                                                              |
 | `d10.col_day`                | intestazione                                                        | 10   | Giorno                                                                                                                                                                          |
 | `d10.col_sky`                | intestazione                                                        | 10   | Cielo                                                                                                                                                                           |
@@ -190,9 +212,14 @@ One line under the station sentence, always the same height (two lines reserved)
 | `d10.tomorrow`               | nome del giorno                                                     | 10   | Domani                                                                                                                                                                          |
 | `d10.cell_range`             | testo per lettori di schermo nella riga del giorno                  | riga | minima {min} (modelli da {minlo} a {minhi}), massima {max} (modelli da {maxlo} a {maxhi})                                                                                       |
 | `d10.less_reliable_h3`       | separatore prima dei giorni 8-10                                    | 40   | Da qui in poi meno affidabile                                                                                                                                                   |
-| `d10.less_reliable_note`     | sotto il separatore                                                 | riga | Arrivano così lontano solo {m} modelli, e la correzione è quella del giorno 7.                                                                                                  |
-| `d10.less_reliable_note_raw` | sotto il separatore, quando minima o massima non sono corrette      | riga | Arrivano così lontano solo {m} modelli.                                                                                                                                         |
+| `d10.less_reliable_note`     | sotto il separatore                                                 | riga | Solo {m} modelli arrivano fin qui.                                                                                                                                              |
+| `d10.less_reliable_note_raw` | sotto il separatore, quando minima o massima non sono corrette      | riga | Solo {m} modelli arrivano fin qui.                                                                                                                                              |
 | `d10.legend_bar`             | legenda della barra                                                 | riga | La barra va dalla minima alla massima. Le estremità più chiare sono l'intervallo tra i modelli.                                                                                 |
+| `d10.key_core`               | chiave disegnata, accanto alla barra piena                          | 30   | dalla minima alla massima                                                                                                                                                       |
+| `d10.key_wings`              | chiave, accanto alle estremità chiare                               | 20   | tra i modelli                                                                                                                                                                   |
+| `d10.key_dot_full`           | chiave, accanto al punto pieno                                      | 16   | 1 mm o più                                                                                                                                                                      |
+| `d10.key_dot_empty`          | chiave, accanto al punto vuoto                                      | 16   | meno di 1 mm                                                                                                                                                                    |
+| `d10.details_mean`           | riga aperta, accanto a pioggia, vento e raffiche                    | 40   | media dei modelli, non corretta                                                                                                                                                 |
 | `d10.note_raw`               | avviso sopra la tabella, quando minima o massima non sono corrette  | riga | Minima e massima senza correzione: oggi la correzione non è disponibile.                                                                                                        |
 | `d10.note_raw_min`           | come sopra, solo la minima                                          | riga | Minima senza correzione: oggi la correzione non è disponibile.                                                                                                                  |
 | `d10.note_raw_max`           | come sopra, solo la massima                                         | riga | Massima senza correzione: oggi la correzione non è disponibile.                                                                                                                 |
@@ -225,11 +252,11 @@ One line under the station sentence, always the same height (two lines reserved)
 | `radar.class.6`           | legenda, ultima classe                                                | 14   | nubifragio                                                            |
 | `radar.rings`             | legenda degli anelli                                                  | riga | Anelli a 10, 25 e 50 km dal paese.                                    |
 | `radar.over`              | legenda, ultima classe                                                | 10   | oltre {v}                                                             |
-| `radar.summary`           | sotto la mappa, cambia con l'immagine                                 | riga | Alle {ora}: {qui} {vicino}                                            |
+| `radar.summary`           | sotto la mappa, cambia con l'immagine                                 | riga | Alle {ora} {qui} {vicino}                                             |
 | `radar.sum_here`          | parte della frase sotto la mappa                                      | riga | sul paese piove ({classe}).                                           |
 | `radar.sum_here_none`     | parte della frase sotto la mappa                                      | riga | sul paese non piove.                                                  |
 | `radar.sum_near`          | parte della frase sotto la mappa                                      | riga | Entro 10 km la pioggia più forte è {classe}.                          |
-| `radar.sum_near_none`     | parte della frase sotto la mappa                                      | riga | Entro 10 km non piove.                                                |
+| `radar.sum_near_none`     | parte della frase sotto la mappa                                      | riga | Non piove neanche entro 10 km.                                        |
 | `radar.credit`            | sotto l'immagine, sempre visibile                                     | riga | Radar: Dipartimento della Protezione Civile (Radar-DPC), CC BY-SA 4.0 |
 | `radar.basemap_credit`    | sotto l'immagine                                                      | riga | Mappa: Natural Earth.                                                 |
 | `radar.unavailable`       | al posto della mappa                                                  | riga | Radar non disponibile.                                                |
@@ -238,90 +265,91 @@ One line under the station sentence, always the same height (two lines reserved)
 
 ## Stati: caricamento, dati vecchi, dati mancanti, fuori linea
 
-| chiave                    | dove                                            | max  | testo                                                                                               |
-| ------------------------- | ----------------------------------------------- | ---- | --------------------------------------------------------------------------------------------------- |
-| `state.loading`           | al posto dei valori mentre arrivano             | 30   | Carico i dati                                                                                       |
-| `state.nodata`            | al posto di un singolo valore assente           | 6    | n.d.                                                                                                |
-| `state.nodata_title`      | spiegazione di n.d.                             | riga | Dato non disponibile                                                                                |
-| `state.stale_tag`         | etichetta accanto a un valore vecchio           | 16   | non aggiornato                                                                                      |
-| `state.metar_stale`       | Adesso, bollettino vecchio                      | riga | L'ultimo bollettino dell'aeroporto è delle {ora}, {fa}: i valori qui sotto non dicono com'è adesso. |
-| `state.metar_expired`     | Adesso, bollettino troppo vecchio per mostrarlo | riga | Nessun bollettino dell'aeroporto dalle {ora}. Non mostriamo valori così vecchi.                     |
-| `state.metar_missing`     | Adesso, nessun bollettino                       | riga | I dati dell'aeroporto non sono disponibili.                                                         |
-| `state.radar_missing`     | Adesso, nessun dato radar                       | riga | Il radar non è disponibile, quindi non sappiamo se piove adesso.                                    |
-| `state.radar_nodata_here` | Adesso, il radar non vede la zona del paese     | riga | Il radar non copre la zona del paese in questa immagine.                                            |
-| `state.forecast_missing`  | al posto di 48 ore e 10 giorni                  | riga | La previsione non è disponibile in questo momento.                                                  |
-| `state.partial_hours`     | sotto il grafico, se mancano ore                | riga | Mancano alcune ore: dove non c'è un modello corretto non mostriamo niente.                          |
-| `state.fetch_failed`      | avviso in alto                                  | riga | Non riusciamo a scaricare i dati. Riproviamo tra un minuto.                                         |
-| `state.noscript`          | se JavaScript è spento                          | riga | Per vedere i dati serve JavaScript: il sito li scarica dal nostro archivio ogni minuto.             |
-| `state.refreshed`         | piè di pagina                                   | riga | Dati controllati alle {ora}.                                                                        |
+| chiave                    | dove                                            | max  | testo                                                                           |
+| ------------------------- | ----------------------------------------------- | ---- | ------------------------------------------------------------------------------- |
+| `state.loading`           | al posto dei valori mentre arrivano             | 30   | Carico i dati                                                                   |
+| `state.nodata`            | al posto di un singolo valore assente           | 6    | n.d.                                                                            |
+| `state.nodata_title`      | spiegazione di n.d.                             | riga | Dato non disponibile                                                            |
+| `state.stale_tag`         | etichetta accanto a un valore vecchio           | 16   | non aggiornato                                                                  |
+| `state.metar_stale`       | Adesso, bollettino vecchio                      | riga | Ultimo bollettino alle {ora} ({fa}): adesso potrebbe essere diverso.            |
+| `state.metar_expired`     | Adesso, bollettino troppo vecchio per mostrarlo | riga | Nessun bollettino dell'aeroporto dalle {ora}. Non mostriamo valori così vecchi. |
+| `state.metar_missing`     | Adesso, nessun bollettino                       | riga | I dati dell'aeroporto non sono disponibili.                                     |
+| `state.radar_missing`     | Adesso, nessun dato radar                       | riga | Il radar non è disponibile, quindi non sappiamo se piove adesso.                |
+| `state.radar_nodata_here` | Adesso, il radar non vede la zona del paese     | riga | Il radar non copre la zona del paese in questa immagine.                        |
+| `state.forecast_missing`  | al posto di 48 ore e 10 giorni                  | riga | La previsione non è disponibile in questo momento.                              |
+| `state.partial_hours`     | sotto il grafico, se mancano ore                | riga | Mancano alcune ore: senza un modello corretto non mostriamo niente.             |
+| `state.fetch_failed`      | avviso in alto                                  | riga | Non riusciamo a scaricare i dati. Riproviamo tra un minuto.                     |
+| `state.noscript`          | se JavaScript è spento                          | riga | Per vedere i dati serve JavaScript.                                             |
+| `state.refreshed`         | piè di pagina                                   | riga | Dati controllati alle {ora}.                                                    |
 
 ## Piè di pagina e stato delle fonti
 
-| chiave                  | dove                                                             | max  | testo                                                                                                                                                                                            |
-| ----------------------- | ---------------------------------------------------------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `footer.status_h2`      | titolo apribile                                                  | 30   | Stato delle fonti                                                                                                                                                                                |
-| `footer.status_ok`      | accanto a una fonte aggiornata                                   | 16   | aggiornata                                                                                                                                                                                       |
-| `footer.status_late`    | accanto a una fonte in ritardo                                   | 16   | in ritardo                                                                                                                                                                                       |
-| `footer.status_down`    | accanto a una fonte ferma                                        | 16   | ferma                                                                                                                                                                                            |
-| `footer.status_row`     | riga di una fonte                                                | riga | Dati delle {ora}, {fa}                                                                                                                                                                           |
-| `footer.src.metar`      | nome della fonte                                                 | 40   | Bollettini METAR degli aeroporti                                                                                                                                                                 |
-| `footer.src.radar`      | nome della fonte                                                 | 40   | Radar della Protezione Civile                                                                                                                                                                    |
-| `footer.src.open-meteo` | nome della fonte                                                 | 40   | Modelli meteorologici (Open-Meteo)                                                                                                                                                               |
-| `footer.src.arpa`       | nome della fonte                                                 | 40   | Stazioni ARPA Lombardia                                                                                                                                                                          |
-| `footer.src.arpa_note`  | sotto ARPA                                                       | riga | Arrivano con 3-9 ore di ritardo: servono a correggere e verificare, non per Adesso.                                                                                                              |
-| `footer.credits`        | crediti, sempre visibili                                         | riga | Dati dei modelli: Open-Meteo.com, CC BY 4.0. Radar: Dipartimento della Protezione Civile (Radar-DPC), CC BY-SA 4.0. Osservazioni: METAR, NOAA Aviation Weather Center. Stazioni: ARPA Lombardia. |
-| `footer.how`            | link                                                             | 20   | Come funziona                                                                                                                                                                                    |
-| `footer.sources`        | link                                                             | 20   | Fonti e licenze                                                                                                                                                                                  |
-| `footer.score`          | link, dalla S4 (riservata)                                       | 24   | Quanto ci prendiamo                                                                                                                                                                              |
-| `footer.score_soon`     | accanto al link, dalla S4 (riservata)                            | 16   | da fine novembre                                                                                                                                                                                 |
-| `footer.privacy`        | link                                                             | 12   | Privacy                                                                                                                                                                                          |
-| `footer.code`           | link al codice                                                   | 30   | Codice sorgente                                                                                                                                                                                  |
-| `footer.nav_label`      | nome della navigazione del piè di pagina, per lettori di schermo | riga | Pagine del sito                                                                                                                                                                                  |
-| `footer.beta`           | ultima riga                                                      | riga | Versione beta. I dati possono mancare o essere sbagliati: non usarli per decisioni di sicurezza.                                                                                                 |
+| chiave                  | dove                                                             | max  | testo                                                                                              |
+| ----------------------- | ---------------------------------------------------------------- | ---- | -------------------------------------------------------------------------------------------------- |
+| `footer.status_h2`      | titolo apribile                                                  | 30   | Stato delle fonti                                                                                  |
+| `footer.status_ok`      | accanto a una fonte aggiornata                                   | 16   | aggiornata                                                                                         |
+| `footer.status_late`    | accanto a una fonte in ritardo                                   | 16   | in ritardo                                                                                         |
+| `footer.status_down`    | accanto a una fonte ferma                                        | 16   | ferma                                                                                              |
+| `footer.status_row`     | riga di una fonte                                                | riga | Dati delle {ora}, {fa}                                                                             |
+| `footer.src.metar`      | nome della fonte                                                 | 40   | Bollettini METAR degli aeroporti                                                                   |
+| `footer.src.radar`      | nome della fonte                                                 | 40   | Radar della Protezione Civile                                                                      |
+| `footer.src.open-meteo` | nome della fonte                                                 | 40   | Modelli meteorologici (Open-Meteo)                                                                 |
+| `footer.src.arpa`       | nome della fonte                                                 | 40   | Stazioni ARPA Lombardia                                                                            |
+| `footer.src.arpa_note`  | sotto ARPA                                                       | riga | Arrivano con 3-9 ore di ritardo: servono a correggere e verificare, non per Adesso.                |
+| `footer.credits`        | crediti, sempre visibili                                         | riga | Dati: Open-Meteo.com (CC BY 4.0), NOAA Aviation Weather Center, ARPA Lombardia.                    |
+| `footer.how`            | link                                                             | 20   | Come funziona                                                                                      |
+| `footer.sources`        | link                                                             | 20   | Fonti e licenze                                                                                    |
+| `footer.score`          | link, dalla S4 (riservata)                                       | 24   | Quanto ci prendiamo                                                                                |
+| `footer.score_soon`     | accanto al link, dalla S4 (riservata)                            | 16   | da fine novembre                                                                                   |
+| `footer.privacy`        | link                                                             | 12   | Privacy                                                                                            |
+| `footer.code`           | link al codice                                                   | 30   | Codice sorgente                                                                                    |
+| `footer.nav_label`      | nome della navigazione del piè di pagina, per lettori di schermo | riga | Pagine del sito                                                                                    |
+| `footer.beta`           | ultima riga                                                      | riga | Sito in prova: i dati possono mancare o essere sbagliati. Per le allerte segui i canali ufficiali. |
 
 ## Unità, tempi, direzioni
 
-| chiave           | dove                                         | max | testo                 |
-| ---------------- | -------------------------------------------- | --- | --------------------- |
-| `unit.c`         | dopo una temperatura                         | 3   | °C                    |
-| `unit.kmh`       | dopo una velocità                            | 5   | km/h                  |
-| `unit.mm`        | dopo una quantità di pioggia                 | 3   | mm                    |
-| `unit.mmh`       | dopo un'intensità di pioggia                 | 5   | mm/h                  |
-| `unit.km`        | dopo una distanza                            | 3   | km                    |
-| `unit.m`         | dopo una distanza                            | 2   | m                     |
-| `unit.pct`       | dopo una percentuale                         | 1   | %                     |
-| `vis.max`        | visibilità di 10 km o più                    | 16  | oltre 10 km           |
-| `time.just_now`  | età sotto un minuto                          | 12  | adesso                |
-| `time.min_ago`   | età in minuti                                | 14  | {n} min fa            |
-| `time.hour_ago`  | età di un'ora esatta                         | 14  | 1 ora fa              |
-| `time.hours_ago` | età in ore, da 3 ore in su                   | 14  | {n} ore fa            |
-| `time.hm_ago`    | età in ore e minuti, sotto le 3 ore          | 20  | {h} h {m} min fa      |
-| `time.yesterday` | giorno                                       | 10  | ieri                  |
-| `time.at`        | ora del giorno                               | 12  | alle {ora}            |
-| `time.hour_word` | nella tabella oraria, per lettori di schermo | 10  | ore {ora}             |
-| `models.one`     | conteggio dei modelli                        | 20  | 1 modello su {m}      |
-| `models.many`    | conteggio dei modelli                        | 20  | {n} modelli su {m}    |
-| `models.none`    | conteggio dei modelli                        | 24  | nessun modello su {m} |
-| `models.short`   | conteggio breve, in tabella                  | 8   | {n}/{m}               |
-| `wind.calm`      | vento sotto 2 km/h                           | 10  | calma                 |
-| `wind.variable`  | direzione variabile                          | 12  | variabile             |
-| `wind.from`      | direzione lunga                              | 16  | da {dir}              |
-| `dir.N`          | direzione breve                              | 2   | N                     |
-| `dir.NE`         | direzione breve                              | 2   | NE                    |
-| `dir.E`          | direzione breve                              | 2   | E                     |
-| `dir.SE`         | direzione breve                              | 2   | SE                    |
-| `dir.S`          | direzione breve                              | 2   | S                     |
-| `dir.SO`         | direzione breve                              | 2   | SO                    |
-| `dir.O`          | direzione breve                              | 2   | O                     |
-| `dir.NO`         | direzione breve                              | 2   | NO                    |
-| `dirlong.N`      | direzione lunga                              | 12  | nord                  |
-| `dirlong.NE`     | direzione lunga                              | 12  | nord-est              |
-| `dirlong.E`      | direzione lunga                              | 12  | est                   |
-| `dirlong.SE`     | direzione lunga                              | 12  | sud-est               |
-| `dirlong.S`      | direzione lunga                              | 12  | sud                   |
-| `dirlong.SO`     | direzione lunga                              | 12  | sud-ovest             |
-| `dirlong.O`      | direzione lunga                              | 12  | ovest                 |
-| `dirlong.NO`     | direzione lunga                              | 12  | nord-ovest            |
+| chiave           | dove                                                        | max | testo                 |
+| ---------------- | ----------------------------------------------------------- | --- | --------------------- |
+| `unit.c`         | dopo una temperatura                                        | 3   | °C                    |
+| `unit.kmh`       | dopo una velocità                                           | 5   | km/h                  |
+| `unit.mm`        | dopo una quantità di pioggia                                | 3   | mm                    |
+| `unit.mmh`       | dopo un'intensità di pioggia                                | 5   | mm/h                  |
+| `unit.km`        | dopo una distanza                                           | 3   | km                    |
+| `unit.m`         | dopo una distanza                                           | 2   | m                     |
+| `unit.pct`       | dopo una percentuale                                        | 1   | %                     |
+| `vis.max`        | visibilità di 10 km o più                                   | 16  | oltre 10 km           |
+| `time.just_now`  | età sotto un minuto                                         | 12  | adesso                |
+| `time.min_ago`   | età in minuti                                               | 14  | {n} min fa            |
+| `time.hour_ago`  | età di un'ora esatta                                        | 14  | 1 ora fa              |
+| `time.hours_ago` | età in ore, da 3 ore in su                                  | 14  | {n} ore fa            |
+| `time.hm_ago`    | età in ore e minuti, sotto le 3 ore                         | 20  | {h} h {m} min fa      |
+| `time.yesterday` | giorno                                                      | 10  | ieri                  |
+| `time.at`        | ora del giorno                                              | 12  | alle {ora}            |
+| `time.hour_word` | nella tabella oraria, per lettori di schermo                | 10  | ore {ora}             |
+| `models.one`     | conteggio dei modelli                                       | 20  | 1 modello su {m}      |
+| `models.many`    | conteggio dei modelli                                       | 20  | {n} modelli su {m}    |
+| `models.none`    | conteggio dei modelli                                       | 24  | nessun modello su {m} |
+| `models.short`   | conteggio breve, in tabella                                 | 8   | {n}/{m}               |
+| `models.of`      | conteggio breve nella striscia delle 12 ore e nei 10 giorni | 10  | {n} su {m}            |
+| `wind.calm`      | vento sotto 2 km/h                                          | 10  | calma                 |
+| `wind.variable`  | direzione variabile                                         | 12  | variabile             |
+| `wind.from`      | direzione lunga                                             | 16  | da {dir}              |
+| `dir.N`          | direzione breve                                             | 2   | N                     |
+| `dir.NE`         | direzione breve                                             | 2   | NE                    |
+| `dir.E`          | direzione breve                                             | 2   | E                     |
+| `dir.SE`         | direzione breve                                             | 2   | SE                    |
+| `dir.S`          | direzione breve                                             | 2   | S                     |
+| `dir.SO`         | direzione breve                                             | 2   | SO                    |
+| `dir.O`          | direzione breve                                             | 2   | O                     |
+| `dir.NO`         | direzione breve                                             | 2   | NO                    |
+| `dirlong.N`      | direzione lunga                                             | 12  | nord                  |
+| `dirlong.NE`     | direzione lunga                                             | 12  | nord-est              |
+| `dirlong.E`      | direzione lunga                                             | 12  | est                   |
+| `dirlong.SE`     | direzione lunga                                             | 12  | sud-est               |
+| `dirlong.S`      | direzione lunga                                             | 12  | sud                   |
+| `dirlong.SO`     | direzione lunga                                             | 12  | sud-ovest             |
+| `dirlong.O`      | direzione lunga                                             | 12  | ovest                 |
+| `dirlong.NO`     | direzione lunga                                             | 12  | nord-ovest            |
 
 ## Simboli del cielo (testo alternativo)
 
@@ -399,16 +427,16 @@ The code reads each group of the METAR weather field (for example `-RA BR`) and 
 
 ## Pagine di testo: titoli e link
 
-| chiave               | dove                                   | max  | testo                                 |
-| -------------------- | -------------------------------------- | ---- | ------------------------------------- |
-| `page.how.title`     | titolo della pagina                    | 40   | Come funziona                         |
-| `page.sources.title` | titolo della pagina                    | 40   | Fonti e licenze                       |
-| `page.privacy.title` | titolo della pagina                    | 40   | Privacy                               |
-| `page.score.title`   | titolo della pagina                    | 40   | Quanto ci prendiamo                   |
-| `page.back`          | link per tornare al paese              | 30   | Torna a {paese}                       |
-| `page.404.title`     | titolo della pagina 404 e della scheda | 40   | Pagina non trovata                    |
-| `page.404.p1`        | prima frase                            | riga | Questo indirizzo non esiste sul sito. |
-| `page.404.p2`        | prima dei link ai due paesi            | riga | Le previsioni sono qui:               |
+| chiave               | dove                                   | max  | testo                     |
+| -------------------- | -------------------------------------- | ---- | ------------------------- |
+| `page.how.title`     | titolo della pagina                    | 40   | Come funziona             |
+| `page.sources.title` | titolo della pagina                    | 40   | Fonti e licenze           |
+| `page.privacy.title` | titolo della pagina                    | 40   | Privacy                   |
+| `page.score.title`   | titolo della pagina                    | 40   | Quanto ci prendiamo       |
+| `page.back`          | link per tornare al paese              | 30   | Torna a {paese}           |
+| `page.404.title`     | titolo della pagina 404 e della scheda | 40   | Pagina non trovata        |
+| `page.404.p1`        | prima frase                            | riga | Questa pagina non esiste. |
+| `page.404.p2`        | prima dei link ai due paesi            | riga | Le previsioni sono qui:   |
 
 ## Testi lunghi
 

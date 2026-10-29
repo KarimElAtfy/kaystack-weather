@@ -38,6 +38,16 @@ test('fills placeholders and leaves unknown ones visible', () => {
   expect(fill('alle {ora}, {fa}', { ora: '14:50' })).toBe('alle 14:50, {fa}');
 });
 
+test('counts models in the verdict with the same words as everywhere else', () => {
+  const quando = t('h48.summary_from', { ora: '15:00' });
+  expect(t('verdict.rain_some', { quando, modelli: t('models.one', { m: 10 }) })).toBe(
+    'Pioggia dalle 15:00 solo per 1 modello su 10.'
+  );
+  expect(t('verdict.rain_most', { quando, modelli: t('models.many', { n: 7, m: 10 }) })).toBe(
+    'Pioggia dalle 15:00 per 7 modelli su 10.'
+  );
+});
+
 test('knows which keys exist', () => {
   expect(has('dir.SO')).toBe(true);
   expect(has('dir.SW')).toBe(false);

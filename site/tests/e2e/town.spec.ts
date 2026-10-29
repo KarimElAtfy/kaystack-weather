@@ -8,10 +8,10 @@ test.beforeEach(async ({ page, context, baseURL }) => {
 
 test('says when the forecast was issued, in Rome time', async ({ page }) => {
   await page.goto('/pedrengo');
-  await expect(page.locator('#statusline')).toHaveText('Emessa alle 14:00, 1 h 10 min fa.');
+  await expect(page.locator('#statusline')).toHaveText('Aggiornata alle 14:00 (1 h 10 min fa).');
   await expect(page.locator('.trust strong')).toHaveText('Torre Boldone');
   await expect(page.locator('#adesso .src').first()).toContainText(
-    'Aeroporto di Orio al Serio, a 4,3 km.'
+    "Misurati all'aeroporto di Orio al Serio, a 4,3 km,"
   );
 });
 
@@ -46,7 +46,7 @@ test('warns about a late forecast on the status line, the sources say why', asyn
   await useScenario(context, 'vecchi', baseURL ?? '');
   await page.goto('/pedrengo');
   await expect(page.locator('#statusline .warn')).toHaveText(
-    'Emessa alle 07:00, 8 ore fa: di solito si aggiorna ogni ora.'
+    'In ritardo: aggiornata alle 07:00 (8 ore fa).'
   );
   await expect(page.locator('#announce')).toHaveText('La previsione non è aggiornata.');
   await expect(page.locator('#sources details')).toHaveAttribute('open', '');
@@ -57,7 +57,7 @@ test('calls a forecast older than a day old', async ({ page }) => {
   await page.clock.setFixedTime(new Date(NOW.getTime() + 25 * 3_600_000));
   await page.goto('/pedrengo');
   await expect(page.locator('#statusline .bad')).toHaveText(
-    'Previsione vecchia: emessa ieri alle 14:00.'
+    'Previsione vecchia, aggiornata ieri alle 14:00.'
   );
   await expect(page.locator('#announce')).toHaveText('La previsione è vecchia.');
 });
@@ -85,7 +85,7 @@ test('says when the data cannot be fetched', async ({ page, context }) => {
 
 test('says once when the device goes offline, and when it is back', async ({ page, context }) => {
   await page.goto('/pedrengo');
-  await expect(page.locator('#statusline')).toHaveText('Emessa alle 14:00, 1 h 10 min fa.');
+  await expect(page.locator('#statusline')).toHaveText('Aggiornata alle 14:00 (1 h 10 min fa).');
   await expect(page.locator('#announce')).toHaveText('');
   await context.setOffline(true);
   await page.clock.runFor(10 * 60_000);
@@ -94,7 +94,7 @@ test('says once when the device goes offline, and when it is back', async ({ pag
   );
   await expect(page.locator('#announce')).toHaveText('Sei offline.');
   await context.setOffline(false);
-  await expect(page.locator('#statusline')).toHaveText('Emessa alle 14:00, 1 h 20 min fa.');
+  await expect(page.locator('#statusline')).toHaveText('Aggiornata alle 14:00 (1 h 20 min fa).');
   await expect(page.locator('#announce')).toHaveText('Di nuovo in linea.');
 });
 
@@ -112,12 +112,12 @@ test('shows only the days the models reach, with no sky made up', async ({
   baseURL
 }) => {
   await page.goto('/pedrengo');
-  await expect(page.locator('#h-giorni10')).toHaveText('Prossimi 10 giorni');
+  await expect(page.locator('#h-giorni10')).toHaveText('10 giorni');
   await expect(page.locator('#giorni-10 tbody svg.sym')).toHaveCount(10);
   await context.unrouteAll();
   await useScenario(context, 'mancanti', baseURL ?? '');
   await page.goto('/pedrengo');
-  await expect(page.locator('#h-giorni10')).toHaveText('Prossimi 9 giorni');
+  await expect(page.locator('#h-giorni10')).toHaveText('9 giorni');
   await expect(page.locator('#giorni-10 tbody tr:not(.sep)')).toHaveCount(9);
   await expect(page.locator('#giorni-10 tbody svg.sym')).toHaveCount(0);
   await expect(page.locator('#giorni-10 tbody .c-sky').first()).toHaveText('Dato non disponibile');
@@ -136,7 +136,7 @@ test('never calls a value corrected that did not get the correction', async ({
     'Temperatura senza correzione: oggi la correzione non è disponibile.'
   );
   await expect(h48.locator('.legend')).toContainText('temperatura, media dei modelli');
-  await expect(h48.locator('.foot')).toContainText('Oggi nessun valore è corretto');
+  await expect(h48.locator('.foot')).toContainText('Oggi la correzione non è disponibile');
   const d10 = page.locator('#giorni-10');
   await expect(d10.locator('.note')).toHaveText(
     'Minima e massima senza correzione: oggi la correzione non è disponibile.'
@@ -147,7 +147,7 @@ test('never calls a value corrected that did not get the correction', async ({
   expect(text).not.toContain('corretta');
   expect(text).not.toContain('corrette');
   expect(text).not.toContain('la correzione è quella');
-  await expect(d10.locator('.sep .n')).toHaveText('Arrivano così lontano solo 3 modelli.');
+  await expect(d10.locator('.sep .n')).toHaveText('Solo 3 modelli arrivano fin qui.');
 });
 
 test('reads the sources when the list is opened on fresh data', async ({ page }) => {

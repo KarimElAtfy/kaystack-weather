@@ -11,7 +11,7 @@ async function open(page: Page, scenario: Scenario, url: string, origin: string)
 test('shows the last frame first and paints its rain', async ({ page, baseURL }) => {
   await open(page, 'pioggia', '/sesto-calende', baseURL ?? '');
   await expect(page.locator('#radar .stamp')).toContainText('15:05');
-  await expect(page.locator('#radar .rsum')).toContainText('Alle 15:05:');
+  await expect(page.locator('#radar .rsum')).toContainText('Alle 15:05 sul paese');
   const painted = await page.locator('#radar canvas').evaluate((canvas: HTMLCanvasElement) => {
     const pixels = canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height).data;
     let count = 0;
@@ -41,8 +41,8 @@ test('plays only when asked and steps with the slider', async ({ page, baseURL }
   await expect(slider).toBeEnabled();
   await slider.focus();
   await page.keyboard.press('Home');
-  await expect(slider).toHaveAttribute('aria-valuetext', /^Alle 14:10: sul paese /);
-  await expect(page.locator('#radar .rsum')).toContainText('Alle 14:10:');
+  await expect(slider).toHaveAttribute('aria-valuetext', /^Alle 14:10 sul paese /);
+  await expect(page.locator('#radar .rsum')).toContainText('Alle 14:10 sul paese');
   await play.click();
   await expect(page.getByRole('button', { name: 'Ferma' })).toBeVisible();
 });

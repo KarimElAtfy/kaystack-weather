@@ -34,7 +34,7 @@ for (const town of TOWNS) {
       'Meteo',
       'Pedrengo',
       'Sesto Calende',
-      'Perché una stazione?',
+      'Perché una stazione',
       'Adesso',
       '48 ore',
       '10 giorni',
@@ -81,7 +81,7 @@ test('skips to the content, then follows the section bar', async ({ page, baseUR
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/#main$/);
   await page.keyboard.press('Tab');
-  expect((await focused(page))?.name).toBe('Perché una stazione?');
+  expect((await focused(page))?.name).toBe('Perché una stazione');
   await page.keyboard.press('Tab');
   await page.keyboard.press('Tab');
   expect((await focused(page))?.name).toBe('48 ore');

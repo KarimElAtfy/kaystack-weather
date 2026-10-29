@@ -45,7 +45,7 @@ test('links back to the remembered town from a text page', async ({ page }) => {
 
 test('answers the station question where the town page points', async ({ page }) => {
   await page.goto('/pedrengo');
-  await page.getByRole('link', { name: 'Perché una stazione?' }).click();
+  await page.getByRole('link', { name: 'Perché una stazione' }).click();
   await expect(page).toHaveURL(/\/come-funziona#stazione$/);
   await expect(page.locator('#stazione')).toHaveText('Perché una stazione');
 });

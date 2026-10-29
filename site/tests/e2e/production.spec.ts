@@ -22,7 +22,7 @@ for (const town of TOWNS) {
 
 test('ignores the clock set in the address', async ({ page, baseURL }) => {
   await openState(page, 'pioggia', '/pedrengo?now=2026-10-26T09:00:00Z', baseURL ?? '');
-  await expect(page.locator('#statusline')).toHaveText('Emessa alle 14:00, 1 h 10 min fa.');
+  await expect(page.locator('#statusline')).toHaveText('Aggiornata alle 14:00 (1 h 10 min fa).');
 });
 
 test("ships none of Kit's data files, so no page has a folder twin", async ({ request }) => {
