@@ -281,7 +281,7 @@
       outline: 2px solid var(--ink);
       outline-offset: 2px;
     }
-    /* One line where the row fits (measured at 21em), two below it, and three
+    /* One line where the row fits (measured at 20.75em), two below it, and three
        where even the second line would not fit, as at 200% text on a phone. */
     .line {
       display: grid;
@@ -305,9 +305,9 @@
           '. . rain rain rain';
       }
     }
-    @container days (min-width: 21em) {
+    @container days (min-width: 20.75em) {
       .line {
-        grid-template-columns: 3.9em 1.75rem 2.1em minmax(4rem, 1fr) 2.3em 4.5em;
+        grid-template-columns: 3.9em 1.75rem 2.1em minmax(4rem, 1fr) 2.3em 4.25em;
         grid-template-areas: 'day sky lo bar hi rain';
       }
       .rain {
