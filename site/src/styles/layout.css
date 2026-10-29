@@ -143,7 +143,9 @@
      phone on its side every pixel of height goes to the data. */
   .sections {
     display: none;
+    container: bar / inline-size;
     background: var(--paper);
+    font-size: var(--text-s);
   }
   .sections ul {
     margin: 0;
@@ -156,7 +158,6 @@
     min-block-size: var(--tap);
     min-inline-size: var(--tap);
     color: var(--ink-2);
-    font-size: var(--text-s);
     line-height: 1.15;
     text-decoration: none;
     border-block-start: 2px solid transparent;
@@ -164,6 +165,9 @@
   .sections a[aria-current='true'] {
     color: var(--ink);
     border-block-start-color: var(--ink);
+  }
+  .sections .short {
+    display: none;
   }
 
   /* Upright phones: at the bottom, under the thumb. The page keeps the same
@@ -194,6 +198,30 @@
       min-block-size: calc(var(--bar-h) - 1px);
       padding-inline: var(--space-1);
       text-align: center;
+    }
+    /* In ems of the labels, so large text counts like a narrow screen: first
+       the short words, then two rows of two in the same height, which large
+       text has room for. */
+    @container bar (max-width: 24em) {
+      .sections .full {
+        position: absolute;
+        inline-size: 1px;
+        block-size: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+      }
+      .sections .short {
+        display: inline;
+      }
+    }
+    @container bar (max-width: 16em) {
+      .sections ul {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .sections a {
+        min-block-size: calc((var(--bar-h) - 1px) / 2);
+      }
     }
   }
 

@@ -162,6 +162,23 @@ test('keeps the section bar at the bottom of an upright phone', async ({ page, b
   );
 });
 
+test('shortens the words of the section bar on a narrow phone, not its names', async ({
+  page,
+  baseURL
+}) => {
+  await page.setViewportSize({ width: 280, height: 653 });
+  await openState(page, 'pioggia', '/pedrengo', baseURL ?? '');
+  const bar = page.locator('[data-qa="section-bar"]');
+  await expect(bar.getByText('Ore', { exact: true })).toBeVisible();
+  await expect(bar.getByText('Giorni', { exact: true })).toBeVisible();
+  await expect(bar.getByRole('link', { name: '48 ore' })).toBeVisible();
+  await expect(bar.getByRole('link', { name: '10 giorni' })).toBeVisible();
+  const cells = await bar
+    .getByRole('link')
+    .evaluateAll((links) => links.map((a) => a.getBoundingClientRect().right));
+  expect(Math.max(...cells)).toBeLessThanOrEqual(280);
+});
+
 test('keeps the section bar at the top of a tablet, the table header in the table', async ({
   page,
   baseURL

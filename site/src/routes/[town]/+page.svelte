@@ -9,11 +9,13 @@
   const named = (key: string) => (has(key) ? t(key) : town.slug);
   const name = $derived(named(`town.${town.slug}`));
   const station = $derived(around('trust.station', 'stazione', { km: km(town.km) }));
+  // The short words take the place of the long ones when the bar runs out of
+  // room; the long ones stay as the links' names, which hold the short ones.
   const sections = [
-    ['adesso', 'nav.now'],
-    ['ore-48', 'nav.h48'],
-    ['giorni-10', 'nav.d10'],
-    ['radar', 'nav.radar']
+    ['adesso', 'nav.now', null],
+    ['ore-48', 'nav.h48', 'nav.h48_short'],
+    ['giorni-10', 'nav.d10', 'nav.d10_short'],
+    ['radar', 'nav.radar', null]
   ] as const;
 </script>
 
@@ -51,8 +53,13 @@
   <nav class="sections" aria-label={t('nav.label')} data-qa="section-bar">
     <div class="wrap">
       <ul>
-        {#each sections as [id, key] (id)}
-          <li><a href="#{id}" data-qa="section-bar-{id}">{t(key)}</a></li>
+        {#each sections as [id, key, short] (id)}
+          <li>
+            <a href="#{id}" data-qa="section-bar-{id}" aria-label={short ? t(key) : undefined}
+              >{#if short}<span class="full">{t(key)}</span><span class="short">{t(short)}</span
+                >{:else}{t(key)}{/if}</a
+            >
+          </li>
         {/each}
       </ul>
     </div>
