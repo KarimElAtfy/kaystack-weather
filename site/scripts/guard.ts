@@ -58,10 +58,8 @@ export function problems(root: string, fixtures: string): string[] {
   return found;
 }
 
-// The parts not yet rebuilt keep their old rules: layout.css until the layout
-// lands, the rest until the cleanup.
+// The parts not yet rebuilt keep their old rules until the cleanup.
 const LEGACY = new Set([
-  'src/styles/layout.css',
   'src/styles/legacy.css',
   'src/lib/radar/radar.css',
   'src/lib/ui/pages.css'

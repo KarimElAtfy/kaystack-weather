@@ -43,13 +43,15 @@ Numbers, dates and times are formatted by the code in Italian (comma decimals, 2
 
 ## Navigazione della pagina del paese
 
-| chiave      | dove                                                   | max  | testo                |
-| ----------- | ------------------------------------------------------ | ---- | -------------------- |
-| `nav.label` | nome della barra delle sezioni, per lettori di schermo | riga | Sezioni della pagina |
-| `nav.now`   | barra delle sezioni                                    | 10   | Adesso               |
-| `nav.h48`   | barra delle sezioni                                    | 10   | 48 ore               |
-| `nav.d10`   | barra delle sezioni                                    | 10   | 10 giorni            |
-| `nav.radar` | barra delle sezioni                                    | 10   | Radar                |
+| chiave          | dove                                                                         | max  | testo                |
+| --------------- | ---------------------------------------------------------------------------- | ---- | -------------------- |
+| `nav.label`     | nome della barra delle sezioni, per lettori di schermo                       | riga | Sezioni della pagina |
+| `nav.now`       | barra delle sezioni                                                          | 10   | Adesso               |
+| `nav.h48`       | barra delle sezioni                                                          | 10   | 48 ore               |
+| `nav.h48_short` | barra delle sezioni, al posto di `nav.h48` su schermi stretti o testo grande | 6    | Ore                  |
+| `nav.d10`       | barra delle sezioni                                                          | 10   | 10 giorni            |
+| `nav.d10_short` | barra delle sezioni, al posto di `nav.d10` su schermi stretti o testo grande | 6    | Giorni               |
+| `nav.radar`     | barra delle sezioni                                                          | 10   | Radar                |
 
 ## Riga di fiducia (sotto il nome del paese)
 

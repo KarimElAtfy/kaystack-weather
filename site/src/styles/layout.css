@@ -1,97 +1,269 @@
-/* The page shell: columns, gutters, the section bar. The only file besides
-   tokens.css with media queries. */
+/* The page shell: gutters, safe areas, the town page grid and the section bar.
+   The only file besides tokens.css with media queries, and only these: widths
+   44em and 64em, heights 32em and 40em, and a phone on its side. Everything
+   else is a container query in its own block. */
 
 @layer layout {
   html {
-    scroll-padding-top: calc(var(--bar) + 20px);
+    scroll-padding-block-start: var(--space-4);
   }
   /* A column at least the screen tall, so the footer of a short page sits at the bottom. */
   .app {
     display: flex;
     flex-direction: column;
-    min-height: 100dvh;
+    min-block-size: 100dvh;
   }
   .app > main {
     flex: 1 0 auto;
-    width: 100%;
+    inline-size: 100%;
   }
   .wrap {
-    max-width: 1232px;
-    margin: 0 auto;
-    padding: 0 var(--sp-4);
+    max-inline-size: 75rem;
+    margin-inline: auto;
+    padding-inline: var(--gutter);
   }
-  /* Section bar. Sticky only where there is height to spare: on a landscape
-     phone or at 400% zoom it would cover half the screen. */
-  .sections {
-    background: var(--bg);
-    border-bottom: 1px solid var(--line);
+  /* The two town links wrap under each other before they push the page wide. */
+  .switch {
+    flex-wrap: wrap;
+    max-inline-size: 100%;
   }
-  .sections .wrap {
-    display: flex;
-    gap: var(--sp-1);
-    overflow-x: auto;
-    scrollbar-width: none;
+
+  /* The hero is one grid and #adesso a subgrid of it, so the island's parts
+     land in the page's own areas: .now (temperature, source and rain lines),
+     .next (verdict, pair, 12-hour strip) and .details. #adesso-body gives no box
+     of its own once loaded: a box that grew from the loading text's place to
+     the whole hero would count as a layout shift. */
+  .hero-area {
+    container: hero / inline-size;
+    padding-block: var(--space-3) var(--space-5);
   }
-  .sections a {
-    flex: none;
-    display: inline-flex;
-    align-items: center;
-    min-height: var(--bar);
-    padding: 0 var(--sp-3);
-    color: var(--text-2);
-    text-decoration: none;
-    font-weight: 600;
-    font-size: var(--fs-sm);
-    border-bottom: 2px solid transparent;
-    margin-bottom: -1px;
+  .hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'town' 'now' 'next' 'details';
+    align-items: start;
+    row-gap: var(--space-4);
   }
-  .sections a[aria-current='true'] {
-    color: var(--text);
-    border-bottom-color: var(--accent);
+  .town-head {
+    grid-area: town;
   }
-  @media (min-height: 500px) {
-    .sections {
-      position: sticky;
-      top: 0;
-      z-index: 20;
+  #adesso {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-row: now-start / -1;
+    grid-template-columns: subgrid;
+    grid-template-rows: subgrid;
+  }
+  #adesso-body {
+    display: contents;
+  }
+  /* The loading box, and a part the layout does not name, take the "now" area
+     and everything under it: the same room the three parts fill once loaded. */
+  #adesso-body.skel,
+  #adesso-body > * {
+    grid-column: 1 / -1;
+    grid-row: now-start / -1;
+  }
+  #adesso-body > .now {
+    grid-area: now;
+  }
+  #adesso-body > .next {
+    grid-area: next;
+  }
+  #adesso-body > .details {
+    grid-area: details;
+  }
+
+  /* Hero in two columns: wide enough, or a phone on its side. The forecast
+     starts level with the town line, so on a phone on its side the verdict,
+     the pair and the strip fit the first screen. #adesso then spans the town
+     cell too; the town line stays on top so its link takes the taps. */
+  @container hero (min-width: 40em) {
+    .hero-grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-areas:
+        'town next'
+        'now next'
+        'now details';
+      column-gap: var(--space-6);
+    }
+    .town-head {
+      position: relative;
+      z-index: 1;
+    }
+    #adesso {
+      grid-row: 1 / -1;
     }
   }
-  @media (max-height: 499px) {
-    html {
-      scroll-padding-top: 16px;
+  @media (orientation: landscape) and (max-height: 32em) {
+    .hero-area {
+      padding-block-start: var(--space-2);
+    }
+    .hero-grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-areas:
+        'town next'
+        'now next'
+        'now details';
+      column-gap: var(--space-5);
+    }
+    .town-head {
+      position: relative;
+      z-index: 1;
+    }
+    #adesso {
+      grid-row: 1 / -1;
     }
   }
 
-  /* Layout */
-  .layout {
+  /* The blocks under the hero: one column, then the 48 h across with the 10
+     days and the radar side by side from 64em. */
+  .blocks {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: var(--sp-5);
-    padding: var(--sp-5) 0 var(--sp-7);
+    gap: var(--space-6);
+    padding-block: var(--space-5) var(--space-6);
   }
-  .layout > * {
-    min-width: 0;
+  .block {
+    container: block / inline-size;
+    border-block-start: 1px solid var(--ink);
+    padding-block-start: var(--space-3);
   }
-  @media (min-width: 1024px) {
-    .layout {
-      grid-template-columns: minmax(0, 1fr) 392px;
-      align-items: start;
-      column-gap: var(--sp-6);
+  .block > h2 {
+    margin-block-end: var(--space-4);
+  }
+  @media (min-width: 64em) {
+    .hero-grid {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
     }
-    .layout > #adesso,
-    .layout > #ore-48,
-    .layout > #giorni-10 {
-      grid-column: 1;
+    .blocks {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
     }
-    .layout > #radar {
-      grid-column: 2;
-      grid-row: 1 / span 3;
+    #ore-48 {
+      grid-column: 1 / -1;
     }
   }
-  @media (min-width: 1024px) and (min-height: 500px) {
-    .layout > #radar {
+
+  /* The section bar has no place unless a query below gives it one: on a
+     phone on its side every pixel of height goes to the data. */
+  .sections {
+    display: none;
+    container: bar / inline-size;
+    background: var(--paper);
+    font-size: var(--text-s);
+  }
+  .sections ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .sections a {
+    display: flex;
+    align-items: center;
+    min-block-size: var(--tap);
+    min-inline-size: var(--tap);
+    color: var(--ink-2);
+    line-height: 1.15;
+    text-decoration: none;
+    border-block-start: 2px solid transparent;
+  }
+  .sections a[aria-current='true'] {
+    color: var(--ink);
+    border-block-start-color: var(--ink);
+  }
+  .sections .short {
+    display: none;
+  }
+
+  /* Upright phones: at the bottom, under the thumb. The page keeps the same
+     room free at its end and for anything focused or reached by a link. */
+  @media (max-width: 44em) and (min-height: 32em) {
+    html:has(.sections) {
+      scroll-padding-block-end: calc(var(--bar-h) + env(safe-area-inset-bottom));
+    }
+    .app:has(.sections) {
+      padding-block-end: calc(var(--bar-h) + env(safe-area-inset-bottom));
+    }
+    .sections {
+      display: block;
+      position: fixed;
+      inset-inline: 0;
+      inset-block-end: 0;
+      z-index: 20;
+      border-block-start: 1px solid var(--ink);
+      padding-block-end: env(safe-area-inset-bottom);
+    }
+    .sections ul {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    /* The rule on top is part of the bar's height, which the paddings above match. */
+    .sections a {
+      justify-content: center;
+      min-block-size: calc(var(--bar-h) - 1px);
+      padding-inline: var(--space-1);
+      text-align: center;
+    }
+    /* In ems of the labels, so large text counts like a narrow screen: first
+       the short words, then two rows of two in the same height, which large
+       text has room for. */
+    @container bar (max-width: 24em) {
+      .sections .full {
+        position: absolute;
+        inline-size: 1px;
+        block-size: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+      }
+      .sections .short {
+        display: inline;
+      }
+    }
+    @container bar (max-width: 16em) {
+      .sections ul {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .sections a {
+        min-block-size: calc((var(--bar-h) - 1px) / 2);
+      }
+    }
+  }
+
+  /* From tablets: a row of links under the hero, sticky where there is
+     height. At exactly 44em both width queries hold; these come later and win. */
+  @media (min-width: 44em) and (min-height: 32em) {
+    html:has(.sections) {
+      scroll-padding-block-end: 0;
+    }
+    .app:has(.sections) {
+      padding-block-end: 0;
+    }
+    .sections {
+      display: block;
+      position: static;
+      border-block: 0;
+      border-block-end: 1px solid var(--rule);
+      padding-block-end: 0;
+    }
+    .sections ul {
+      display: flex;
+      gap: var(--space-5);
+    }
+    .sections a {
+      justify-content: flex-start;
+      min-block-size: var(--sticky-h);
+      padding-inline: 0;
+    }
+  }
+  @media (min-width: 44em) and (min-height: 40em) {
+    html:has(.sections) {
+      scroll-padding-block-start: calc(var(--sticky-h) + var(--space-4));
+    }
+    .sections {
       position: sticky;
-      top: calc(var(--bar) + 16px);
+      inset-block-start: 0;
+      z-index: 20;
     }
   }
 }

@@ -9,7 +9,9 @@ test.beforeEach(async ({ page, context, baseURL }) => {
 test('says when the forecast was issued, in Rome time', async ({ page }) => {
   await page.goto('/pedrengo');
   await expect(page.locator('#statusline')).toHaveText('Aggiornata alle 14:00 (1 h 10 min fa).');
-  await expect(page.locator('.trust strong')).toHaveText('Torre Boldone');
+  await expect(
+    page.locator('[data-qa="town-line"]').getByRole('link', { name: /^Torre Boldone,/ })
+  ).toHaveText('Torre Boldone');
   await expect(page.locator('#adesso .src').first()).toContainText(
     "Misurati all'aeroporto di Orio al Serio, a 4,3 km,"
   );
