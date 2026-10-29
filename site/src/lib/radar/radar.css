@@ -320,10 +320,10 @@
     }
   }
   /* Each word centred under the step it names: four on two staggered rows
-     where one row would touch, four on one row from 25em, all six from 32em.
+     where one row would touch (one a row where even that would), four on one
+     row from 25em, all six from 32em.
      The names left out stay for screen readers. */
   .ramp .words {
-    grid-template-rows: auto auto;
     margin: var(--space-1) 0 0;
     padding: 0;
     list-style: none;
@@ -345,6 +345,18 @@
   .ramp .words .c6 {
     grid-area: 2 / 6;
     justify-self: end;
+  }
+  /* One word a row where even two would touch, as at doubled text on a fold. */
+  @container ramp (max-width: 13em) {
+    .ramp .words .c3 {
+      grid-row: 2;
+    }
+    .ramp .words .c4 {
+      grid-row: 3;
+    }
+    .ramp .words .c6 {
+      grid-row: 4;
+    }
   }
   .ramp .words .minor {
     position: absolute;
