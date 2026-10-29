@@ -1,0 +1,163 @@
+/* Every value the site's colours, type and space come from. Blocks read these
+   names only. Contrast figures are against --paper, light / dark. */
+
+@layer tokens {
+  :root {
+    --paper: #f5f2eb;
+    --ink: #1c1b18; /* 15.4 */
+    --ink-2: #57534b; /* 6.8 */
+    --ink-3: #6f6a60; /* 4.8 */
+    --rule: #d8d2c4; /* decorative only */
+    --temp: #b8461b; /* 4.8 */
+    --temp-band: rgba(184, 70, 27, 0.18);
+    --temp-wing: rgba(184, 70, 27, 0.33);
+    --rain: #1f56a8; /* 6.4 */
+    --night: rgba(60, 50, 30, 0.055);
+    --warn: #8a4500; /* 6.4 */
+    --bad: #9e2414; /* 6.9 */
+
+    --map-land: #eceeea;
+    --map-water: #dde1e4;
+    --map-river: #c2c8ce;
+    --map-border: #8b929a;
+    --map-ring: rgba(40, 48, 60, 0.4);
+    --map-label: #20252c;
+    --map-halo: rgba(255, 255, 255, 0.92);
+    --nodata: rgba(70, 78, 90, 0.5);
+    /* Monotone in lightness, checked for the three colour-vision deficiencies. */
+    --radar-1: #5baee1;
+    --radar-2: #348dd7;
+    --radar-3: #3566c7;
+    --radar-4: #463eac;
+    --radar-5: #4d1977;
+    --radar-6: #42043a;
+
+    /* Words only: Georgia, the last fallback, has old-style figures. */
+    --font-serif: ui-serif, 'Iowan Old Style', Charter, 'Sitka Text', 'Noto Serif', Georgia, serif;
+    --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+    /* rem at both ends of each clamp, so the user's text size moves them all. */
+    --text-xs: 0.8125rem;
+    --text-s: clamp(0.875rem, 0.85rem + 0.1vw, 0.9375rem);
+    --text-m: clamp(1rem, 0.97rem + 0.15vw, 1.0625rem);
+    --text-l: clamp(1.1875rem, 1.1rem + 0.4vw, 1.375rem);
+    --text-xl: clamp(1.375rem, 1.25rem + 0.6vw, 1.75rem);
+    --text-2xl: clamp(1.875rem, 1.6rem + 1.2vw, 2.75rem);
+    --text-hero: clamp(4.5rem, 2.5rem + 12vmin, 9rem);
+
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: clamp(1rem, 0.9rem + 0.4vw, 1.25rem);
+    --space-5: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+    --space-6: clamp(2rem, 1.5rem + 2vw, 3rem);
+
+    /* The larger inset on both sides keeps a phone in landscape symmetrical. */
+    --gutter: max(1rem, env(safe-area-inset-left), env(safe-area-inset-right));
+    --bar-h: 3.5rem;
+    --sticky-h: 3rem;
+    --tap: 2.75rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #161512;
+      --ink: #ece7dc; /* 14.8 */
+      --ink-2: #b3ac9f; /* 8.1 */
+      --ink-3: #9a9386; /* 6.0 */
+      --rule: #34312a;
+      --temp: #f08b55; /* 7.4 */
+      --temp-band: rgba(240, 139, 85, 0.22);
+      --temp-wing: rgba(240, 139, 85, 0.38);
+      --rain: #86aef0; /* 8.1 */
+      --night: rgba(255, 245, 225, 0.045);
+      --warn: #f0b45a; /* 9.9 */
+      --bad: #ff9b8a; /* 9.0 */
+
+      --map-land: #1b2027;
+      --map-water: #252c35;
+      --map-river: #343c47;
+      --map-border: #8f99a6;
+      --map-ring: rgba(220, 228, 238, 0.42);
+      --map-label: #e3e8ee;
+      --map-halo: rgba(15, 18, 22, 0.9);
+      --nodata: rgba(200, 210, 222, 0.42);
+      --radar-1: #296898;
+      --radar-2: #3f81c1;
+      --radar-3: #6f97e2;
+      --radar-4: #b3a8f6;
+      --radar-5: #e9c1f2;
+      --radar-6: #ffe3f1;
+    }
+  }
+
+  /* The old names, for the blocks not yet rebuilt; the cleanup removes them.
+     Colours follow the new palette. Sizes keep their old values, so a block's
+     geometry, and its loading placeholder, change only when that block does. */
+  :root {
+    --bg: var(--paper);
+    --surface: var(--paper);
+    --surface-2: color-mix(in srgb, var(--ink) 6%, var(--paper));
+    --line: var(--rule);
+    --line-strong: var(--ink-3);
+    --text: var(--ink);
+    --text-2: var(--ink-2);
+    --text-3: var(--ink-3);
+    --accent: var(--ink);
+    --accent-soft: var(--surface-2);
+    --focus: var(--ink);
+    --warn-bg: var(--paper);
+    --warn-line: var(--warn);
+    --warn-text: var(--warn);
+    --bad-bg: var(--paper);
+    --bad-line: var(--bad);
+    --bad-text: var(--bad);
+    --ok: var(--ink-2);
+    --wind: var(--ink-2);
+    --gust: var(--ink-2);
+    --grid: var(--rule);
+    --zero: var(--ink-3);
+
+    --sym-sun: var(--temp);
+    --sym-moon: var(--ink-2);
+    --sym-cloud: var(--paper);
+    --sym-cloud-back: var(--rule);
+    --sym-cloud-edge: var(--ink-2);
+    --sym-rain: var(--rain);
+    --sym-fog: var(--ink-2);
+    --sym-snow: var(--rain);
+
+    --t-m10: var(--temp);
+    --t-0: var(--temp);
+    --t-10: var(--temp);
+    --t-20: var(--temp);
+    --t-30: var(--temp);
+    --t-40: var(--temp);
+
+    --r1: var(--radar-1);
+    --r2: var(--radar-2);
+    --r3: var(--radar-3);
+    --r4: var(--radar-4);
+    --r5: var(--radar-5);
+    --r6: var(--radar-6);
+
+    --font: var(--font-sans);
+    --fs-xs: 0.75rem;
+    --fs-sm: 0.875rem;
+    --fs-md: 1rem;
+    --fs-lg: 1.125rem;
+    --fs-xl: 1.375rem;
+    --fs-2xl: 1.75rem;
+    --fs-hero: 3.5rem;
+    --sp-1: 4px;
+    --sp-2: 8px;
+    --sp-3: 12px;
+    --sp-4: 16px;
+    --sp-5: 24px;
+    --sp-6: 32px;
+    --sp-7: 48px;
+    --radius: 0;
+    --radius-sm: 0;
+    --bar: 44px;
+  }
+}
