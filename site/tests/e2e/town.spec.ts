@@ -140,7 +140,7 @@ test('never calls a value corrected that did not get the correction', async ({
   await expect(d10.locator('.note')).toHaveText(
     'Minima e massima senza correzione: oggi la correzione non è disponibile.'
   );
-  await expect(d10.locator('.foot')).toContainText('Minima e massima sono la media semplice');
+  await expect(d10.locator('.foot')).toContainText('Minima e massima sono la media dei modelli');
   // "Nessun valore è corretto" and "non corretta" are allowed: they say the opposite.
   const text = ((await page.locator('body').textContent()) ?? '')
     .toLowerCase()
