@@ -112,6 +112,11 @@ One line under the station sentence, always the same height (two lines reserved)
 | `now.source_radar`   | sotto il blocco radar                                                                 | riga | Radar della Protezione Civile, immagine delle {ora}, {fa}.      |
 | `now.to_radar`       | link alla sezione radar                                                               | 30   | Guarda il radar                                                 |
 | `now.metar_raw`      | link per vedere il bollettino originale                                               | 40   | Bollettino METAR originale                                      |
+| `now.line_wind`      | riga dei dettagli, dopo la temperatura                                                | 20   | Vento {v} {dir}                                                 |
+| `now.line_calm`      | riga dei dettagli, vento sotto 2 km/h                                                 | 20   | Calma di vento                                                  |
+| `now.line_gust`      | riga dei dettagli, solo se il bollettino le segnala                                   | 20   | raffiche {g}                                                    |
+| `now.line_humidity`  | riga dei dettagli                                                                     | 20   | umidità {pct}                                                   |
+| `now.line_vis`       | riga dei dettagli, solo sotto 5 km                                                    | 20   | visibilità {v}                                                  |
 
 ## Verdetto, coppia e prossime 12 ore
 
