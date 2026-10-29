@@ -204,12 +204,18 @@
   {/if}
   <div class="key" aria-hidden="true">
     <span>
-      <svg width="48" height="12" viewBox="0 0 48 12" focusable="false">
-        <rect class="wing" x="0" y="1" width="10" height="10" />
-        <rect class="core" x="10" y="1" width="28" height="10" />
-        <rect class="wing" x="38" y="1" width="10" height="10" />
+      <svg width="28" height="12" viewBox="0 0 28 12" focusable="false">
+        <rect class="core" x="0" y="1" width="28" height="10" />
       </svg>
-      {t('d10.key_core')}, {t('d10.key_wings')}
+      {t('d10.key_core')}
+    </span>
+    <span>
+      <svg width="28" height="12" viewBox="0 0 28 12" focusable="false">
+        <rect class="wing" x="0" y="1" width="10" height="10" />
+        <rect class="core" x="10" y="1" width="8" height="10" />
+        <rect class="wing" x="18" y="1" width="10" height="10" />
+      </svg>
+      {t('d10.key_wings')}
     </span>
     <span>{@render dots(1, 1)} {t('d10.key_dot_full')}</span>
     <span>{@render dots(0, 1)} {t('d10.key_dot_empty')}</span>
