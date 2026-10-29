@@ -239,7 +239,7 @@
     {/if}
   </div>
   <div class="foot">
-    <p>{raw ? t('d10.footnote_raw') : t('d10.footnote', { stazione: data.town.station })}</p>
+    <p>{raw ? t('d10.footnote_raw') : t('d10.footnote')}</p>
   </div>
 {/if}
 
