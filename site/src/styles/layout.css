@@ -22,6 +22,11 @@
     margin-inline: auto;
     padding-inline: var(--gutter);
   }
+  /* The two town links wrap under each other before they push the page wide. */
+  .switch {
+    flex-wrap: wrap;
+    max-inline-size: 100%;
+  }
 
   /* The hero is one grid and #adesso a subgrid of it, so the island's parts
      land in the page's own areas: .now (temperature, source and rain lines),
