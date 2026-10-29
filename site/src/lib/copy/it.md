@@ -35,11 +35,11 @@ Numbers, dates and times are formatted by the code in Italian (comma decimals, 2
 
 ## Pagina iniziale (selettore)
 
-| chiave       | dove                        | max  | testo                                               |
-| ------------ | --------------------------- | ---- | --------------------------------------------------- |
-| `home.h1`    | titolo                      | 40   | Che tempo fa?                                       |
-| `home.intro` | sotto il titolo             | riga | Previsioni corrette sulla stazione ARPA più vicina. |
-| `home.ref`   | sotto il nome di ogni paese | 60   | Stazione ARPA di {stazione}, a {km}                 |
+| chiave       | dove                                | max  | testo                                               |
+| ------------ | ----------------------------------- | ---- | --------------------------------------------------- |
+| `home.h1`    | titolo, solo per lettori di schermo | 40   | Meteo a Pedrengo e Sesto Calende                    |
+| `home.intro` | sotto il titolo                     | riga | Previsioni corrette sulla stazione ARPA più vicina. |
+| `home.ref`   | sotto il nome di ogni paese         | 60   | Stazione ARPA di {stazione}, a {km}                 |
 
 ## Navigazione della pagina del paese
 

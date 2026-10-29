@@ -8,8 +8,11 @@ test.beforeEach(async ({ page, context, baseURL }) => {
 
 test('shows both towns on a first visit', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('.towncard')).toHaveCount(2);
-  await expect(page.locator('.towncard').first()).toContainText('Torre Boldone, a 3,4 km');
+  const towns = page.locator('.towns a');
+  await expect(towns).toHaveCount(2);
+  await expect(towns.first()).toHaveAccessibleName(
+    'Pedrengo BG Stazione ARPA di Torre Boldone, a 3,4 km'
+  );
 });
 
 test('keeps the footer at the bottom of a short page', async ({ page }) => {
@@ -31,7 +34,7 @@ test('ignores a remembered town that does not exist', async ({ page }) => {
   await page.goto('/privacy');
   await page.evaluate(() => localStorage.setItem('meteo.town', 'milano'));
   await page.goto('/');
-  await expect(page.locator('h1')).toHaveText('Che tempo fa?');
+  await expect(page.locator('h1')).toHaveText('Meteo a Pedrengo e Sesto Calende');
 });
 
 test('links back to the remembered town from a text page', async ({ page }) => {
@@ -48,6 +51,7 @@ test('answers the station question where the town page points', async ({ page })
   await page.getByRole('link', { name: 'Perché una stazione' }).click();
   await expect(page).toHaveURL(/\/come-funziona#stazione$/);
   await expect(page.locator('#stazione')).toHaveText('Perché una stazione');
+  await expect(page.locator('.prose .nw').first()).toHaveText('2 km');
 });
 
 test('answers an unknown address with a 404 that leads to the towns', async ({ page }) => {
