@@ -152,7 +152,8 @@ test('keeps the section bar at the bottom of an upright phone', async ({ page, b
   expect(box.height).toBeLessThanOrEqual(room.focus);
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
   const footer = await page.locator('footer').evaluate((e) => e.getBoundingClientRect().bottom);
-  expect(footer).toBeLessThanOrEqual(box.top);
+  // The page scrolls in fractions of a pixel: half of one is rounding, not overlap.
+  expect(footer).toBeLessThanOrEqual(box.top + 0.5);
   await bar.getByRole('link', { name: '10 giorni' }).click();
   await expect(page).toHaveURL(/#giorni-10$/);
   await expect(bar.getByRole('link', { name: '10 giorni' })).toHaveAttribute(
