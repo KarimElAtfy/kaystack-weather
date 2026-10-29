@@ -18,7 +18,7 @@
   focusable="false"
 >
   {#if label}<title>{label}</title>{/if}
-  {#if sunLayer(sky.base)}<use href="#{sky.base}-sun" />{/if}
-  {#if inkLayer(sky.base)}<use href="#{sky.base}-ink" />{/if}
-  {#if sky.drops}<use href="#{sky.drops}" />{/if}
+  {#if sunLayer(sky.base)}<use href="#{sky.base}-sun" data-qa="sym-sun" />{/if}
+  {#if inkLayer(sky.base)}<use href="#{sky.base}-ink" data-qa="sym-ink" />{/if}
+  {#if sky.drops}<use href="#{sky.drops}" data-qa="sym-rain" />{/if}
 </svg>
