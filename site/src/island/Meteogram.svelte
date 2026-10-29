@@ -88,6 +88,12 @@
     return { t0, t1, X, perHour, low, high, YT };
   });
 
+  // Gridlines every 5 degrees, labelled every 5 or, where those would touch, every 10.
+  const grid = $derived(
+    [-15, -10, -5, 0, 5, 10, 15, 20, 25, 30, 35, 40].filter((v) => v > g.low && v < g.high)
+  );
+  const labelStep = $derived(g.YT(0) - g.YT(5) >= font * 1.3 ? 5 : 10);
+
   const nights = $derived.by(() => {
     const spans: [number, number][] = [];
     let start: number | null = null;
@@ -188,7 +194,23 @@
       return { text, x, y, box };
     });
     // A label wider than the plot has no place on it: left out, never shrunk.
-    return keep(placed.filter((mark) => mark.box.right - mark.box.left <= plot));
+    const [top, bottom] = lane('temp')!;
+    return keep(
+      placed.filter(
+        (mark) =>
+          mark.box.right - mark.box.left <= plot &&
+          mark.box.top >= top &&
+          mark.box.bottom <= bottom + 2
+      )
+    );
+  });
+  const dayBoxes = $derived.by(() => {
+    const [top, bottom] = lane('day')!;
+    return days.flatMap((d) => {
+      if (!d.label) return [];
+      const left = d.i === first ? 0 : d.x + 4;
+      return [{ left, right: left + measure(d.label, true), top, bottom: bottom + font * 0.3 }];
+    });
   });
   // The clock change is said above the chart too, so its mark gives way to the labels.
   const dstMarks = $derived.by(() => {
@@ -200,7 +222,11 @@
         const x = g.X(at(i)) + 3;
         return { x, box: { left: x, right: x + w, top, bottom: top + font + 3 } };
       })
-      .filter((m) => m.box.right <= W && !marks.some((other) => overlap(other.box, m.box)));
+      .filter(
+        (m) =>
+          m.box.right <= W &&
+          ![...marks.map((other) => other.box), ...dayBoxes].some((other) => overlap(other, m.box))
+      );
   });
   // The lane titles shorten to one word where the long one would not fit.
   const title = (long: string, short: string) =>
@@ -208,7 +234,7 @@
 
   const [rainTop, rainBottom] = $derived(lane('rain') ?? [0, 0]);
   // Bars stop a line short of the lane's top, so the count above the tallest stays inside.
-  const barTop = $derived(rainTop + font + 4);
+  const barTop = $derived(rainTop + Math.ceil(font * 1.4));
   const rainShare = (i: number) => (hourly.rain.n_models[i] ?? 0) / (hourly.rain.m_models[i] || 1);
   const wet = $derived(shown.filter((i) => (hourly.rain.n_models[i] ?? 0) > 0));
   const wettest = $derived(
@@ -350,9 +376,11 @@
           height={wind[1] - plotTop}
         />
       {/each}
-      {#each [0, 5, 10, 15, 20, 25, 30, 35, 40, -5, -10, -15].filter((v) => v > g.low && v < g.high) as v (v)}
+      {#each grid as v (v)}
         <line class="grid" class:zero={v === 0} x1="0" x2={W} y1={g.YT(v)} y2={g.YT(v)} />
-        <text class="ylab" x={W - 2} y={g.YT(v) - 3} text-anchor="end">{int(v)}°</text>
+        {#if v % labelStep === 0}
+          <text class="ylab" x={W - 2} y={g.YT(v) - 3} text-anchor="end">{int(v)}°</text>
+        {/if}
       {/each}
       {#each midnights as i (i)}
         <line class="mid" x1={g.X(at(i))} x2={g.X(at(i))} y1={day[0]} y2={axis[0]} />
