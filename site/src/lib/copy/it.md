@@ -35,11 +35,11 @@ Numbers, dates and times are formatted by the code in Italian (comma decimals, 2
 
 ## Pagina iniziale (selettore)
 
-| chiave       | dove                        | max  | testo                                               |
-| ------------ | --------------------------- | ---- | --------------------------------------------------- |
-| `home.h1`    | titolo                      | 40   | Che tempo fa?                                       |
-| `home.intro` | sotto il titolo             | riga | Previsioni corrette sulla stazione ARPA più vicina. |
-| `home.ref`   | sotto il nome di ogni paese | 60   | Stazione ARPA di {stazione}, a {km}                 |
+| chiave       | dove                                | max  | testo                                               |
+| ------------ | ----------------------------------- | ---- | --------------------------------------------------- |
+| `home.h1`    | titolo, solo per lettori di schermo | 40   | Meteo a Pedrengo e Sesto Calende                    |
+| `home.intro` | sotto il titolo                     | riga | Previsioni corrette sulla stazione ARPA più vicina. |
+| `home.ref`   | sotto il nome di ogni paese         | 60   | Stazione ARPA di {stazione}, a {km}                 |
 
 ## Navigazione della pagina del paese
 
@@ -444,7 +444,7 @@ Drafts. Each block below is one paragraph or one list item; the owner rewrites t
 
 #### page.how.intro
 
-Questo sito fa le previsioni per due paesi, Pedrengo e Sesto Calende. Non inventa un modello nuovo: prende quelli che esistono, corregge i loro errori abituali e lo dice quando non è sicuro.
+Il sito non ha un modello suo. Prende dieci modelli esistenti e ne corregge la temperatura sulla stazione ARPA più vicina a ogni paese.
 
 #### page.how.h_station
 
@@ -452,7 +452,7 @@ Perché una stazione
 
 #### page.how.station
 
-Né Pedrengo né Sesto Calende hanno una stazione meteo. La previsione è fatta per la stazione ARPA Lombardia più adatta: Torre Boldone per Pedrengo, Ispra JRC per Sesto Calende. Il sito scrive sempre quale stazione usa e a che distanza è. Anche due stazioni vicine non misurano lo stesso: Torre Boldone e Bergamo, a meno di 2 km, differiscono in media di più di mezzo grado, e di notte Varano Borghi è in media 2,6 °C più freddo di Ispra.
+Né Pedrengo né Sesto Calende hanno una stazione meteo, quindi la previsione è fatta per la stazione ARPA Lombardia più adatta: Torre Boldone per Pedrengo, Ispra JRC per Sesto Calende. Anche stazioni vicine misurano cose diverse: Torre Boldone e Bergamo, a meno di 2 km, differiscono in media di più di mezzo grado.
 
 #### page.how.h_models
 
@@ -460,47 +460,23 @@ Da dove viene la previsione
 
 #### page.how.models
 
-Ogni ora controlliamo se sono uscite nuove corse di dieci modelli meteorologici, scaricati da Open-Meteo: ECMWF IFS e AIFS, ICON-D2 e ICON-EU del servizio tedesco, ICON-2I del servizio italiano, ICON-CH1 e ICON-CH2 del servizio svizzero, AROME del servizio francese, il modello globale del servizio britannico e GFS del servizio americano. Alcuni arrivano a 2 giorni, altri a 10 o più: per questo più si guarda lontano, meno modelli ci sono.
-
-#### page.how.h_correction
-
-La correzione
+Ogni ora scarichiamo da Open-Meteo le nuove corse di dieci modelli: ECMWF IFS e AIFS, ICON-D2 e ICON-EU del servizio tedesco, ICON-2I del servizio italiano, ICON-CH1 e ICON-CH2 del servizio svizzero, AROME del servizio francese, il modello globale del servizio britannico e GFS del servizio americano. Alcuni arrivano a 2 giorni, altri a 10.
 
 #### page.how.correction
 
-Ogni modello sbaglia a modo suo: c'è chi fa troppo caldo di notte e chi troppo freddo di giorno. Per ogni modello calcoliamo l'errore medio degli ultimi 60 giorni rispetto alla stazione, separato per ora del giorno e per giorno di anticipo, e lo togliamo. Poi facciamo la media dei modelli corretti, tutti con lo stesso peso. Un modello entra nella media solo se ha almeno 45 giorni di confronti su 60. I coefficienti si ricalcolano ogni notte.
-
-#### page.how.h_what
-
-Cosa è corretto e cosa no
-
-#### page.how.what
-
-In questa versione correggiamo solo la temperatura: quella ora per ora, la massima e la minima, ognuna con la sua correzione. Vento, raffiche, nuvole, punto di rugiada e quantità di pioggia sono la media semplice dei modelli, senza correzione, e il sito lo scrive accanto a ogni valore.
+Ogni notte calcoliamo per ciascun modello l'errore medio degli ultimi 60 giorni rispetto alla stazione, ora per ora e per giorno di anticipo, e lo togliamo; un modello entra solo se ha almeno 45 giorni di confronti. Poi facciamo la media, tutti con lo stesso peso. Per ora correggiamo solo la temperatura: vento, nuvole e quantità di pioggia sono la media dei modelli senza correzione.
 
 #### page.how.h_range
 
-L'intervallo tra i modelli
+Quanto i modelli vanno d'accordo
 
 #### page.how.range
 
-Accanto alla temperatura mostriamo il valore più basso e quello più alto tra i modelli corretti. Non è una probabilità: dice solo quanto i modelli sono d'accordo tra loro. Se la fascia è stretta, i modelli si somigliano; se è larga, c'è più incertezza. Anche quando sono tutti d'accordo possono sbagliare insieme.
-
-#### page.how.h_rain
-
-La pioggia
+La fascia intorno alla temperatura va dal modello più freddo al più caldo. Se è stretta i modelli si somigliano, se è larga c'è più incertezza; possono comunque sbagliare tutti insieme.
 
 #### page.how.rain
 
-Per ogni ora contiamo quanti modelli danno almeno 0,2 mm, per ogni giorno quanti ne danno almeno 1 mm. "7 modelli su 10" vuol dire questo, e non una probabilità del 70%. La quantità che vedi nella tabella è la media dei modelli, senza correzione. Una vera probabilità di pioggia, misurata e calibrata, arriverà con la versione 1.0.
-
-#### page.how.h_symbols
-
-I simboli
-
-#### page.how.symbols
-
-Il simbolo del cielo viene dalle nuvole previste e da quanti modelli danno pioggia. Una goccia vuota vuol dire pioggia possibile: la dà qualche modello, ma meno della metà. Le gocce piene compaiono quando la dà almeno la metà dei modelli, e sono una, due o tre secondo la quantità media. Nebbia, temporale e neve compaiono solo in Adesso, perché vengono dal bollettino dell'aeroporto.
+Per la pioggia contiamo i modelli che ne danno almeno 0,2 mm in un'ora o 1 mm in un giorno. "7 modelli su 10" vuol dire questo, non una probabilità del 70%. Nel simbolo del cielo la goccia vuota vuol dire che la pioggia la dà meno della metà dei modelli; le gocce piene, da una a tre secondo la quantità, che la dà almeno la metà.
 
 #### page.how.h_far
 
@@ -508,7 +484,7 @@ Giorni 8, 9 e 10
 
 #### page.how.far
 
-Così lontano arrivano di solito solo tre modelli, e la correzione usata è quella del settimo giorno. Per questo li segniamo come meno affidabili.
+Così lontano arrivano di solito solo tre modelli, e la correzione è quella del settimo giorno. Per questo sono segnati come meno affidabili.
 
 #### page.how.h_now
 
@@ -516,7 +492,7 @@ Adesso
 
 #### page.how.now
 
-I valori di Adesso sono misurati, non previsti. Vengono dai bollettini METAR degli aeroporti di Orio al Serio, per Pedrengo, e di Malpensa, per Sesto Calende, che escono ogni 30 minuti, e dal radar della Protezione Civile, che fa un'immagine ogni 5 minuti. L'aeroporto non è in paese: per questo scriviamo sempre a quanti chilometri si trova e quanti minuti ha il dato.
+I valori di Adesso sono misurati, non previsti. Vengono dal bollettino METAR dell'aeroporto, Orio al Serio per Pedrengo e Malpensa per Sesto Calende, che esce ogni 30 minuti, e dal radar della Protezione Civile, che fa un'immagine ogni 5. L'aeroporto non è in paese, per questo il sito ne scrive sempre la distanza. Nebbia, temporale e neve compaiono solo qui, perché li segnala l'aeroporto.
 
 #### page.how.h_times
 
@@ -524,23 +500,15 @@ Orari
 
 #### page.how.times
 
-Tutti gli orari sono quelli italiani. La notte del 25 ottobre 2026 torna l'ora solare: alle 3 si torna alle 2, e nel grafico e nella tabella le ore dalle 2 alle 3 compaiono due volte.
-
-#### page.how.h_score
-
-Quanto ci prendiamo
-
-#### page.how.score
-
-Da fine novembre pubblicheremo l'errore delle nostre previsioni rispetto alle stazioni, con il numero di casi e il periodo, anche quando i modelli senza correzione fanno meglio di noi.
+Gli orari sono quelli italiani. Nella notte del cambio dell'ora il grafico e la tabella mostrano due volte le ore tra le 2 e le 3.
 
 #### page.sources.intro
 
-Il sito usa solo dati aperti. Qui sotto ci sono tutte le fonti, cosa ne facciamo e con quale licenza.
+Il sito usa solo dati aperti.
 
 #### page.sources.openmeteo
 
-Previsioni dei modelli: Open-Meteo.com, licenza CC BY 4.0. I modelli sono dei servizi meteorologici europei, americano e britannico elencati in Come funziona.
+Previsioni dei modelli: Open-Meteo.com, licenza CC BY 4.0. I modelli sono elencati in Come funziona.
 
 #### page.sources.radar
 
@@ -576,7 +544,7 @@ Il paese che scegli resta salvato solo nel tuo browser, per riaprirlo la volta d
 
 #### page.privacy.p3
 
-Le pagine del sito sono file fissi, distribuiti dalla rete di Microsoft Azure Static Web Apps; le impostazioni del servizio stanno in una regione Azure negli Stati Uniti (East US 2). I dati meteo arrivano da un archivio Azure in Italia. Come ogni server web, quelli di Azure ricevono l'indirizzo IP di chi si collega. Il sito non ha un server suo, non registra le visite e non conserva niente su chi lo usa.
+Le pagine sono file fissi distribuiti da Microsoft Azure Static Web Apps, con le impostazioni del servizio negli Stati Uniti (East US 2); i dati meteo arrivano da un archivio Azure in Italia. Come ogni server web, Azure riceve l'indirizzo IP di chi si collega. Il sito non ha un server suo e non registra le visite.
 
 #### page.score.p1
 

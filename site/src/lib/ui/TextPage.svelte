@@ -11,6 +11,9 @@
   // whose last part starts with h_ is a heading; "stazione" is the anchor the
   // town pages link to.
   const ANCHORS: Record<string, string> = { station: 'stazione' };
+  // A number and its unit stay on one line, as on the town pages.
+  const UNIT = /(\d+(?:,\d+)? (?:km|mm|°C|%))/;
+  const pieces = (text: string) => text.split(UNIT).map((part, i) => ({ part, unit: i % 2 === 1 }));
   const blocks = $derived(
     Object.entries(long)
       .filter(([key]) => key.startsWith(`page.${name}.`))
@@ -46,7 +49,11 @@
     <a class="back" href="/" hidden data-back={back}>{t('site.name')}</a>
     <h1>{t(title)}</h1>
     {#each blocks as block (block.key)}
-      {#if block.id}<h2 id={block.id}>{block.text}</h2>{:else}<p>{block.text}</p>{/if}
+      {#if block.id}<h2 id={block.id}>{block.text}</h2>{:else}<p>
+          {#each pieces(block.text) as piece, i (i)}{#if piece.unit}<span class="nw"
+                >{piece.part}</span
+              >{:else}{piece.part}{/if}{/each}
+        </p>{/if}
     {/each}
   </article>
 </main>

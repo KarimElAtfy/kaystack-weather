@@ -1,82 +1,85 @@
-/* The selector and the text pages. */
+/* The selector and the text pages: paper and ink, no boxes. */
 
 @layer blocks {
-  .home {
-    padding-top: var(--sp-6);
-    padding-bottom: var(--sp-7);
-  }
-  .home h1 {
-    font-size: var(--fs-2xl);
-    line-height: 1.2;
+  .home,
+  .prose {
+    padding-block: var(--space-5) var(--space-6);
   }
   .home .intro {
-    margin-top: var(--sp-3);
-    color: var(--text-2);
-    max-width: 56ch;
+    color: var(--ink-2);
+    font-size: var(--text-m);
+    max-width: 66ch;
   }
+
+  /* One row per town, the whole row is the link. */
   .towns {
-    display: grid;
-    gap: var(--sp-4);
-    margin-top: var(--sp-5);
+    list-style: none;
+    margin: var(--space-4) 0 0;
+    padding: 0;
+    border-bottom: 1px solid var(--rule);
   }
-  @media (min-width: 720px) {
-    .towns {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
-  .towncard {
+  .towns a {
     display: block;
+    min-block-size: var(--tap);
+    padding-block: var(--space-4);
+    border-top: 1px solid var(--rule);
+    color: var(--ink);
     text-decoration: none;
-    color: var(--text);
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: var(--sp-5);
-    min-height: 120px;
   }
-  .towncard:hover {
-    border-color: var(--line-strong);
+  .towns .name {
+    font-family: var(--font-serif);
+    font-size: var(--text-2xl);
+    line-height: 1.1;
   }
-  .towncard .name {
-    font-size: var(--fs-xl);
-    font-weight: 700;
-    display: flex;
-    align-items: baseline;
-    gap: var(--sp-2);
-    flex-wrap: wrap;
+  .towns .prov {
+    font-family: var(--font-sans);
+    font-size: var(--text-s);
+    color: var(--ink-3);
   }
-  .towncard .prov {
-    font-size: var(--fs-sm);
-    color: var(--text-3);
-    font-weight: 500;
-  }
-  .towncard .ref {
+  .towns .ref {
     display: block;
-    margin-top: var(--sp-2);
-    color: var(--text-2);
-    font-size: var(--fs-sm);
+    margin-top: var(--space-1);
+    color: var(--ink-2);
+    font-size: var(--text-s);
   }
+  .towns a:hover .name {
+    text-decoration: underline;
+    text-decoration-color: var(--rule);
+    text-underline-offset: 0.15em;
+  }
+
   .prose {
-    padding-top: var(--sp-5);
-    padding-bottom: var(--sp-7);
-    max-width: 68ch;
+    max-width: 66ch;
+    font-size: var(--text-m);
+    line-height: 1.6;
   }
   .prose h1 {
-    font-size: var(--fs-2xl);
-    line-height: 1.2;
-    margin-bottom: var(--sp-3);
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: var(--text-2xl);
+    line-height: 1.1;
+    margin-bottom: var(--space-4);
   }
   .prose h2 {
-    font-size: var(--fs-lg);
-    margin: var(--sp-5) 0 var(--sp-2);
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: var(--text-xl);
+    line-height: 1.2;
+    margin: var(--space-5) 0 var(--space-2);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--ink);
   }
   .prose p {
-    margin: 0 0 var(--sp-3);
+    margin: 0 0 var(--space-3);
+  }
+  .prose .nw {
+    white-space: nowrap;
   }
   .prose .back {
     display: inline-flex;
-    min-height: 44px;
     align-items: center;
-    font-size: var(--fs-sm);
+    min-block-size: var(--tap);
+    min-inline-size: var(--tap);
+    font-size: var(--text-s);
   }
 }
