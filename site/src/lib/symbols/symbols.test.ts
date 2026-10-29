@@ -1,6 +1,7 @@
 import { expect, test } from 'vitest';
 import { has } from '#lib/copy/t.ts';
 import { fromCover, fromMetar, pick } from './pick.ts';
+import { inkLayer, sunLayer } from './layers.ts';
 import { ICON_IDS, SYMBOL_IDS, favicon, sprite } from './sprite.ts';
 
 test('draws every symbol a pick can ask for', () => {
@@ -58,6 +59,15 @@ test('writes one symbol per id and leaves the colours to the page', () => {
     expect(svg).toContain(`<symbol id="${id}"`);
   }
   expect(svg).not.toMatch(/<style|style="|#[0-9a-f]{6}/);
+});
+
+test('splits each sky into one symbol per colour', () => {
+  const svg = sprite();
+  for (const id of SYMBOL_IDS.filter((i) => !i.startsWith('drops'))) {
+    expect(svg.includes(`<symbol id="${id}-sun"`)).toBe(sunLayer(id));
+    expect(svg.includes(`<symbol id="${id}-ink"`)).toBe(inkLayer(id));
+  }
+  expect(svg).toContain('<symbol id="few-day" viewBox="0 0 32 32"><use href="#few-day-sun"/>');
 });
 
 test('draws a favicon that needs no page tokens', () => {

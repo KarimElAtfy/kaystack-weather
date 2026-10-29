@@ -66,13 +66,14 @@ for (const scheme of ['light', 'dark'] as const) {
       expect((await shares(page, map, '--map-land')).token).toBeGreaterThan(0.5);
     });
 
-    test('paints the clouds of the weather symbols', async ({ page, baseURL }) => {
+    test('paints the lines of the weather symbols', async ({ page, baseURL }) => {
       await open(page, 'pioggia', baseURL ?? '');
       const days = page.locator('#giorni-10 table.days');
       await days.scrollIntoViewIfNeeded();
-      const found = await shares(page, days, '--sym-cloud');
+      const found = await shares(page, days, '--ink-2');
       expect(found.black).toBeLessThan(0.001);
-      expect(found.token).toBeGreaterThan(0.005);
+      // Strokes cover far less of the table than the filled clouds did.
+      expect(found.token).toBeGreaterThan(0.001);
     });
   });
 }
