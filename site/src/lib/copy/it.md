@@ -113,6 +113,20 @@ One line under the station sentence, always the same height (two lines reserved)
 | `now.to_radar`       | link alla sezione radar                                                               | 30   | Guarda il radar                                                 |
 | `now.metar_raw`      | link per vedere il bollettino originale                                               | 40   | Bollettino METAR originale                                      |
 
+## Verdetto, coppia e prossime 12 ore
+
+Under Adesso: one sentence on rain in the next 12 hours, two figures, and six cells every 2 hours. `{quando}` comes from `h48.summary_from`, `h48.summary_from_day` and `h48.summary_by`; `{modelli}` from `models.one` and `models.many`, so one model reads "1 modello su 10". Before 15:00 the pair is Oggi and Stanotte, from 15:00 Stanotte and Domani.
+
+| chiave              | dove                                                              | max  | testo                                                     |
+| ------------------- | ----------------------------------------------------------------- | ---- | --------------------------------------------------------- |
+| `verdict.rain_most` | verdetto: almeno metà dei modelli dà pioggia                      | riga | Pioggia {quando} per {modelli}.                           |
+| `verdict.rain_some` | verdetto: meno della metà                                         | riga | Pioggia {quando} solo per {modelli}.                      |
+| `verdict.rain_none` | verdetto: nessun modello                                          | riga | Nessuno dei {m} modelli dà pioggia nelle prossime 12 ore. |
+| `verdict.today`     | coppia sotto il verdetto, prima delle 15                          | 12   | Oggi {t}                                                  |
+| `verdict.tonight`   | coppia sotto il verdetto                                          | 12   | Stanotte {t}                                              |
+| `verdict.tomorrow`  | coppia sotto il verdetto, dalle 15                                | 12   | Domani {t}                                                |
+| `strip.label`       | nome della striscia delle prossime 12 ore, per lettori di schermo | riga | Prossime 12 ore                                           |
+
 ## Prossime 48 ore
 
 | chiave                  | dove                                                                                          | max  | testo                                                                                                                                  |
@@ -281,47 +295,48 @@ One line under the station sentence, always the same height (two lines reserved)
 
 ## Unità, tempi, direzioni
 
-| chiave           | dove                                         | max | testo                 |
-| ---------------- | -------------------------------------------- | --- | --------------------- |
-| `unit.c`         | dopo una temperatura                         | 3   | °C                    |
-| `unit.kmh`       | dopo una velocità                            | 5   | km/h                  |
-| `unit.mm`        | dopo una quantità di pioggia                 | 3   | mm                    |
-| `unit.mmh`       | dopo un'intensità di pioggia                 | 5   | mm/h                  |
-| `unit.km`        | dopo una distanza                            | 3   | km                    |
-| `unit.m`         | dopo una distanza                            | 2   | m                     |
-| `unit.pct`       | dopo una percentuale                         | 1   | %                     |
-| `vis.max`        | visibilità di 10 km o più                    | 16  | oltre 10 km           |
-| `time.just_now`  | età sotto un minuto                          | 12  | adesso                |
-| `time.min_ago`   | età in minuti                                | 14  | {n} min fa            |
-| `time.hour_ago`  | età di un'ora esatta                         | 14  | 1 ora fa              |
-| `time.hours_ago` | età in ore, da 3 ore in su                   | 14  | {n} ore fa            |
-| `time.hm_ago`    | età in ore e minuti, sotto le 3 ore          | 20  | {h} h {m} min fa      |
-| `time.yesterday` | giorno                                       | 10  | ieri                  |
-| `time.at`        | ora del giorno                               | 12  | alle {ora}            |
-| `time.hour_word` | nella tabella oraria, per lettori di schermo | 10  | ore {ora}             |
-| `models.one`     | conteggio dei modelli                        | 20  | 1 modello su {m}      |
-| `models.many`    | conteggio dei modelli                        | 20  | {n} modelli su {m}    |
-| `models.none`    | conteggio dei modelli                        | 24  | nessun modello su {m} |
-| `models.short`   | conteggio breve, in tabella                  | 8   | {n}/{m}               |
-| `wind.calm`      | vento sotto 2 km/h                           | 10  | calma                 |
-| `wind.variable`  | direzione variabile                          | 12  | variabile             |
-| `wind.from`      | direzione lunga                              | 16  | da {dir}              |
-| `dir.N`          | direzione breve                              | 2   | N                     |
-| `dir.NE`         | direzione breve                              | 2   | NE                    |
-| `dir.E`          | direzione breve                              | 2   | E                     |
-| `dir.SE`         | direzione breve                              | 2   | SE                    |
-| `dir.S`          | direzione breve                              | 2   | S                     |
-| `dir.SO`         | direzione breve                              | 2   | SO                    |
-| `dir.O`          | direzione breve                              | 2   | O                     |
-| `dir.NO`         | direzione breve                              | 2   | NO                    |
-| `dirlong.N`      | direzione lunga                              | 12  | nord                  |
-| `dirlong.NE`     | direzione lunga                              | 12  | nord-est              |
-| `dirlong.E`      | direzione lunga                              | 12  | est                   |
-| `dirlong.SE`     | direzione lunga                              | 12  | sud-est               |
-| `dirlong.S`      | direzione lunga                              | 12  | sud                   |
-| `dirlong.SO`     | direzione lunga                              | 12  | sud-ovest             |
-| `dirlong.O`      | direzione lunga                              | 12  | ovest                 |
-| `dirlong.NO`     | direzione lunga                              | 12  | nord-ovest            |
+| chiave           | dove                                                        | max | testo                 |
+| ---------------- | ----------------------------------------------------------- | --- | --------------------- |
+| `unit.c`         | dopo una temperatura                                        | 3   | °C                    |
+| `unit.kmh`       | dopo una velocità                                           | 5   | km/h                  |
+| `unit.mm`        | dopo una quantità di pioggia                                | 3   | mm                    |
+| `unit.mmh`       | dopo un'intensità di pioggia                                | 5   | mm/h                  |
+| `unit.km`        | dopo una distanza                                           | 3   | km                    |
+| `unit.m`         | dopo una distanza                                           | 2   | m                     |
+| `unit.pct`       | dopo una percentuale                                        | 1   | %                     |
+| `vis.max`        | visibilità di 10 km o più                                   | 16  | oltre 10 km           |
+| `time.just_now`  | età sotto un minuto                                         | 12  | adesso                |
+| `time.min_ago`   | età in minuti                                               | 14  | {n} min fa            |
+| `time.hour_ago`  | età di un'ora esatta                                        | 14  | 1 ora fa              |
+| `time.hours_ago` | età in ore, da 3 ore in su                                  | 14  | {n} ore fa            |
+| `time.hm_ago`    | età in ore e minuti, sotto le 3 ore                         | 20  | {h} h {m} min fa      |
+| `time.yesterday` | giorno                                                      | 10  | ieri                  |
+| `time.at`        | ora del giorno                                              | 12  | alle {ora}            |
+| `time.hour_word` | nella tabella oraria, per lettori di schermo                | 10  | ore {ora}             |
+| `models.one`     | conteggio dei modelli                                       | 20  | 1 modello su {m}      |
+| `models.many`    | conteggio dei modelli                                       | 20  | {n} modelli su {m}    |
+| `models.none`    | conteggio dei modelli                                       | 24  | nessun modello su {m} |
+| `models.short`   | conteggio breve, in tabella                                 | 8   | {n}/{m}               |
+| `models.of`      | conteggio breve nella striscia delle 12 ore e nei 10 giorni | 10  | {n} su {m}            |
+| `wind.calm`      | vento sotto 2 km/h                                          | 10  | calma                 |
+| `wind.variable`  | direzione variabile                                         | 12  | variabile             |
+| `wind.from`      | direzione lunga                                             | 16  | da {dir}              |
+| `dir.N`          | direzione breve                                             | 2   | N                     |
+| `dir.NE`         | direzione breve                                             | 2   | NE                    |
+| `dir.E`          | direzione breve                                             | 2   | E                     |
+| `dir.SE`         | direzione breve                                             | 2   | SE                    |
+| `dir.S`          | direzione breve                                             | 2   | S                     |
+| `dir.SO`         | direzione breve                                             | 2   | SO                    |
+| `dir.O`          | direzione breve                                             | 2   | O                     |
+| `dir.NO`         | direzione breve                                             | 2   | NO                    |
+| `dirlong.N`      | direzione lunga                                             | 12  | nord                  |
+| `dirlong.NE`     | direzione lunga                                             | 12  | nord-est              |
+| `dirlong.E`      | direzione lunga                                             | 12  | est                   |
+| `dirlong.SE`     | direzione lunga                                             | 12  | sud-est               |
+| `dirlong.S`      | direzione lunga                                             | 12  | sud                   |
+| `dirlong.SO`     | direzione lunga                                             | 12  | sud-ovest             |
+| `dirlong.O`      | direzione lunga                                             | 12  | ovest                 |
+| `dirlong.NO`     | direzione lunga                                             | 12  | nord-ovest            |
 
 ## Simboli del cielo (testo alternativo)
 
