@@ -43,12 +43,12 @@
   let { hourly, first, now, lat, lon, selected = $bindable(), readout }: Props = $props();
 
   let width = $state(0);
-  let cap = $state(0);
+  let capHeight = $state(0);
   let root = $state<HTMLElement>();
   // The chart's own text size, read from the page so that it follows the user's setting.
   // A probe ten em wide reports any change of the text size, zoom included.
-  let probe = $state(130);
-  const font = $derived(probe / 10 || 13);
+  let probeWidth = $state(130);
+  const font = $derived(probeWidth / 10 || 13);
   let family = $state('sans-serif');
   $effect(() => {
     if (root) family = getComputedStyle(root).fontFamily;
@@ -65,7 +65,7 @@
   const shown = $derived(times.map((_, i) => i).filter((i) => i >= first));
   const at = (i: number) => times[i] ?? 0;
   const W = $derived(Math.max(200, width));
-  const R = $derived(rows(W, font, cap || null));
+  const R = $derived(rows(W, font, capHeight || null));
   const lane = (name: keyof typeof R) => (R[name] as [number, number] | undefined) ?? null;
 
   // The right margin holds the temperature scale, so its labels never sit on the line.
@@ -251,6 +251,29 @@
     for (const i of shown) if (Math.abs(at(i) - ms) < Math.abs(at(best) - ms)) best = i;
     selected = best;
   }
+  // The chart's width, the screen's height cap and the text size, read on the
+  // next frame: drawing in the observer's own turn makes WebKit report a loop.
+  function sizes(node: HTMLElement) {
+    const cap = node.querySelector<HTMLElement>('.cap')!;
+    const probe = node.querySelector<HTMLElement>('.probe')!;
+    let frame = 0;
+    const read = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        width = node.clientWidth;
+        capHeight = cap.clientHeight;
+        probeWidth = probe.clientWidth;
+      });
+    };
+    const observer = new ResizeObserver(read);
+    for (const target of [node, cap, probe]) observer.observe(target);
+    return {
+      destroy() {
+        cancelAnimationFrame(frame);
+        observer.disconnect();
+      }
+    };
+  }
   // The readout stays until Escape, a tap outside the chart, or another hour.
   $effect(() => {
     if (selected === null) return;
@@ -279,9 +302,9 @@
   }
 </script>
 
-<div class="meteogram" bind:this={root} bind:clientWidth={width}>
-  <div class="cap" bind:clientHeight={cap} aria-hidden="true"></div>
-  <div class="probe" bind:clientWidth={probe} aria-hidden="true"></div>
+<div class="meteogram" bind:this={root} use:sizes>
+  <div class="cap" aria-hidden="true"></div>
+  <div class="probe" aria-hidden="true"></div>
   {#if readout && selected !== null}
     <div class="readout" use:beside={g.X(at(selected))}>
       {#each readout as line, k (k)}<p class:when={k === 0}>{line}</p>{/each}
