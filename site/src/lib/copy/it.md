@@ -504,11 +504,11 @@ Gli orari sono quelli italiani. Nella notte del cambio dell'ora il grafico e la 
 
 #### page.sources.intro
 
-Il sito usa solo dati aperti. Qui sotto ci sono tutte le fonti, cosa ne facciamo e con quale licenza.
+Il sito usa solo dati aperti.
 
 #### page.sources.openmeteo
 
-Previsioni dei modelli: Open-Meteo.com, licenza CC BY 4.0. I modelli sono dei servizi meteorologici europei, americano e britannico elencati in Come funziona.
+Previsioni dei modelli: Open-Meteo.com, licenza CC BY 4.0. I modelli sono elencati in Come funziona.
 
 #### page.sources.radar
 
@@ -544,7 +544,7 @@ Il paese che scegli resta salvato solo nel tuo browser, per riaprirlo la volta d
 
 #### page.privacy.p3
 
-Le pagine del sito sono file fissi, distribuiti dalla rete di Microsoft Azure Static Web Apps; le impostazioni del servizio stanno in una regione Azure negli Stati Uniti (East US 2). I dati meteo arrivano da un archivio Azure in Italia. Come ogni server web, quelli di Azure ricevono l'indirizzo IP di chi si collega. Il sito non ha un server suo, non registra le visite e non conserva niente su chi lo usa.
+Le pagine sono file fissi distribuiti da Microsoft Azure Static Web Apps, con le impostazioni del servizio negli Stati Uniti (East US 2); i dati meteo arrivano da un archivio Azure in Italia. Come ogni server web, Azure riceve l'indirizzo IP di chi si collega. Il sito non ha un server suo e non registra le visite.
 
 #### page.score.p1
 
