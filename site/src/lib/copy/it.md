@@ -16,30 +16,30 @@ Numbers, dates and times are formatted by the code in Italian (comma decimals, 2
 
 ## Sito e intestazione
 
-| chiave                        | dove                                                                  | max  | testo                                                                                                                                    |
-| ----------------------------- | --------------------------------------------------------------------- | ---- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `site.name`                   | intestazione, titolo della scheda                                     | 16   | Meteo                                                                                                                                    |
-| `site.beta`                   | etichetta accanto al nome                                             | 6    | beta                                                                                                                                     |
-| `site.beta_title`             | descrizione dell'etichetta beta per lettori di schermo e al passaggio | riga | Versione di prova: i dati possono mancare o essere sbagliati.                                                                            |
-| `site.skip`                   | link per saltare al contenuto (visibile solo da tastiera)             | 30   | Vai al contenuto                                                                                                                         |
-| `site.title_town`             | titolo della scheda del browser, pagina del paese                     | 60   | Meteo a {paese}: adesso, 48 ore, 10 giorni e radar                                                                                       |
-| `site.title_home`             | titolo della scheda, pagina iniziale                                  | 60   | Meteo per Pedrengo e Sesto Calende                                                                                                       |
-| `site.description`            | descrizione per i motori di ricerca                                   | 155  | Previsioni per Pedrengo e Sesto Calende corrette sulle stazioni ARPA vicine, con misure degli aeroporti e radar della Protezione Civile. |
-| `switch.label`                | nome del selettore del paese, per lettori di schermo                  | riga | Scegli il paese                                                                                                                          |
-| `switch.pedrengo`             | selettore del paese                                                   | 14   | Pedrengo                                                                                                                                 |
-| `switch.sesto-calende`        | selettore del paese                                                   | 14   | Sesto Calende                                                                                                                            |
-| `town.pedrengo`               | titolo della pagina                                                   | 30   | Pedrengo                                                                                                                                 |
-| `town.sesto-calende`          | titolo della pagina                                                   | 30   | Sesto Calende                                                                                                                            |
-| `town.province.pedrengo`      | accanto al titolo                                                     | 6    | BG                                                                                                                                       |
-| `town.province.sesto-calende` | accanto al titolo                                                     | 6    | VA                                                                                                                                       |
+| chiave                        | dove                                                                  | max  | testo                                                                                                                                |
+| ----------------------------- | --------------------------------------------------------------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `site.name`                   | intestazione, titolo della scheda                                     | 16   | Meteo                                                                                                                                |
+| `site.beta`                   | etichetta accanto al nome                                             | 6    | beta                                                                                                                                 |
+| `site.beta_title`             | descrizione dell'etichetta beta per lettori di schermo e al passaggio | riga | Versione di prova: i dati possono mancare o essere sbagliati.                                                                        |
+| `site.skip`                   | link per saltare al contenuto (visibile solo da tastiera)             | 30   | Vai al contenuto                                                                                                                     |
+| `site.title_town`             | titolo della scheda del browser, pagina del paese                     | 60   | Meteo a {paese}                                                                                                                      |
+| `site.title_home`             | titolo della scheda, pagina iniziale                                  | 60   | Meteo a Pedrengo e Sesto Calende                                                                                                     |
+| `site.description`            | descrizione per i motori di ricerca                                   | 155  | Previsioni per Pedrengo e Sesto Calende corrette sulle stazioni ARPA vicine. Misure degli aeroporti e radar della Protezione Civile. |
+| `switch.label`                | nome del selettore del paese, per lettori di schermo                  | riga | Scegli il paese                                                                                                                      |
+| `switch.pedrengo`             | selettore del paese                                                   | 14   | Pedrengo                                                                                                                             |
+| `switch.sesto-calende`        | selettore del paese                                                   | 14   | Sesto Calende                                                                                                                        |
+| `town.pedrengo`               | titolo della pagina                                                   | 30   | Pedrengo                                                                                                                             |
+| `town.sesto-calende`          | titolo della pagina                                                   | 30   | Sesto Calende                                                                                                                        |
+| `town.province.pedrengo`      | accanto al titolo                                                     | 6    | BG                                                                                                                                   |
+| `town.province.sesto-calende` | accanto al titolo                                                     | 6    | VA                                                                                                                                   |
 
 ## Pagina iniziale (selettore)
 
-| chiave       | dove                        | max  | testo                                                                                                                                                       |
-| ------------ | --------------------------- | ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `home.h1`    | titolo                      | 40   | Che tempo fa?                                                                                                                                               |
-| `home.intro` | sotto il titolo             | riga | Previsioni per due paesi della Lombardia, corrette ogni giorno sulla stazione ARPA più vicina. Il sito ricorda l'ultimo paese che hai scelto, senza cookie. |
-| `home.ref`   | sotto il nome di ogni paese | 60   | Stazione di riferimento: {stazione}, a {km}                                                                                                                 |
+| chiave       | dove                        | max  | testo                                               |
+| ------------ | --------------------------- | ---- | --------------------------------------------------- |
+| `home.h1`    | titolo                      | 40   | Che tempo fa?                                       |
+| `home.intro` | sotto il titolo             | riga | Previsioni corrette sulla stazione ARPA più vicina. |
+| `home.ref`   | sotto il nome di ogni paese | 60   | Stazione ARPA di {stazione}, a {km}                 |
 
 ## Navigazione della pagina del paese
 
@@ -265,46 +265,46 @@ Under Adesso: one sentence on rain in the next 12 hours, two figures, and six ce
 
 ## Stati: caricamento, dati vecchi, dati mancanti, fuori linea
 
-| chiave                    | dove                                            | max  | testo                                                                                   |
-| ------------------------- | ----------------------------------------------- | ---- | --------------------------------------------------------------------------------------- |
-| `state.loading`           | al posto dei valori mentre arrivano             | 30   | Carico i dati                                                                           |
-| `state.nodata`            | al posto di un singolo valore assente           | 6    | n.d.                                                                                    |
-| `state.nodata_title`      | spiegazione di n.d.                             | riga | Dato non disponibile                                                                    |
-| `state.stale_tag`         | etichetta accanto a un valore vecchio           | 16   | non aggiornato                                                                          |
-| `state.metar_stale`       | Adesso, bollettino vecchio                      | riga | Ultimo bollettino alle {ora} ({fa}): adesso potrebbe essere diverso.                    |
-| `state.metar_expired`     | Adesso, bollettino troppo vecchio per mostrarlo | riga | Nessun bollettino dell'aeroporto dalle {ora}. Non mostriamo valori così vecchi.         |
-| `state.metar_missing`     | Adesso, nessun bollettino                       | riga | I dati dell'aeroporto non sono disponibili.                                             |
-| `state.radar_missing`     | Adesso, nessun dato radar                       | riga | Il radar non è disponibile, quindi non sappiamo se piove adesso.                        |
-| `state.radar_nodata_here` | Adesso, il radar non vede la zona del paese     | riga | Il radar non copre la zona del paese in questa immagine.                                |
-| `state.forecast_missing`  | al posto di 48 ore e 10 giorni                  | riga | La previsione non è disponibile in questo momento.                                      |
-| `state.partial_hours`     | sotto il grafico, se mancano ore                | riga | Mancano alcune ore: senza un modello corretto non mostriamo niente.                     |
-| `state.fetch_failed`      | avviso in alto                                  | riga | Non riusciamo a scaricare i dati. Riproviamo tra un minuto.                             |
-| `state.noscript`          | se JavaScript è spento                          | riga | Per vedere i dati serve JavaScript: il sito li scarica dal nostro archivio ogni minuto. |
-| `state.refreshed`         | piè di pagina                                   | riga | Dati controllati alle {ora}.                                                            |
+| chiave                    | dove                                            | max  | testo                                                                           |
+| ------------------------- | ----------------------------------------------- | ---- | ------------------------------------------------------------------------------- |
+| `state.loading`           | al posto dei valori mentre arrivano             | 30   | Carico i dati                                                                   |
+| `state.nodata`            | al posto di un singolo valore assente           | 6    | n.d.                                                                            |
+| `state.nodata_title`      | spiegazione di n.d.                             | riga | Dato non disponibile                                                            |
+| `state.stale_tag`         | etichetta accanto a un valore vecchio           | 16   | non aggiornato                                                                  |
+| `state.metar_stale`       | Adesso, bollettino vecchio                      | riga | Ultimo bollettino alle {ora} ({fa}): adesso potrebbe essere diverso.            |
+| `state.metar_expired`     | Adesso, bollettino troppo vecchio per mostrarlo | riga | Nessun bollettino dell'aeroporto dalle {ora}. Non mostriamo valori così vecchi. |
+| `state.metar_missing`     | Adesso, nessun bollettino                       | riga | I dati dell'aeroporto non sono disponibili.                                     |
+| `state.radar_missing`     | Adesso, nessun dato radar                       | riga | Il radar non è disponibile, quindi non sappiamo se piove adesso.                |
+| `state.radar_nodata_here` | Adesso, il radar non vede la zona del paese     | riga | Il radar non copre la zona del paese in questa immagine.                        |
+| `state.forecast_missing`  | al posto di 48 ore e 10 giorni                  | riga | La previsione non è disponibile in questo momento.                              |
+| `state.partial_hours`     | sotto il grafico, se mancano ore                | riga | Mancano alcune ore: senza un modello corretto non mostriamo niente.             |
+| `state.fetch_failed`      | avviso in alto                                  | riga | Non riusciamo a scaricare i dati. Riproviamo tra un minuto.                     |
+| `state.noscript`          | se JavaScript è spento                          | riga | Per vedere i dati serve JavaScript.                                             |
+| `state.refreshed`         | piè di pagina                                   | riga | Dati controllati alle {ora}.                                                    |
 
 ## Piè di pagina e stato delle fonti
 
-| chiave                  | dove                                                             | max  | testo                                                                                                                                                                                            |
-| ----------------------- | ---------------------------------------------------------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `footer.status_h2`      | titolo apribile                                                  | 30   | Stato delle fonti                                                                                                                                                                                |
-| `footer.status_ok`      | accanto a una fonte aggiornata                                   | 16   | aggiornata                                                                                                                                                                                       |
-| `footer.status_late`    | accanto a una fonte in ritardo                                   | 16   | in ritardo                                                                                                                                                                                       |
-| `footer.status_down`    | accanto a una fonte ferma                                        | 16   | ferma                                                                                                                                                                                            |
-| `footer.status_row`     | riga di una fonte                                                | riga | Dati delle {ora}, {fa}                                                                                                                                                                           |
-| `footer.src.metar`      | nome della fonte                                                 | 40   | Bollettini METAR degli aeroporti                                                                                                                                                                 |
-| `footer.src.radar`      | nome della fonte                                                 | 40   | Radar della Protezione Civile                                                                                                                                                                    |
-| `footer.src.open-meteo` | nome della fonte                                                 | 40   | Modelli meteorologici (Open-Meteo)                                                                                                                                                               |
-| `footer.src.arpa`       | nome della fonte                                                 | 40   | Stazioni ARPA Lombardia                                                                                                                                                                          |
-| `footer.src.arpa_note`  | sotto ARPA                                                       | riga | Arrivano con 3-9 ore di ritardo: servono a correggere e verificare, non per Adesso.                                                                                                              |
-| `footer.credits`        | crediti, sempre visibili                                         | riga | Dati dei modelli: Open-Meteo.com, CC BY 4.0. Radar: Dipartimento della Protezione Civile (Radar-DPC), CC BY-SA 4.0. Osservazioni: METAR, NOAA Aviation Weather Center. Stazioni: ARPA Lombardia. |
-| `footer.how`            | link                                                             | 20   | Come funziona                                                                                                                                                                                    |
-| `footer.sources`        | link                                                             | 20   | Fonti e licenze                                                                                                                                                                                  |
-| `footer.score`          | link, dalla S4 (riservata)                                       | 24   | Quanto ci prendiamo                                                                                                                                                                              |
-| `footer.score_soon`     | accanto al link, dalla S4 (riservata)                            | 16   | da fine novembre                                                                                                                                                                                 |
-| `footer.privacy`        | link                                                             | 12   | Privacy                                                                                                                                                                                          |
-| `footer.code`           | link al codice                                                   | 30   | Codice sorgente                                                                                                                                                                                  |
-| `footer.nav_label`      | nome della navigazione del piè di pagina, per lettori di schermo | riga | Pagine del sito                                                                                                                                                                                  |
-| `footer.beta`           | ultima riga                                                      | riga | Versione beta. I dati possono mancare o essere sbagliati: non usarli per decisioni di sicurezza.                                                                                                 |
+| chiave                  | dove                                                             | max  | testo                                                                                              |
+| ----------------------- | ---------------------------------------------------------------- | ---- | -------------------------------------------------------------------------------------------------- |
+| `footer.status_h2`      | titolo apribile                                                  | 30   | Stato delle fonti                                                                                  |
+| `footer.status_ok`      | accanto a una fonte aggiornata                                   | 16   | aggiornata                                                                                         |
+| `footer.status_late`    | accanto a una fonte in ritardo                                   | 16   | in ritardo                                                                                         |
+| `footer.status_down`    | accanto a una fonte ferma                                        | 16   | ferma                                                                                              |
+| `footer.status_row`     | riga di una fonte                                                | riga | Dati delle {ora}, {fa}                                                                             |
+| `footer.src.metar`      | nome della fonte                                                 | 40   | Bollettini METAR degli aeroporti                                                                   |
+| `footer.src.radar`      | nome della fonte                                                 | 40   | Radar della Protezione Civile                                                                      |
+| `footer.src.open-meteo` | nome della fonte                                                 | 40   | Modelli meteorologici (Open-Meteo)                                                                 |
+| `footer.src.arpa`       | nome della fonte                                                 | 40   | Stazioni ARPA Lombardia                                                                            |
+| `footer.src.arpa_note`  | sotto ARPA                                                       | riga | Arrivano con 3-9 ore di ritardo: servono a correggere e verificare, non per Adesso.                |
+| `footer.credits`        | crediti, sempre visibili                                         | riga | Dati: Open-Meteo.com (CC BY 4.0), NOAA Aviation Weather Center, ARPA Lombardia.                    |
+| `footer.how`            | link                                                             | 20   | Come funziona                                                                                      |
+| `footer.sources`        | link                                                             | 20   | Fonti e licenze                                                                                    |
+| `footer.score`          | link, dalla S4 (riservata)                                       | 24   | Quanto ci prendiamo                                                                                |
+| `footer.score_soon`     | accanto al link, dalla S4 (riservata)                            | 16   | da fine novembre                                                                                   |
+| `footer.privacy`        | link                                                             | 12   | Privacy                                                                                            |
+| `footer.code`           | link al codice                                                   | 30   | Codice sorgente                                                                                    |
+| `footer.nav_label`      | nome della navigazione del piè di pagina, per lettori di schermo | riga | Pagine del sito                                                                                    |
+| `footer.beta`           | ultima riga                                                      | riga | Sito in prova: i dati possono mancare o essere sbagliati. Per le allerte segui i canali ufficiali. |
 
 ## Unità, tempi, direzioni
 
@@ -427,16 +427,16 @@ The code reads each group of the METAR weather field (for example `-RA BR`) and 
 
 ## Pagine di testo: titoli e link
 
-| chiave               | dove                                   | max  | testo                                 |
-| -------------------- | -------------------------------------- | ---- | ------------------------------------- |
-| `page.how.title`     | titolo della pagina                    | 40   | Come funziona                         |
-| `page.sources.title` | titolo della pagina                    | 40   | Fonti e licenze                       |
-| `page.privacy.title` | titolo della pagina                    | 40   | Privacy                               |
-| `page.score.title`   | titolo della pagina                    | 40   | Quanto ci prendiamo                   |
-| `page.back`          | link per tornare al paese              | 30   | Torna a {paese}                       |
-| `page.404.title`     | titolo della pagina 404 e della scheda | 40   | Pagina non trovata                    |
-| `page.404.p1`        | prima frase                            | riga | Questo indirizzo non esiste sul sito. |
-| `page.404.p2`        | prima dei link ai due paesi            | riga | Le previsioni sono qui:               |
+| chiave               | dove                                   | max  | testo                     |
+| -------------------- | -------------------------------------- | ---- | ------------------------- |
+| `page.how.title`     | titolo della pagina                    | 40   | Come funziona             |
+| `page.sources.title` | titolo della pagina                    | 40   | Fonti e licenze           |
+| `page.privacy.title` | titolo della pagina                    | 40   | Privacy                   |
+| `page.score.title`   | titolo della pagina                    | 40   | Quanto ci prendiamo       |
+| `page.back`          | link per tornare al paese              | 30   | Torna a {paese}           |
+| `page.404.title`     | titolo della pagina 404 e della scheda | 40   | Pagina non trovata        |
+| `page.404.p1`        | prima frase                            | riga | Questa pagina non esiste. |
+| `page.404.p2`        | prima dei link ai due paesi            | riga | Le previsioni sono qui:   |
 
 ## Testi lunghi
 
