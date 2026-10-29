@@ -39,3 +39,8 @@ test('moves the town under its marker when neither side has room', () => {
   const wide = { ...town, x: 80, w: 90 };
   expect(place(160, 200, [], wide, [], []).get('town')).toEqual({ left: 35, top: 108 });
 });
+
+test('pulls the town inside the map when no side fits', () => {
+  const tall = { ...town, x: 50, y: 50, w: 90, h: 60 };
+  expect(place(100, 100, [], tall, [], []).get('town')).toEqual({ left: 5, top: 40 });
+});

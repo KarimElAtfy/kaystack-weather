@@ -78,6 +78,15 @@
   }
   .map .here {
     font-weight: 600;
+    /* Wider than a small map at large text: it wraps rather than leaving it. */
+    inline-size: max-content;
+    max-inline-size: 100%;
+    white-space: normal;
+  }
+  .map .probe {
+    position: absolute;
+    inline-size: 10em;
+    visibility: hidden;
   }
   .map .city {
     position: absolute;
@@ -98,6 +107,9 @@
     border: 1px solid var(--rule);
     font-weight: 600;
     font-size: var(--text-s);
+  }
+  .stamp.gone {
+    visibility: hidden;
   }
   /* A frame not drawn yet, or missing: hatched over the map, so the town at
      the centre stays in sight while scrubbing. */
@@ -260,10 +272,17 @@
     background: repeating-linear-gradient(135deg, var(--nodata) 0 2px, transparent 2px 5px);
     border: 1px solid var(--nodata);
   }
-  .ramp .bounds .unit {
-    grid-column: 7;
-    justify-self: end;
+  .ramp .title {
+    margin: 0 0 var(--space-1);
+  }
+  .ramp .bounds span {
     white-space: nowrap;
+  }
+  /* Every other bound where six would touch, as with large text on a phone. */
+  @container ramp (max-width: 16em) {
+    .ramp .bounds span:nth-child(even) {
+      visibility: hidden;
+    }
   }
   /* Four words in a row where the steps are too narrow for six; from 30em
      each class has its name under its step. Every name stays for screen readers. */

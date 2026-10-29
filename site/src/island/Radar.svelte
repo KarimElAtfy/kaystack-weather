@@ -151,10 +151,10 @@
   let stamp = $state<HTMLElement>();
   let names = $state<Record<string, HTMLElement>>({});
   let spots = $state(new Map<string, Spot>());
-  // The town's name width changes with the text size, and calls for placing again.
-  let townWidth = $state(0);
+  // A probe ten em wide changes with the text size, and calls for placing again.
+  let probe = $state(0);
   $effect(() => {
-    if (!radar || !mapSize || !townWidth) return;
+    if (!radar || !mapSize || !probe) return;
     const k = mapSize / radar.frame_width_px;
     const tx = (radar.town_px.x + 0.5) * k;
     const ty = (radar.town_px.y + 0.5) * k;
@@ -184,15 +184,22 @@
       y: p.y * k,
       ...size(p.name)
     }));
-    spots = place(
-      mapSize,
-      mapSize,
-      taken,
-      { key: 'town', x: tx, y: ty, ...size('town') },
-      rings,
-      others
-    );
+    const here = { key: 'town', x: tx, y: ty, ...size('town') };
+    const placed = place(mapSize, mapSize, taken, here, rings, others);
+    spots = placed;
+    // On a map too small for both, the time gives way to the town: it is also
+    // under the range and in its spoken text.
+    const spot = placed.get('town');
+    const corner = taken[0];
+    stampHidden =
+      !!spot &&
+      !!corner &&
+      spot.left < corner.right &&
+      spot.top < corner.bottom &&
+      spot.left + here.w > corner.left &&
+      spot.top + here.h > corner.top;
   });
+  let stampHidden = $state(false);
   // Positions set through the CSSOM, which the policy allows where a style
   // attribute would be refused.
   function at(node: HTMLElement, spot: Spot | undefined) {
@@ -289,6 +296,7 @@
         <circle class="town-dot" cx={tx} cy={ty} r="0.8" />
       </svg>
       <div class="names" aria-hidden="true" data-qa="map-label">
+        <span class="probe" bind:clientWidth={probe}></span>
         {#each points as p (p.name)}
           <span class="city" use:dot={[p.x * k, p.y * k, spots.has(p.name)]}></span>
           <span class="name" bind:this={names[p.name]} use:at={spots.get(p.name)}>{p.name}</span>
@@ -300,15 +308,12 @@
             use:at={spots.get(`ring ${km}`)}>{km} {t('unit.km')}</span
           >
         {/each}
-        <span
-          class="name here"
-          bind:this={names.town}
-          bind:clientWidth={townWidth}
-          use:at={spots.get('town')}>{town}</span
-        >
+        <span class="name here" bind:this={names.town} use:at={spots.get('town')}>{town}</span>
       </div>
       {#if frame && !loading}
-        <div class="stamp" bind:this={stamp}>{hm(Date.parse(frame.time))}</div>
+        <div class="stamp" class:gone={stampHidden} bind:this={stamp}>
+          {hm(Date.parse(frame.time))}
+        </div>
       {/if}
       {#if loading}
         <div class="veil-box"><p>{t('radar.loading')}</p></div>
@@ -363,7 +368,7 @@
       </button>
     </div>
     <div class="ramp">
-      <p class="vh">{t('radar.legend_title')}</p>
+      <p class="title">{t('radar.legend_title')}</p>
       <div class="steps" aria-hidden="true">
         {#each radar.scale as bin (bin.index)}<i class="r{bin.index}" data-qa="radar-{bin.index}"
           ></i>{/each}
@@ -371,7 +376,6 @@
       </div>
       <div class="bounds" aria-hidden="true">
         {#each radar.scale as bin (bin.index)}<span>{bound(bin.from_mm_h)}</span>{/each}
-        <span class="unit">{t('unit.mmh')}</span>
       </div>
       <ul class="words">
         {#each radar.scale as bin (bin.index)}

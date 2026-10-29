@@ -38,17 +38,20 @@ export function place(
     out.set(key, { left: b.left, top: b.top });
   };
 
-  // The town: right of its marker, else left, else under it moved inside the
-  // map; kept even where it overlaps something.
+  // The town: right of its marker, else left, else under or over it moved
+  // inside the map, else as far inside as it goes; kept even over something.
   const marker = box(town.x - 2 * DOT, town.y - 2 * DOT, 4 * DOT, 4 * DOT);
   used.push(marker);
   const centred = Math.min(Math.max(0, town.x - town.w / 2), width - town.w);
+  const under = town.y + 2 * DOT + GAP / 2;
   const spots = [
     box(town.x + 2 * DOT + GAP / 2, town.y - town.h / 2, town.w, town.h),
     box(town.x - 2 * DOT - GAP / 2 - town.w, town.y - town.h / 2, town.w, town.h),
-    box(centred, town.y + 2 * DOT + GAP / 2, town.w, town.h)
+    box(centred, under, town.w, town.h),
+    box(centred, town.y - 2 * DOT - GAP / 2 - town.h, town.w, town.h)
   ];
-  keep(town.key, spots.find(inside) ?? spots[2]!);
+  const last = box(centred, Math.max(0, Math.min(under, height - town.h)), town.w, town.h);
+  keep(town.key, spots.find(inside) ?? last);
 
   for (const ring of rings) {
     const b = box(ring.x - ring.w / 2, ring.y - ring.h - 1, ring.w, ring.h);
