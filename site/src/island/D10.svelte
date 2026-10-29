@@ -8,7 +8,7 @@
   import { pick } from '#lib/symbols/pick.ts';
   import Sky from '#lib/symbols/Sky.svelte';
   import Icon from '#lib/symbols/Icon.svelte';
-  import { dayMonth, dayNumber, localDate, weekdayShort, ymd } from '#lib/time.ts';
+  import { dayNumber, localDate, weekdayShort, ymd } from '#lib/time.ts';
   import type { TownData } from './town.svelte.ts';
 
   let { data }: { data: TownData } = $props();
@@ -56,7 +56,6 @@
       const day = daily.day[k] ?? '';
       const at = localDate(day);
       const ahead = Math.round((at - issueDay) / DAY);
-      const previous = k > 0 ? localDate(daily.day[k - 1] ?? day) : at;
       const n = daily.rain.n_models[k] ?? 0;
       const m = daily.rain.m_models[k] ?? 0;
       // No cloud cover, no sky: a symbol would be a forecast nobody made.
@@ -79,9 +78,6 @@
       return {
         day,
         name,
-        // The month only where it changes, so a row never has to guess it.
-        month:
-          Number(dayNumber(at)) < Number(dayNumber(previous)) ? dayMonth(at).split(' ').pop() : '',
         // Less reliable: the correction comes from a shorter lead than the day's own.
         far: (daily.tmax_c.lead_band[k] ?? 0) < ahead,
         n,
@@ -317,12 +313,6 @@
       grid-area: day;
       font-weight: 600;
       line-height: 1.15;
-    }
-    .day small {
-      display: block;
-      font-weight: 400;
-      font-size: var(--text-xs);
-      color: var(--ink-2);
     }
     .sky {
       grid-area: sky;
