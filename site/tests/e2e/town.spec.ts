@@ -10,7 +10,7 @@ test('says when the forecast was issued, in Rome time', async ({ page }) => {
   await page.goto('/pedrengo');
   await expect(page.locator('#statusline')).toHaveText('Aggiornata alle 14:00 (1 h 10 min fa).');
   await expect(page.locator('.trust strong')).toHaveText('Torre Boldone');
-  await expect(page.locator('#adesso .src').first()).toContainText(
+  await expect(page.locator('#adesso .source')).toContainText(
     "Misurati all'aeroporto di Orio al Serio, a 4,3 km,"
   );
 });
@@ -96,6 +96,36 @@ test('says once when the device goes offline, and when it is back', async ({ pag
   await context.setOffline(false);
   await expect(page.locator('#statusline')).toHaveText('Aggiornata alle 14:00 (1 h 20 min fa).');
   await expect(page.locator('#announce')).toHaveText('Di nuovo in linea.');
+});
+
+test('tells the next 12 hours under the measurement', async ({ page }) => {
+  await page.goto('/pedrengo');
+  await expect(page.locator('[data-qa="temperature"]')).toContainText('13°');
+  await expect(page.locator('[data-qa="verdict"]')).toHaveText(
+    'Pioggia dalle 17:00 per 5 modelli su 10.'
+  );
+  await expect(page.locator('[data-qa="pair"]')).toHaveText('Stanotte 8° Domani 13°');
+  // Each cell: the hour, the symbol's text, the temperature, the models with rain.
+  await expect(page.locator('[data-qa="strip"] li')).toHaveText([
+    '16:00 Pioggia debole. Pioggia: 5 modelli su 10. 16° 5 su 10',
+    '18:00 Pioggia. Pioggia: 8 modelli su 10. 15° 8 su 10',
+    '20:00 Pioggia. Pioggia: 10 modelli su 10. 13° 10 su 10',
+    '22:00 Pioggia. Pioggia: 10 modelli su 10. 10° 10 su 10',
+    '00:00 Pioggia. Pioggia: 6 modelli su 10. 8° 6 su 10',
+    '02:00 Pioggia possibile. Pioggia: 3 modelli su 10. 8° 3 su 10'
+  ]);
+});
+
+test('keeps the measurement when the forecast is missing', async ({ page, context }) => {
+  await context.route(`${ACCOUNT}/public/v1/pedrengo/forecast.json`, (route) =>
+    route.fulfill({ status: 404, body: '' })
+  );
+  await page.goto('/pedrengo');
+  await expect(page.locator('#adesso .next')).toHaveText(
+    'La previsione non è disponibile in questo momento.'
+  );
+  await expect(page.locator('[data-qa="temperature"]')).toBeVisible();
+  await expect(page.locator('[data-qa="rain-line"]')).toBeVisible();
 });
 
 test('shows what is missing instead of empty space', async ({ page, context, baseURL }) => {
