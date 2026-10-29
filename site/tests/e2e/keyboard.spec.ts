@@ -42,8 +42,8 @@ for (const town of TOWNS) {
       'Grafico',
       'Tabella',
       'Ora del grafico',
-      'Avvia',
       "Ora dell'immagine",
+      'Avvia',
       'Stato delle fonti'
     ];
     const at = order.map((name) => names.indexOf(name));

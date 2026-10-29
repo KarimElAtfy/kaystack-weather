@@ -1,3 +1,4 @@
+import json
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -24,25 +25,28 @@ def test_each_town_has_a_map_drawn_in_its_frame(town):
     }
 
 
-def test_city_labels_keep_clear_of_what_the_site_draws(town):
+def test_the_map_carries_shapes_and_leaves_the_names_to_the_site(town):
     root = ET.parse(MAPS / f"{town.slug}.svg").getroot()
-    frame = basemap.Frame(town)
-    labels = list(root.iter(f"{SVG}text"))
-    assert len(labels) >= 6
-    rings = basemap.ring_label_boxes(frame)
-    assert len(rings) == 3
-    for label in labels:
-        x, y = float(label.get("x")), float(label.get("y"))
-        box = basemap.label_box(x, y, label.get("text-anchor"), label.text)
-        assert box.inside(frame.width, frame.height), label.text
-        assert not any(box.meets(b) for b in basemap.site_boxes(frame, town.name)), label.text
+    classes = {e.get("class") for e in root.iter() if e.get("class")}
+    assert classes == {"map-land", "map-river", "map-water", "map-border"}
+    assert not list(root.iter(f"{SVG}text"))
 
 
-def test_a_city_under_a_ring_label_is_left_off(town):
+def test_cities_sit_inside_the_frame_in_the_order_picked(town):
     frame = basemap.Frame(town)
-    tx, ty = frame.town
-    frame.px = lambda lon, lat: (tx, ty - 11.5)
-    assert basemap.place_cities(frame, town.name, [("Qui", 0.0, 0.0)]) == []
+    cities = json.loads((MAPS / "cities.json").read_text(encoding="utf-8"))[town.slug]
+    assert len(cities) >= 6
+    picked = [name for name, _, _ in basemap.CITIES[town.slug]]
+    assert [c["name"] for c in cities] == [n for n in picked if n in {c["name"] for c in cities}]
+    for city in cities:
+        assert 0 <= city["x"] <= frame.width and 0 <= city["y"] <= frame.height, city["name"]
+
+
+def test_a_city_outside_the_frame_is_left_out(town):
+    frame = basemap.Frame(town)
+    frame.px = lambda lon, lat: (lon, lat)
+    points = basemap.city_points(frame, [("Fuori", -1.0, 50.0), ("Dentro", 40.0, 30.0)])
+    assert points == [{"name": "Dentro", "x": 30.0, "y": 40.0}]
 
 
 def test_a_line_keeps_one_point_past_each_edge(town):

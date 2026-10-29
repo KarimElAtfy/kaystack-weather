@@ -1,12 +1,15 @@
 <script lang="ts">
   // The last hour of radar: the map under and over a canvas that paints the
   // sprite's classes in this theme's colours, so heavier rain stands out more
-  // against the map in light and dark alike. It never plays by itself.
+  // against the map in light and dark alike. The names on the map are page
+  // text. It never plays by itself.
   import { onMount } from 'svelte';
   import { has, t } from '#lib/copy/t.ts';
   import { radarMapFreshness } from '#lib/data/states.ts';
-  import { className, range, type Bin } from '#lib/radar/classes.ts';
-  import { aroundTown, paint, rgba, type Rgba } from '#lib/radar/sprite.ts';
+  import { bound, className, range, type Bin } from '#lib/radar/classes.ts';
+  import { place, type Box, type Name, type Spot } from '#lib/radar/labels.ts';
+  import { SCALE, aroundTown, paint, rgba, type Rgba } from '#lib/radar/sprite.ts';
+  import cities from '#lib/radar/maps/cities.json';
   import Icon from '#lib/symbols/Icon.svelte';
   import { ago, hm } from '#lib/time.ts';
   import type { TownData } from './town.svelte.ts';
@@ -68,7 +71,7 @@
     const line = colour('--nodata');
     palette = [
       [0, 0, 0, 0],
-      ...[1, 2, 3, 4, 5, 6].map((i) => colour(`--r${i}`)),
+      ...[1, 2, 3, 4, 5, 6].map((i) => colour(`--radar-${i}`)),
       line,
       [line[0], line[1], line[2], Math.round(line[3] * 0.28)]
     ];
@@ -79,8 +82,11 @@
     const cells = frames?.[shown];
     const context = canvas?.getContext('2d');
     if (!radar || !context || !palette.length) return;
-    const image = context.createImageData(radar.frame_width_px, radar.frame_height_px);
-    if (cells && !frame?.missing) paint(cells, palette, image.data);
+    const image = context.createImageData(
+      radar.frame_width_px * SCALE,
+      radar.frame_height_px * SCALE
+    );
+    if (cells && !frame?.missing) paint(cells, palette, image.data, radar.frame_width_px);
     context.putImageData(image, 0, 0);
   });
 
@@ -95,10 +101,9 @@
     chosen = next;
     timer = setTimeout(step, next === last ? 1400 : 450);
   }
-  // While the images load, and for Ultima on the last frame, the controls stay
-  // in the tab order with aria-disabled and ignore activation: disabled would
-  // take them out of it, and on a phone they load only once in view.
-  const idle = $derived(shown === last && !playing);
+  // While the images load the controls stay in the tab order with
+  // aria-disabled and ignore activation: disabled would take them out of it,
+  // and on a phone they load only once in view.
   function toggle() {
     if (loading) return;
     if (playing) return stop();
@@ -138,12 +143,102 @@
     if (unavailable) data.askStatus();
   });
   const since = $derived(lastTime ?? data.status.value?.sources.radar?.data_time ?? null);
-  const rings = [10, 25, 50];
+  const RINGS = [10, 25, 50];
+
+  // The names on the map. Each is measured where it is drawn, then placed by
+  // the rule in labels.ts; the ones left out are hidden, never shrunk.
+  const points = $derived(
+    (cities as Record<string, { name: string; x: number; y: number }[]>)[data.town.slug] ?? []
+  );
+  let mapSize = $state(0);
+  let stamp = $state<HTMLElement>();
+  let names = $state<Record<string, HTMLElement>>({});
+  let spots = $state(new Map<string, Spot>());
+  // A probe ten em wide changes with the text size, and calls for placing again.
+  let probe = $state(0);
+  $effect(() => {
+    if (!radar || !mapSize || !probe) return;
+    const k = mapSize / radar.frame_width_px;
+    const tx = (radar.town_px.x + 0.5) * k;
+    const ty = (radar.town_px.y + 0.5) * k;
+    const size = (key: string) => {
+      const node = names[key];
+      return { w: node?.offsetWidth ?? 0, h: node?.offsetHeight ?? 0 };
+    };
+    const taken: Box[] = stamp
+      ? [
+          {
+            left: 0,
+            top: 0,
+            right: stamp.offsetLeft + stamp.offsetWidth,
+            bottom: stamp.offsetTop + stamp.offsetHeight
+          }
+        ]
+      : [];
+    const rings: Name[] = RINGS.map((km) => ({
+      key: `ring ${km}`,
+      x: tx,
+      y: ty - (km / radar.km_per_px) * k,
+      ...size(`ring ${km}`)
+    }));
+    const others: Name[] = points.map((p) => ({
+      key: p.name,
+      x: p.x * k,
+      y: p.y * k,
+      ...size(p.name)
+    }));
+    const here = { key: 'town', x: tx, y: ty, ...size('town') };
+    const placed = place(mapSize, mapSize, taken, here, rings, others);
+    spots = placed;
+    // On a map too small for both, the time gives way to the town: it is also
+    // under the range and in its spoken text.
+    const spot = placed.get('town');
+    const corner = taken[0];
+    stampHidden =
+      !!spot &&
+      !!corner &&
+      spot.left < corner.right &&
+      spot.top < corner.bottom &&
+      spot.left + here.w > corner.left &&
+      spot.top + here.h > corner.top;
+  });
+  let stampHidden = $state(false);
+  // Positions set through the CSSOM, which the policy allows where a style
+  // attribute would be refused.
+  function at(node: HTMLElement, spot: Spot | undefined) {
+    // Hidden, not removed: a name left out keeps its size for the next placing.
+    const move = (spot: Spot | undefined) => {
+      node.style.visibility = spot ? '' : 'hidden';
+      if (spot) {
+        node.style.left = `${spot.left}px`;
+        node.style.top = `${spot.top}px`;
+      }
+    };
+    move(spot);
+    return { update: move };
+  }
+  function dot(node: HTMLElement, [x, y, shown]: [number, number, boolean]) {
+    const move = ([x, y, shown]: [number, number, boolean]) => {
+      node.style.visibility = shown ? '' : 'hidden';
+      node.style.left = `${x}px`;
+      node.style.top = `${y}px`;
+    };
+    move([x, y, shown]);
+    return { update: move };
+  }
+  const k = $derived(radar && mapSize ? mapSize / radar.frame_width_px : 0);
+  // The played part of the track, which WebKit and Chrome cannot style on
+  // their own: a custom property the track's gradient reads, set through the CSSOM.
+  function played(node: HTMLElement, share: number) {
+    const set = (share: number) => node.style.setProperty('--played', String(share));
+    set(share);
+    return { update: set };
+  }
 </script>
 
 {#snippet credit(map: boolean)}
   <p class="credit">
-    <strong>{t('radar.credit')}</strong>{#if map}. {t('radar.basemap_credit')}{/if}
+    {t('radar.credit')}{#if map}. {t('radar.basemap_credit')}{/if}
   </p>
 {/snippet}
 
@@ -185,51 +280,50 @@
     <div
       class="map"
       role="img"
+      bind:clientWidth={mapSize}
       aria-label={t('radar.map_label', {
         paese: town,
         ora: frame ? hm(Date.parse(frame.time)) : '',
         sintesi: sentence
       })}
     >
-      <svg viewBox="0 0 {width} {height}" preserveAspectRatio="none" aria-hidden="true"
-        ><use href="#under" /></svg
+      <!-- One box for the four map layers' colour checks. -->
+      <svg
+        viewBox="0 0 {width} {height}"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+        data-qa="map-land"
+        ><g data-qa="map-water"><g data-qa="map-river"><use href="#under" /></g></g></svg
       >
-      <canvas bind:this={canvas} {width} {height}></canvas>
+      <canvas bind:this={canvas} width={width * SCALE} height={height * SCALE}></canvas>
       {#if loading || frame?.missing}<div class="veil" aria-hidden="true"></div>{/if}
-      <svg viewBox="0 0 {width} {height}" aria-hidden="true">
+      <svg viewBox="0 0 {width} {height}" aria-hidden="true" data-qa="map-border">
         <use href="#over" />
-        {#each rings as km (km)}
-          {@const r = km / radar.km_per_px}
-          <circle class="ring" cx={tx} cy={ty} {r} />
-          {#if ty - r > 4}
-            <text class="label" x={tx} y={ty - r - 0.8} text-anchor="middle" font-size="3.2"
-              >{km} {t('unit.km')}</text
-            >
-          {/if}
+        {#each RINGS as km (km)}
+          <circle class="ring" cx={tx} cy={ty} r={km / radar.km_per_px} />
         {/each}
-        <circle class="town-halo" cx={tx} cy={ty} r="2.2" />
-        <circle class="town-ring" cx={tx} cy={ty} r="2.2" />
-        <circle class="town-dot" cx={tx} cy={ty} r="0.7" />
-        <text class="label" x={tx + 3.2} y={ty + 4.6} font-size="4" font-weight="700">{town}</text>
-        <g transform="translate({width - 16} {height - 5})">
-          <rect
-            class="bar-back"
-            x="-1.5"
-            y="-4.6"
-            width={10 / radar.km_per_px + 4}
-            height="6.6"
-            rx="1"
-          />
-          <line class="bar" x1="0" x2={10 / radar.km_per_px} y1="0" y2="0" />
-          <line class="bar" x1="0" x2="0" y1="-1" y2="0.6" />
-          <line class="bar" x1={10 / radar.km_per_px} x2={10 / radar.km_per_px} y1="-1" y2="0.6" />
-          <text class="label" x={5 / radar.km_per_px} y="-1.4" text-anchor="middle" font-size="2.8"
-            >10 {t('unit.km')}</text
-          >
-        </g>
+        <circle class="town-ring" cx={tx} cy={ty} r="2" />
+        <circle class="town-dot" cx={tx} cy={ty} r="0.8" />
       </svg>
+      <div class="names" aria-hidden="true" data-qa="map-label">
+        <span class="probe" bind:clientWidth={probe}></span>
+        {#each points as p (p.name)}
+          <span class="city" use:dot={[p.x * k, p.y * k, spots.has(p.name)]}></span>
+          <span class="name" bind:this={names[p.name]} use:at={spots.get(p.name)}>{p.name}</span>
+        {/each}
+        {#each RINGS as km (km)}
+          <span
+            class="name ring-name"
+            bind:this={names[`ring ${km}`]}
+            use:at={spots.get(`ring ${km}`)}>{km} {t('unit.km')}</span
+          >
+        {/each}
+        <span class="name here" bind:this={names.town} use:at={spots.get('town')}>{town}</span>
+      </div>
       {#if frame && !loading}
-        <div class="stamp">{hm(Date.parse(frame.time))}<span>{t('radar.observed')}</span></div>
+        <div class="stamp" class:gone={stampHidden} bind:this={stamp}>
+          {hm(Date.parse(frame.time))}
+        </div>
       {/if}
       {#if loading}
         <div class="veil-box"><p>{t('radar.loading')}</p></div>
@@ -239,67 +333,69 @@
         </div>
       {/if}
     </div>
-    <div class="controls">
+    <div class="timeline">
+      <div class="track">
+        <div class="ticks" aria-hidden="true">
+          {#each radar.frames as f, i (f.time)}
+            <i class:on={i === shown} class:miss={f.missing}></i>
+          {/each}
+        </div>
+        <input
+          type="range"
+          use:played={last ? shown / last : 1}
+          min="0"
+          max={last}
+          step="1"
+          value={shown}
+          aria-disabled={loading ? 'true' : undefined}
+          oninput={(event) => {
+            if (loading) {
+              event.currentTarget.value = String(shown);
+              return;
+            }
+            stop();
+            chosen = Number(event.currentTarget.value);
+          }}
+          aria-label={t('radar.slider')}
+          aria-valuetext={loading
+            ? t('radar.loading')
+            : frame
+              ? sentence || hm(Date.parse(frame.time))
+              : undefined}
+        />
+        <div class="ends" aria-hidden="true">
+          <span>{hm(Date.parse(radar.frames[0]?.time ?? ''))}</span>
+          <span>{lastTime ? hm(Date.parse(lastTime)) : ''}</span>
+        </div>
+      </div>
       <button
-        class="btn play"
+        class="play"
         type="button"
         aria-disabled={loading ? 'true' : undefined}
+        aria-label={playing ? t('radar.pause') : t('radar.play')}
         onclick={toggle}
       >
-        <Icon name={playing ? 'pause' : 'play'} />{playing ? t('radar.pause') : t('radar.play')}
+        <Icon name={playing ? 'pause' : 'play'} />
       </button>
-      <input
-        type="range"
-        min="0"
-        max={last}
-        step="1"
-        value={shown}
-        aria-disabled={loading ? 'true' : undefined}
-        oninput={(event) => {
-          if (loading) {
-            event.currentTarget.value = String(shown);
-            return;
-          }
-          stop();
-          chosen = Number(event.currentTarget.value);
-        }}
-        aria-label={t('radar.slider')}
-        aria-valuetext={loading
-          ? t('radar.loading')
-          : frame
-            ? sentence || hm(Date.parse(frame.time))
-            : undefined}
-      />
-      <span class="ftime" aria-hidden="true"
-        >{frame && !loading ? hm(Date.parse(frame.time)) : ''}</span
-      >
-      <button
-        class="btn latest"
-        type="button"
-        aria-disabled={loading || idle ? 'true' : undefined}
-        onclick={() => {
-          if (loading || idle) return;
-          stop();
-          chosen = null;
-        }}>{t('radar.latest')}</button
-      >
     </div>
-    <p class="rsum">{sentence}</p>
-    <div class="rlegend">
-      <h3>{t('radar.legend_title')}</h3>
-      <ul>
+    <div class="ramp">
+      <p class="title">{t('radar.legend_title')}</p>
+      <div class="steps" aria-hidden="true">
+        {#each radar.scale as bin (bin.index)}<i class="r{bin.index}" data-qa="radar-{bin.index}"
+          ></i>{/each}
+      </div>
+      <div class="bounds" aria-hidden="true">
+        {#each radar.scale as bin (bin.index)}<span>{bound(bin.from_mm_h)}</span>{/each}
+      </div>
+      <ul class="words">
         {#each radar.scale as bin (bin.index)}
-          <li>
-            <span class="sw sw-{bin.index}"></span><b>{range(bin)}</b><span
-              >{className(bin.index)}</span
-            >
+          <li class="c{bin.index}" class:minor={bin.index === 1 || bin.index === 5}>
+            <span class="vh">{range(bin)} {t('unit.mmh')}, {className(bin.index)}</span>
+            <span class="word" aria-hidden="true">{className(bin.index)}</span>
           </li>
         {/each}
-        <li class="nd">
-          <span class="sw sw-nodata"></span><span>{t('radar.legend_nodata')}</span>
-        </li>
       </ul>
-      <p class="credit">{t('radar.rings')}</p>
+      <p class="nd"><i class="nodata" aria-hidden="true"></i>{t('radar.legend_nodata')}</p>
     </div>
     {@render credit(true)}
   {/if}

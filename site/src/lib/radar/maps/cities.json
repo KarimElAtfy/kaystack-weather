@@ -1,0 +1,24 @@
+{
+  "pedrengo": [
+    { "name": "Bergamo", "x": 54.58, "y": 59.55 },
+    { "name": "Milano", "x": 16.15, "y": 83.47 },
+    { "name": "Brescia", "x": 96.95, "y": 78.27 },
+    { "name": "Lecco", "x": 33.49, "y": 41.15 },
+    { "name": "Como", "x": 9.65, "y": 44.97 },
+    { "name": "Treviglio", "x": 47.86, "y": 78.63 },
+    { "name": "Crema", "x": 54.34, "y": 96.08 },
+    { "name": "Lovere", "x": 86.13, "y": 47.52 }
+  ],
+  "sesto-calende": [
+    { "name": "Varese", "x": 76.04, "y": 60.39 },
+    { "name": "Novara", "x": 57.48, "y": 100.35 },
+    { "name": "Lugano", "x": 87.03, "y": 39.32 },
+    { "name": "Locarno", "x": 75.23, "y": 21.4 },
+    { "name": "Verbania", "x": 54.75, "y": 47.55 },
+    { "name": "Gallarate", "x": 71.99, "y": 77.1 },
+    { "name": "Como", "x": 95.65, "y": 61.97 },
+    { "name": "Milano", "x": 102.15, "y": 100.47 },
+    { "name": "Biella", "x": 13.87, "y": 85.12 },
+    { "name": "Domodossola", "x": 35.66, "y": 25.02 }
+  ]
+}

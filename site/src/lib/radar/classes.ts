@@ -22,7 +22,8 @@ export function className(index: number): string {
   return has(key) ? t(key) : '';
 }
 
-const bound = (x: number) => dec(x).replace(/,0$/, '');
+// A class's lower bound, "0,2" or "15", as the legend's ticks write it.
+export const bound = (x: number) => dec(x).replace(/,0$/, '');
 
 // "2-6" or "oltre 40", the radar legend's way of writing a range.
 export function range(bin: Bin): string {

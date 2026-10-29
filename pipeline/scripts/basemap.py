@@ -1,5 +1,6 @@
 r"""Draws the map under and over each town's radar frames, in the frames' own pixels,
-into the SVG files the site copies into each town page.
+into the SVG files the site copies into each town page, and writes where the
+cities fall in those pixels.
 
     uv run python -m scripts.basemap --natural-earth ../../meteo-dati/natural-earth-5.1.2 \
         --out ../site/src/lib/radar/maps
@@ -10,10 +11,10 @@ the v5.1.2 tag, and checked against their SHA-256. Natural Earth's places leave 
 most of the towns readers look for (Brescia, Lecco, Varese), so the places are the
 ones the designer picked, at their Wikidata coordinates (P625, CC0).
 
-The site draws the rings at 10, 25 and 50 km with their labels above the top of
-each ring, the town with its name, and the 10 km bar at the bottom right. City
-labels keep out of all of them: each city takes the first side of its dot where
-the label fits, or is left off.
+The maps hold shapes only. The site writes the names in the page's own type, so
+they keep their size at any map width and text setting, and leaves out the ones
+that collide there; cities.json gives it each city's point, in the order the site
+drops them last.
 """
 
 import argparse
@@ -21,12 +22,11 @@ import hashlib
 import json
 import math
 from collections.abc import Iterable, Iterator
-from dataclasses import dataclass
 from pathlib import Path
 
 import requests
 
-from meteo import radar, sprites, towns
+from meteo import radar, towns
 from meteo.towns import Town
 
 RELEASE = "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson"
@@ -66,37 +66,9 @@ CITIES = {
         ("Domodossola", 46.116111, 8.291111),  # Q23325
     ],
 }
-# The site's radar.css colours the map's classes for each theme and sets labels
-# at LABEL_PX. The file carries no style of its own: WebKit and Firefox read a
-# style element in a file referenced by <use> without the page's tokens.
-LABEL_PX = 3.6
-# A generous average glyph width for the site's sans-serif, so that the estimated
-# box is never smaller than the drawn label.
-CHAR_EM = 0.6
-DOT_R = 0.9
 # Lines are kept this far past the frame, so that they leave it at the right angle.
 MARGIN = 6
 TOLERANCE = 0.15
-RINGS_KM = (10, 25, 50)
-
-
-@dataclass(frozen=True)
-class Box:
-    left: float
-    top: float
-    right: float
-    bottom: float
-
-    def meets(self, other: "Box") -> bool:
-        return (
-            self.left < other.right
-            and other.left < self.right
-            and self.top < other.bottom
-            and other.top < self.bottom
-        )
-
-    def inside(self, width: float, height: float) -> bool:
-        return self.left >= 0 and self.top >= 0 and self.right <= width and self.bottom <= height
 
 
 def fetch(folder: Path) -> None:
@@ -119,9 +91,6 @@ class Frame:
         self.view = town.radar_view
         self.width = (self.view["east"] - self.view["west"]) // 1000
         self.height = (self.view["north"] - self.view["south"]) // 1000
-        px = sprites.town_px(town)
-        # The site puts the town at the centre of its cell.
-        self.town = (px.x + 0.5, px.y + 0.5)
 
     def px(self, lon: float, lat: float) -> tuple[float, float]:
         x, y = radar.transverse_mercator(lat, lon, 42.0, 12.5)
@@ -132,59 +101,17 @@ class Frame:
         return -MARGIN <= x <= self.width + MARGIN and -MARGIN <= y <= self.height + MARGIN
 
 
-def ring_label_boxes(frame: Frame) -> list[Box]:
-    """7 x 3 px, centred above the top of each ring the site labels."""
-    tx, ty = frame.town
-    return [Box(tx - 3.5, ty - km - 3, tx + 3.5, ty - km) for km in RINGS_KM if ty - km > 4]
-
-
-def site_boxes(frame: Frame, town_name: str) -> list[Box]:
-    """What the site draws over the map, as Radar.svelte places it."""
-    tx, ty = frame.town
-    w, h = frame.width, frame.height
-    name = 4 * CHAR_EM * len(town_name)
-    return [
-        *ring_label_boxes(frame),
-        Box(tx - 2.6, ty - 2.6, tx + 2.6, ty + 2.6),
-        Box(tx + 3.2, ty + 4.6 - 3.2, tx + 3.2 + name, ty + 4.6 + 1),
-        Box(w - 17.5, h - 9.6, w - 16 + 10 + 2.5, h - 3),
-    ]
-
-
-def label_box(x: float, y: float, anchor: str, text: str) -> Box:
-    """The box a label takes, from its anchor point and baseline as in the SVG."""
-    width = LABEL_PX * CHAR_EM * len(text)
-    left = {"start": x, "end": x - width, "middle": x - width / 2}[anchor]
-    return Box(left, y - 0.8 * LABEL_PX, left + width, y + 0.25 * LABEL_PX)
-
-
-def placements(x: float, y: float) -> Iterator[tuple[float, float, str]]:
-    yield x + 1.8, y + 1.2, "start"
-    yield x - 1.8, y + 1.2, "end"
-    yield x, y - 1.8, "middle"
-    yield x, y + 4.4, "middle"
-
-
 type City = tuple[str, float, float]
-type Placed = tuple[str, float, float, float, float, str]
 
 
-def place_cities(frame: Frame, town_name: str, cities: Iterable[City]) -> list[Placed]:
-    """(name, dot x, dot y, label x, label y, anchor) for each city that fits."""
-    taken = site_boxes(frame, town_name)
-    placed: list[Placed] = []
+def city_points(frame: Frame, cities: Iterable[City]) -> list[dict[str, float | str]]:
+    """Each city inside the frame, as the site reads it: name and point in pixels."""
+    found: list[dict[str, float | str]] = []
     for name, lat, lon in cities:
         x, y = frame.px(lon, lat)
-        dot = Box(x - DOT_R, y - DOT_R, x + DOT_R, y + DOT_R)
-        if not dot.inside(frame.width, frame.height) or any(dot.meets(b) for b in taken):
-            continue
-        for lx, ly, anchor in placements(x, y):
-            box = label_box(lx, ly, anchor, name)
-            if box.inside(frame.width, frame.height) and not any(box.meets(b) for b in taken):
-                taken += [dot, box]
-                placed.append((name, x, y, lx, ly, anchor))
-                break
-    return placed
+        if 0 <= x <= frame.width and 0 <= y <= frame.height:
+            found.append({"name": name, "x": round(x, 2), "y": round(y, 2)})
+    return found
 
 
 def simplify(points: list[tuple[float, float]]) -> list[tuple[float, float]]:
@@ -249,7 +176,7 @@ def features(folder: Path, name: str) -> list[dict]:
         return [feature for feature in json.load(f)["features"] if feature["geometry"]]
 
 
-def draw(frame: Frame, folder: Path, town_name: str, cities: Iterable[City]) -> str:
+def draw(frame: Frame, folder: Path) -> str:
     w, h = frame.width, frame.height
     under = [f'<rect class="map-land" width="{w}" height="{h}"/>']
     for source in ("ne_10m_rivers_lake_centerlines", "ne_10m_rivers_europe"):
@@ -272,12 +199,6 @@ def draw(frame: Frame, folder: Path, town_name: str, cities: Iterable[City]) -> 
         for line in lines(feature["geometry"]):
             for run in runs(frame, line):
                 over.append(f'<polyline class="map-border" points="{coords(simplify(run))}"/>')
-    for name, x, y, lx, ly, anchor in place_cities(frame, town_name, cities):
-        over.append(f'<circle class="map-city" cx="{_n(x)}" cy="{_n(y)}" r="{DOT_R}"/>')
-        over.append(
-            f'<text class="map-label" x="{_n(lx)}" y="{_n(ly)}" text-anchor="{anchor}">'
-            f"{name}</text>"
-        )
     box = f'viewBox="0 0 {w} {h}"'
     return (
         f'<svg xmlns="http://www.w3.org/2000/svg">'
@@ -293,11 +214,23 @@ def main() -> None:
     parser.add_argument("--towns", type=Path, default=Path(__file__).resolve().parents[2] / "towns")
     args = parser.parse_args()
     fetch(args.natural_earth)
+    points = {}
     for town in towns.load(args.towns):
-        svg = draw(Frame(town), args.natural_earth, town.name, CITIES[town.slug])
+        frame = Frame(town)
+        svg = draw(frame, args.natural_earth)
         path = args.out / f"{town.slug}.svg"
         path.write_text(svg, encoding="utf-8", newline="\n")
         print(f"{path}: {len(svg.encode())} bytes")
+        points[town.slug] = city_points(frame, CITIES[town.slug])
+    # One city a line, as the site's formatter keeps it.
+    blocks = [
+        f"  {json.dumps(slug)}: [\n"
+        + ",\n".join(f"    {{ {json.dumps(city, ensure_ascii=False)[1:-1]} }}" for city in cities)
+        + "\n  ]"
+        for slug, cities in points.items()
+    ]
+    text = "{\n" + ",\n".join(blocks) + "\n}\n"
+    (args.out / "cities.json").write_text(text, encoding="utf-8", newline="\n")
 
 
 if __name__ == "__main__":
