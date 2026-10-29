@@ -25,10 +25,28 @@
     const high = Math.ceil(Math.max(...all, 1));
     return (v: number) => ((v - low) / (high - low)) * 100;
   });
-  // A span on the scale, never thinner than `least` so a tight range still shows.
+  // The bars are drawn in their own pixels, so the hatch of days 8-10 keeps
+  // 1 px lines; their width is read on the next frame, as every row shares it.
+  let barPx = $state(0);
+  function bar(node: SVGSVGElement) {
+    let frame = 0;
+    const observer = new ResizeObserver(() => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => (barPx = node.clientWidth));
+    });
+    observer.observe(node);
+    return {
+      destroy() {
+        cancelAnimationFrame(frame);
+        observer.disconnect();
+      }
+    };
+  }
+  // A span on the scale in pixels, never thinner than `least` px so a tight range still shows.
   const span = (a: number, b: number, least: number) => {
-    const from = scale(a);
-    return { x: Math.min(from, 100 - least), width: Math.max(least, scale(b) - from) };
+    const from = (scale(a) / 100) * barPx;
+    const width = Math.max(least, ((scale(b) - scale(a)) / 100) * barPx);
+    return { x: Math.min(from, barPx - least), width };
   };
 
   const rows = $derived.by(() => {
@@ -127,25 +145,23 @@
       <summary>
         <span class="vh">{r.said}</span>
         <span class="line" aria-hidden="true">
-          <span class="day"
-            >{r.name}{#if r.month}<small>{r.month}</small>{/if}</span
-          >
+          <span class="day">{r.name}</span>
           <span class="sky">
             {#if r.sky}<Sky sky={r.sky} size={28} />{/if}
           </span>
           <span class="lo">{deg(r.min.mean)}</span>
-          <svg class="bar" viewBox="0 0 100 12" preserveAspectRatio="none" focusable="false">
-            <rect class="track" x="0" y="5" width="100" height="2" />
+          <svg class="bar" use:bar viewBox="0 0 {barPx || 1} 12" focusable="false">
+            <rect class="track" x="0" y="5" width={barPx} height="2" />
             {#if r.min.low != null && r.min.high != null}
-              {@const s = span(r.min.low, r.min.high, 1)}
+              {@const s = span(r.min.low, r.min.high, 2)}
               <rect class="wing" data-qa="temp-wing" x={s.x} y="1" width={s.width} height="10" />
             {/if}
             {#if r.max.low != null && r.max.high != null}
-              {@const s = span(r.max.low, r.max.high, 1)}
+              {@const s = span(r.max.low, r.max.high, 2)}
               <rect class="wing" data-qa="temp-wing" x={s.x} y="1" width={s.width} height="10" />
             {/if}
             {#if both}
-              {@const s = span(r.min.mean ?? 0, r.max.mean ?? 0, 2)}
+              {@const s = span(r.min.mean ?? 0, r.max.mean ?? 0, 4)}
               <rect class="core" data-qa="temp" x={s.x} y="1" width={s.width} height="10" />
               {#if r.far}
                 <rect x={s.x} y="1" width={s.width} height="10" fill="url(#d10-far)" />
@@ -178,12 +194,12 @@
     <defs>
       <pattern
         id="d10-far"
-        width="5"
-        height="5"
+        width="4"
+        height="4"
         patternUnits="userSpaceOnUse"
         patternTransform="rotate(45)"
       >
-        <line class="hatch" x1="0" y1="0" x2="0" y2="5" />
+        <line class="hatch" x1="0.5" y1="0" x2="0.5" y2="4" />
       </pattern>
     </defs>
   </svg>
@@ -351,7 +367,7 @@
     }
     .hatch {
       stroke: var(--paper);
-      stroke-width: 1.6;
+      stroke-width: 1;
     }
     .dots circle {
       fill: none;
