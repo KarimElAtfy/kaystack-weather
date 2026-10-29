@@ -145,6 +145,8 @@
   @layer blocks {
     .toggle {
       display: inline-flex;
+      flex-wrap: wrap;
+      max-inline-size: 100%;
       margin-block-end: var(--space-3);
       border: 1px solid var(--ink-3);
     }
