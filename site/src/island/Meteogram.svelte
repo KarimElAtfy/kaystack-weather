@@ -179,7 +179,7 @@
     const placed = labels(hourly, now).map((label) => {
       const text = `${deg(label.value)} ${t('h48.label_at', { ora: String(Number(hour(at(label.i)))) })}`;
       const w = measure(text, true);
-      const x = Math.min(W - w / 2 - 2, Math.max(w / 2 + 2, g.X(at(label.i))));
+      const x = Math.min(plot + 1 - w / 2, Math.max(w / 2 + 2, g.X(at(label.i))));
       const y =
         label.kind === 'high'
           ? g.YT(T.high[label.i] ?? label.value) - 5
@@ -187,7 +187,8 @@
       const box: Box = { left: x - w / 2, right: x + w / 2, top: y - font, bottom: y + 3 };
       return { text, x, y, box };
     });
-    return keep(placed);
+    // A label wider than the plot has no place on it: left out, never shrunk.
+    return keep(placed.filter((mark) => mark.box.right - mark.box.left <= plot));
   });
   // The clock change is said above the chart too, so its mark gives way to the labels.
   const dstMarks = $derived.by(() => {
