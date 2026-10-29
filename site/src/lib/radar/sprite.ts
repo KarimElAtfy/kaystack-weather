@@ -68,11 +68,35 @@ export function aroundTown(
 
 export type Rgba = [number, number, number, number];
 
-// palette[i] is the colour of index i; index 0 stays transparent.
-export function paint(frame: Uint8Array, palette: Rgba[], target: Uint8ClampedArray): void {
+// The canvas draws each radar cell as SCALE x SCALE pixels, so that where the
+// radar sees nothing the hatch can be thin diagonal lines, as in the legend,
+// rather than whole cells in a checker.
+export const SCALE = 4;
+const PERIOD = 3 * SCALE;
+const LINE = 2;
+
+// palette[i] is the colour of index i; index 0 stays transparent. target holds
+// (width * SCALE) x (height * SCALE) pixels.
+export function paint(
+  frame: Uint8Array,
+  palette: Rgba[],
+  target: Uint8ClampedArray,
+  width: number
+): void {
+  const clear: Rgba = [0, 0, 0, 0];
+  const line = palette[HATCH_LINE] ?? clear;
+  const wide = width * SCALE;
   frame.forEach((index, i) => {
-    const colour: Rgba = index === NO_RAIN ? [0, 0, 0, 0] : (palette[index] ?? [0, 0, 0, 0]);
-    target.set(colour, i * 4);
+    const cx = (i % width) * SCALE;
+    const cy = Math.floor(i / width) * SCALE;
+    const hatch = isHatch(index);
+    const colour = index === NO_RAIN || hatch ? clear : (palette[index] ?? clear);
+    for (let y = cy; y < cy + SCALE; y++) {
+      for (let x = cx; x < cx + SCALE; x++) {
+        const own = hatch && (x + y) % PERIOD < LINE ? line : colour;
+        target.set(own, (y * wide + x) * 4);
+      }
+    }
   });
 }
 

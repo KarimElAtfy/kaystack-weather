@@ -8,7 +8,7 @@
   import { radarMapFreshness } from '#lib/data/states.ts';
   import { bound, className, range, type Bin } from '#lib/radar/classes.ts';
   import { place, type Box, type Name, type Spot } from '#lib/radar/labels.ts';
-  import { aroundTown, paint, rgba, type Rgba } from '#lib/radar/sprite.ts';
+  import { SCALE, aroundTown, paint, rgba, type Rgba } from '#lib/radar/sprite.ts';
   import cities from '#lib/radar/maps/cities.json';
   import Icon from '#lib/symbols/Icon.svelte';
   import { ago, hm } from '#lib/time.ts';
@@ -82,8 +82,11 @@
     const cells = frames?.[shown];
     const context = canvas?.getContext('2d');
     if (!radar || !context || !palette.length) return;
-    const image = context.createImageData(radar.frame_width_px, radar.frame_height_px);
-    if (cells && !frame?.missing) paint(cells, palette, image.data);
+    const image = context.createImageData(
+      radar.frame_width_px * SCALE,
+      radar.frame_height_px * SCALE
+    );
+    if (cells && !frame?.missing) paint(cells, palette, image.data, radar.frame_width_px);
     context.putImageData(image, 0, 0);
   });
 
@@ -285,7 +288,7 @@
         data-qa="map-land"
         ><g data-qa="map-water"><g data-qa="map-river"><use href="#under" /></g></g></svg
       >
-      <canvas bind:this={canvas} {width} {height}></canvas>
+      <canvas bind:this={canvas} width={width * SCALE} height={height * SCALE}></canvas>
       {#if loading || frame?.missing}<div class="veil" aria-hidden="true"></div>{/if}
       <svg viewBox="0 0 {width} {height}" aria-hidden="true" data-qa="map-border">
         <use href="#over" />

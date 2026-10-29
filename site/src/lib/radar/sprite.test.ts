@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { inflateSync } from 'node:zlib';
 import { expect, test } from 'vitest';
-import { aroundTown, framesFrom, indexOf, paint, rgba } from './sprite.ts';
+import { SCALE, aroundTown, framesFrom, indexOf, paint, rgba } from './sprite.ts';
 
 const grey = (index: number) => Math.round((255 * (index + 0.5)) / 9);
 
@@ -57,14 +57,39 @@ test('treats a missing frame as no data everywhere', () => {
   expect(aroundTown(frames[7]!, 120, radar.town_px, 1)).toEqual({ here: -1, near: 0 });
 });
 
+const PALETTE = [
+  [0, 0, 0, 0],
+  [1, 1, 1, 255],
+  [9, 9, 9, 255],
+  [],
+  [],
+  [],
+  [],
+  [5, 5, 5, 140],
+  [5, 5, 5, 40]
+] as never;
+const at = (target: Uint8ClampedArray, wide: number, x: number, y: number) => [
+  ...target.slice((y * wide + x) * 4, (y * wide + x) * 4 + 4)
+];
+
 test('paints rain in the palette and leaves dry cells clear', () => {
-  const target = new Uint8ClampedArray(3 * 4);
-  paint(
-    Uint8Array.from([0, 2, 7]),
-    [[0, 0, 0, 0], [1, 1, 1, 255], [9, 9, 9, 255], [], [], [], [], [5, 5, 5, 140]] as never,
-    target
-  );
-  expect([...target]).toEqual([0, 0, 0, 0, 9, 9, 9, 255, 5, 5, 5, 140]);
+  const wide = 3 * SCALE;
+  const target = new Uint8ClampedArray(wide * SCALE * 4);
+  paint(Uint8Array.from([0, 2, 0]), PALETTE, target, 3);
+  expect(at(target, wide, 1, 1)).toEqual([0, 0, 0, 0]);
+  expect(at(target, wide, SCALE + 1, 1)).toEqual([9, 9, 9, 255]);
+});
+
+test('draws no data as thin diagonal lines, not whole cells', () => {
+  const wide = 3 * SCALE;
+  const target = new Uint8ClampedArray(wide * 3 * SCALE * 4);
+  paint(Uint8Array.from([7, 8, 8, 8, 8, 7, 8, 7, 8]), PALETTE, target, 3);
+  const lined = (x: number, y: number) => at(target, wide, x, y)[3] === 140;
+  expect(lined(0, 0)).toBe(true);
+  expect(lined(1, 0)).toBe(true);
+  expect(lined(2, 0)).toBe(false);
+  expect(lined(5, 7)).toBe(true);
+  expect(lined(4, 4)).toBe(false);
 });
 
 test('reads colours as the browser computes them', () => {
