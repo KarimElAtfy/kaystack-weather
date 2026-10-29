@@ -112,12 +112,12 @@ test('shows only the days the models reach, with no sky made up', async ({
   baseURL
 }) => {
   await page.goto('/pedrengo');
-  await expect(page.locator('#h-giorni10')).toHaveText('Prossimi 10 giorni');
+  await expect(page.locator('#h-giorni10')).toHaveText('10 giorni');
   await expect(page.locator('#giorni-10 tbody svg.sym')).toHaveCount(10);
   await context.unrouteAll();
   await useScenario(context, 'mancanti', baseURL ?? '');
   await page.goto('/pedrengo');
-  await expect(page.locator('#h-giorni10')).toHaveText('Prossimi 9 giorni');
+  await expect(page.locator('#h-giorni10')).toHaveText('9 giorni');
   await expect(page.locator('#giorni-10 tbody tr:not(.sep)')).toHaveCount(9);
   await expect(page.locator('#giorni-10 tbody svg.sym')).toHaveCount(0);
   await expect(page.locator('#giorni-10 tbody .c-sky').first()).toHaveText('Dato non disponibile');
@@ -136,7 +136,7 @@ test('never calls a value corrected that did not get the correction', async ({
     'Temperatura senza correzione: oggi la correzione non è disponibile.'
   );
   await expect(h48.locator('.legend')).toContainText('temperatura, media dei modelli');
-  await expect(h48.locator('.foot')).toContainText('Oggi nessun valore è corretto');
+  await expect(h48.locator('.foot')).toContainText('Oggi la correzione non è disponibile');
   const d10 = page.locator('#giorni-10');
   await expect(d10.locator('.note')).toHaveText(
     'Minima e massima senza correzione: oggi la correzione non è disponibile.'
@@ -147,7 +147,7 @@ test('never calls a value corrected that did not get the correction', async ({
   expect(text).not.toContain('corretta');
   expect(text).not.toContain('corrette');
   expect(text).not.toContain('la correzione è quella');
-  await expect(d10.locator('.sep .n')).toHaveText('Arrivano così lontano solo 3 modelli.');
+  await expect(d10.locator('.sep .n')).toHaveText('Solo 3 modelli arrivano fin qui.');
 });
 
 test('reads the sources when the list is opened on fresh data', async ({ page }) => {
