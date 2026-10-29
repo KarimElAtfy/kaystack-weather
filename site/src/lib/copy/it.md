@@ -53,10 +53,10 @@ Numbers, dates and times are formatted by the code in Italian (comma decimals, 2
 
 ## Riga di fiducia (sotto il nome del paese)
 
-| chiave          | dove                  | max  | testo                                                                  |
-| --------------- | --------------------- | ---- | ---------------------------------------------------------------------- |
-| `trust.station` | prima frase           | riga | Previsione fatta per la stazione ARPA di {stazione}, a {km} dal paese. |
-| `trust.why`     | link alla spiegazione | 30   | Perché una stazione?                                                   |
+| chiave          | dove                  | max  | testo                                                  |
+| --------------- | --------------------- | ---- | ------------------------------------------------------ |
+| `trust.station` | prima frase           | riga | Previsione per la stazione ARPA di {stazione}, a {km}. |
+| `trust.why`     | link alla spiegazione | 30   | Perché una stazione                                    |
 
 ## Riga di stato (sotto la riga di fiducia)
 
@@ -64,13 +64,13 @@ One line under the station sentence, always the same height (two lines reserved)
 
 | chiave               | dove                                                  | max | testo                                                          |
 | -------------------- | ----------------------------------------------------- | --- | -------------------------------------------------------------- |
-| `status.ok`          | riga di stato, normale (oggi)                         | 62  | Emessa alle {ora}, {fa}.                                       |
-| `status.ok_day`      | riga di stato, normale (altro giorno)                 | 62  | Emessa {giorno} alle {ora}, {fa}.                              |
-| `status.stale`       | riga di stato, previsione in ritardo (avviso)         | 62  | Emessa alle {ora}, {fa}: di solito si aggiorna ogni ora.       |
-| `status.old`         | riga di stato, previsione di più di un giorno (grave) | 62  | Previsione vecchia: emessa {giorno} alle {ora}.                |
+| `status.ok`          | riga di stato, normale (oggi)                         | 62  | Aggiornata alle {ora} ({fa}).                                  |
+| `status.ok_day`      | riga di stato, normale (altro giorno)                 | 62  | Aggiornata {giorno} alle {ora} ({fa}).                         |
+| `status.stale`       | riga di stato, previsione in ritardo (avviso)         | 62  | In ritardo: aggiornata alle {ora} ({fa}).                      |
+| `status.old`         | riga di stato, previsione di più di un giorno (grave) | 62  | Previsione vecchia, aggiornata {giorno} alle {ora}.            |
 | `status.missing`     | riga di stato, nessuna previsione                     | 62  | Previsione non disponibile in questo momento.                  |
 | `status.offline`     | riga di stato, dispositivo offline                    | 62  | Sei offline: dati scaricati alle {ora}.                        |
-| `status.failed`      | riga di stato, letture fallite con dati vecchi        | 62  | Non riusciamo a scaricare i dati: gli ultimi sono delle {ora}. |
+| `status.failed`      | riga di stato, letture fallite con dati vecchi        | 62  | Non riusciamo a scaricare i dati. Gli ultimi sono delle {ora}. |
 | `status.failed_none` | riga di stato, letture fallite senza dati             | 62  | Non riusciamo a scaricare i dati: riproviamo tra un minuto.    |
 | `announce.stale`     | annuncio nascosto                                     | 40  | La previsione non è aggiornata.                                |
 | `announce.old`       | annuncio nascosto                                     | 40  | La previsione è vecchia.                                       |
@@ -80,43 +80,43 @@ One line under the station sentence, always the same height (two lines reserved)
 
 ## Adesso
 
-| chiave               | dove                                                                                  | max  | testo                                                           |
-| -------------------- | ------------------------------------------------------------------------------------- | ---- | --------------------------------------------------------------- |
-| `now.h2`             | titolo della sezione                                                                  | 20   | Adesso                                                          |
-| `now.measured`       | etichetta accanto al titolo: distingue le misure dalle previsioni                     | 30   | misurato, non previsto                                          |
-| `now.measured_short` | etichetta accanto al titolo Radar                                                     | 12   | osservato                                                       |
-| `now.temp_label`     | nome della temperatura grande, per lettori di schermo                                 | riga | Temperatura misurata                                            |
-| `airport.LIME`       | nome breve dell'aeroporto in Adesso; un codice sconosciuto usa il nome del bollettino | 20   | Orio al Serio                                                   |
-| `airport.LIMC`       | nome breve dell'aeroporto in Adesso                                                   | 20   | Malpensa                                                        |
-| `now.source_metar`   | sotto la temperatura                                                                  | riga | Aeroporto di {aeroporto}, a {km}. Bollettino delle {ora}, {fa}. |
-| `now.wind`           | griglia dei valori                                                                    | 14   | Vento                                                           |
-| `now.gust`           | griglia dei valori                                                                    | 14   | Raffiche                                                        |
-| `now.humidity`       | griglia dei valori                                                                    | 14   | Umidità                                                         |
-| `now.humidity_short` | sotto il valore dell'umidità                                                          | 12   | calcolata                                                       |
-| `now.humidity_note`  | spiegazione dell'umidità (al passaggio e per lettori di schermo)                      | riga | Calcolata dalla temperatura e dal punto di rugiada.             |
-| `now.dewpoint`       | griglia dei valori                                                                    | 18   | Punto di rugiada                                                |
-| `now.visibility`     | griglia dei valori                                                                    | 14   | Visibilità                                                      |
-| `now.sky`            | griglia dei valori: nuvole viste dall'aeroporto                                       | 14   | Nuvole                                                          |
-| `now.weather_none`   | quando il bollettino non segnala fenomeni                                             | 30   | Nessun fenomeno segnalato                                       |
-| `now.no_gust`        | raffiche assenti nel bollettino                                                       | 14   | nessuna                                                         |
-| `now.rain_h3`        | titolo del blocco radar                                                               | 30   | Piove adesso?                                                   |
-| `now.rain_none`      | il radar non vede pioggia sul paese né entro 10 km                                    | riga | Non piove, e non piove entro 10 km.                             |
-| `now.rain_here_past` | piove sul paese, ma l'immagine è vecchia                                              | riga | Alle {ora} pioveva sul paese: pioggia {intensita}, {valore}.    |
-| `now.rain_none_past` | non piove, ma l'immagine è vecchia                                                    | riga | Alle {ora} non pioveva sul paese.                               |
-| `now.rain_none_near` | niente sul paese, ma qualcosa vicino                                                  | riga | Non piove sul paese.                                            |
-| `now.rain_here`      | piove sul paese                                                                       | riga | Sì: pioggia {intensita}, {valore}.                              |
-| `now.rain_5`         | entro 5 km                                                                            | riga | Entro 5 km: fino a {valore}.                                    |
-| `now.rain_10`        | entro 10 km                                                                           | riga | Entro 10 km: fino a {valore}.                                   |
-| `now.rain_5_none`    | entro 5 km, niente                                                                    | riga | Entro 5 km: niente.                                             |
-| `now.rain_10_none`   | entro 10 km, niente                                                                   | riga | Entro 10 km: niente.                                            |
-| `now.source_radar`   | sotto il blocco radar                                                                 | riga | Radar della Protezione Civile, immagine delle {ora}, {fa}.      |
-| `now.to_radar`       | link alla sezione radar                                                               | 30   | Guarda il radar                                                 |
-| `now.metar_raw`      | link per vedere il bollettino originale                                               | 40   | Bollettino METAR originale                                      |
-| `now.line_wind`      | riga dei dettagli, dopo la temperatura                                                | 20   | Vento {v} {dir}                                                 |
-| `now.line_calm`      | riga dei dettagli, vento sotto 2 km/h                                                 | 20   | Calma di vento                                                  |
-| `now.line_gust`      | riga dei dettagli, solo se il bollettino le segnala                                   | 20   | raffiche {g}                                                    |
-| `now.line_humidity`  | riga dei dettagli                                                                     | 20   | umidità {pct}                                                   |
-| `now.line_vis`       | riga dei dettagli, solo sotto 5 km                                                    | 20   | visibilità {v}                                                  |
+| chiave               | dove                                                                                  | max  | testo                                                             |
+| -------------------- | ------------------------------------------------------------------------------------- | ---- | ----------------------------------------------------------------- |
+| `now.h2`             | titolo della sezione                                                                  | 20   | Adesso                                                            |
+| `now.measured`       | etichetta accanto al titolo: distingue le misure dalle previsioni                     | 30   | misurato, non previsto                                            |
+| `now.measured_short` | etichetta accanto al titolo Radar                                                     | 12   | osservato                                                         |
+| `now.temp_label`     | nome della temperatura grande, per lettori di schermo                                 | riga | Temperatura misurata                                              |
+| `airport.LIME`       | nome breve dell'aeroporto in Adesso; un codice sconosciuto usa il nome del bollettino | 20   | Orio al Serio                                                     |
+| `airport.LIMC`       | nome breve dell'aeroporto in Adesso                                                   | 20   | Malpensa                                                          |
+| `now.source_metar`   | sotto la temperatura                                                                  | riga | Misurati all'aeroporto di {aeroporto}, a {km}, alle {ora} ({fa}). |
+| `now.wind`           | griglia dei valori                                                                    | 14   | Vento                                                             |
+| `now.gust`           | griglia dei valori                                                                    | 14   | Raffiche                                                          |
+| `now.humidity`       | griglia dei valori                                                                    | 14   | Umidità                                                           |
+| `now.humidity_short` | sotto il valore dell'umidità                                                          | 12   | calcolata                                                         |
+| `now.humidity_note`  | spiegazione dell'umidità (al passaggio e per lettori di schermo)                      | riga | Calcolata dalla temperatura e dal punto di rugiada.               |
+| `now.dewpoint`       | griglia dei valori                                                                    | 18   | Punto di rugiada                                                  |
+| `now.visibility`     | griglia dei valori                                                                    | 14   | Visibilità                                                        |
+| `now.sky`            | griglia dei valori: nuvole viste dall'aeroporto                                       | 14   | Nuvole                                                            |
+| `now.weather_none`   | quando il bollettino non segnala fenomeni                                             | 30   | Nessun fenomeno segnalato                                         |
+| `now.no_gust`        | raffiche assenti nel bollettino                                                       | 14   | nessuna                                                           |
+| `now.rain_h3`        | titolo del blocco radar                                                               | 30   | Piove adesso?                                                     |
+| `now.rain_none`      | il radar non vede pioggia sul paese né entro 10 km                                    | riga | Non piove, neanche nel raggio di 10 km.                           |
+| `now.rain_here_past` | piove sul paese, ma l'immagine è vecchia                                              | riga | Alle {ora} pioveva sul paese ({intensita}, {valore}).             |
+| `now.rain_none_past` | non piove, ma l'immagine è vecchia                                                    | riga | Alle {ora} non pioveva sul paese.                                 |
+| `now.rain_none_near` | niente sul paese, ma qualcosa vicino                                                  | riga | Non piove sul paese.                                              |
+| `now.rain_here`      | piove sul paese                                                                       | riga | Piove sul paese ({intensita}, {valore}).                          |
+| `now.rain_5`         | entro 5 km                                                                            | riga | Piove a meno di 5 km, fino a {valore}.                            |
+| `now.rain_10`        | entro 10 km                                                                           | riga | Piove a meno di 10 km, fino a {valore}.                           |
+| `now.rain_5_none`    | entro 5 km, niente                                                                    | riga | Entro 5 km: niente.                                               |
+| `now.rain_10_none`   | entro 10 km, niente                                                                   | riga | Entro 10 km: niente.                                              |
+| `now.source_radar`   | sotto il blocco radar                                                                 | riga | Radar delle {ora} ({fa}).                                         |
+| `now.to_radar`       | link alla sezione radar                                                               | 30   | Guarda il radar                                                   |
+| `now.metar_raw`      | link per vedere il bollettino originale                                               | 40   | Dettagli del bollettino                                           |
+| `now.line_wind`      | riga dei dettagli, dopo la temperatura                                                | 20   | Vento {v} {dir}                                                   |
+| `now.line_calm`      | riga dei dettagli, vento sotto 2 km/h                                                 | 20   | Calma di vento                                                    |
+| `now.line_gust`      | riga dei dettagli, solo se il bollettino le segnala                                   | 20   | raffiche {g}                                                      |
+| `now.line_humidity`  | riga dei dettagli                                                                     | 20   | umidità {pct}                                                     |
+| `now.line_vis`       | riga dei dettagli, solo sotto 5 km                                                    | 20   | visibilità {v}                                                    |
 
 ## Verdetto, coppia e prossime 12 ore
 
@@ -252,11 +252,11 @@ Under Adesso: one sentence on rain in the next 12 hours, two figures, and six ce
 | `radar.class.6`           | legenda, ultima classe                                                | 14   | nubifragio                                                            |
 | `radar.rings`             | legenda degli anelli                                                  | riga | Anelli a 10, 25 e 50 km dal paese.                                    |
 | `radar.over`              | legenda, ultima classe                                                | 10   | oltre {v}                                                             |
-| `radar.summary`           | sotto la mappa, cambia con l'immagine                                 | riga | Alle {ora}: {qui} {vicino}                                            |
+| `radar.summary`           | sotto la mappa, cambia con l'immagine                                 | riga | Alle {ora} {qui} {vicino}                                             |
 | `radar.sum_here`          | parte della frase sotto la mappa                                      | riga | sul paese piove ({classe}).                                           |
 | `radar.sum_here_none`     | parte della frase sotto la mappa                                      | riga | sul paese non piove.                                                  |
 | `radar.sum_near`          | parte della frase sotto la mappa                                      | riga | Entro 10 km la pioggia più forte è {classe}.                          |
-| `radar.sum_near_none`     | parte della frase sotto la mappa                                      | riga | Entro 10 km non piove.                                                |
+| `radar.sum_near_none`     | parte della frase sotto la mappa                                      | riga | Non piove neanche entro 10 km.                                        |
 | `radar.credit`            | sotto l'immagine, sempre visibile                                     | riga | Radar: Dipartimento della Protezione Civile (Radar-DPC), CC BY-SA 4.0 |
 | `radar.basemap_credit`    | sotto l'immagine                                                      | riga | Mappa: Natural Earth.                                                 |
 | `radar.unavailable`       | al posto della mappa                                                  | riga | Radar non disponibile.                                                |
@@ -265,22 +265,22 @@ Under Adesso: one sentence on rain in the next 12 hours, two figures, and six ce
 
 ## Stati: caricamento, dati vecchi, dati mancanti, fuori linea
 
-| chiave                    | dove                                            | max  | testo                                                                                               |
-| ------------------------- | ----------------------------------------------- | ---- | --------------------------------------------------------------------------------------------------- |
-| `state.loading`           | al posto dei valori mentre arrivano             | 30   | Carico i dati                                                                                       |
-| `state.nodata`            | al posto di un singolo valore assente           | 6    | n.d.                                                                                                |
-| `state.nodata_title`      | spiegazione di n.d.                             | riga | Dato non disponibile                                                                                |
-| `state.stale_tag`         | etichetta accanto a un valore vecchio           | 16   | non aggiornato                                                                                      |
-| `state.metar_stale`       | Adesso, bollettino vecchio                      | riga | L'ultimo bollettino dell'aeroporto è delle {ora}, {fa}: i valori qui sotto non dicono com'è adesso. |
-| `state.metar_expired`     | Adesso, bollettino troppo vecchio per mostrarlo | riga | Nessun bollettino dell'aeroporto dalle {ora}. Non mostriamo valori così vecchi.                     |
-| `state.metar_missing`     | Adesso, nessun bollettino                       | riga | I dati dell'aeroporto non sono disponibili.                                                         |
-| `state.radar_missing`     | Adesso, nessun dato radar                       | riga | Il radar non è disponibile, quindi non sappiamo se piove adesso.                                    |
-| `state.radar_nodata_here` | Adesso, il radar non vede la zona del paese     | riga | Il radar non copre la zona del paese in questa immagine.                                            |
-| `state.forecast_missing`  | al posto di 48 ore e 10 giorni                  | riga | La previsione non è disponibile in questo momento.                                                  |
-| `state.partial_hours`     | sotto il grafico, se mancano ore                | riga | Mancano alcune ore: dove non c'è un modello corretto non mostriamo niente.                          |
-| `state.fetch_failed`      | avviso in alto                                  | riga | Non riusciamo a scaricare i dati. Riproviamo tra un minuto.                                         |
-| `state.noscript`          | se JavaScript è spento                          | riga | Per vedere i dati serve JavaScript: il sito li scarica dal nostro archivio ogni minuto.             |
-| `state.refreshed`         | piè di pagina                                   | riga | Dati controllati alle {ora}.                                                                        |
+| chiave                    | dove                                            | max  | testo                                                                                   |
+| ------------------------- | ----------------------------------------------- | ---- | --------------------------------------------------------------------------------------- |
+| `state.loading`           | al posto dei valori mentre arrivano             | 30   | Carico i dati                                                                           |
+| `state.nodata`            | al posto di un singolo valore assente           | 6    | n.d.                                                                                    |
+| `state.nodata_title`      | spiegazione di n.d.                             | riga | Dato non disponibile                                                                    |
+| `state.stale_tag`         | etichetta accanto a un valore vecchio           | 16   | non aggiornato                                                                          |
+| `state.metar_stale`       | Adesso, bollettino vecchio                      | riga | Ultimo bollettino alle {ora} ({fa}): adesso potrebbe essere diverso.                    |
+| `state.metar_expired`     | Adesso, bollettino troppo vecchio per mostrarlo | riga | Nessun bollettino dell'aeroporto dalle {ora}. Non mostriamo valori così vecchi.         |
+| `state.metar_missing`     | Adesso, nessun bollettino                       | riga | I dati dell'aeroporto non sono disponibili.                                             |
+| `state.radar_missing`     | Adesso, nessun dato radar                       | riga | Il radar non è disponibile, quindi non sappiamo se piove adesso.                        |
+| `state.radar_nodata_here` | Adesso, il radar non vede la zona del paese     | riga | Il radar non copre la zona del paese in questa immagine.                                |
+| `state.forecast_missing`  | al posto di 48 ore e 10 giorni                  | riga | La previsione non è disponibile in questo momento.                                      |
+| `state.partial_hours`     | sotto il grafico, se mancano ore                | riga | Mancano alcune ore: dove non c'è un modello corretto non mostriamo niente.              |
+| `state.fetch_failed`      | avviso in alto                                  | riga | Non riusciamo a scaricare i dati. Riproviamo tra un minuto.                             |
+| `state.noscript`          | se JavaScript è spento                          | riga | Per vedere i dati serve JavaScript: il sito li scarica dal nostro archivio ogni minuto. |
+| `state.refreshed`         | piè di pagina                                   | riga | Dati controllati alle {ora}.                                                            |
 
 ## Piè di pagina e stato delle fonti
 

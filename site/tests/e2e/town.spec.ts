@@ -8,10 +8,10 @@ test.beforeEach(async ({ page, context, baseURL }) => {
 
 test('says when the forecast was issued, in Rome time', async ({ page }) => {
   await page.goto('/pedrengo');
-  await expect(page.locator('#statusline')).toHaveText('Emessa alle 14:00, 1 h 10 min fa.');
+  await expect(page.locator('#statusline')).toHaveText('Aggiornata alle 14:00 (1 h 10 min fa).');
   await expect(page.locator('.trust strong')).toHaveText('Torre Boldone');
   await expect(page.locator('#adesso .src').first()).toContainText(
-    'Aeroporto di Orio al Serio, a 4,3 km.'
+    "Misurati all'aeroporto di Orio al Serio, a 4,3 km,"
   );
 });
 
@@ -46,7 +46,7 @@ test('warns about a late forecast on the status line, the sources say why', asyn
   await useScenario(context, 'vecchi', baseURL ?? '');
   await page.goto('/pedrengo');
   await expect(page.locator('#statusline .warn')).toHaveText(
-    'Emessa alle 07:00, 8 ore fa: di solito si aggiorna ogni ora.'
+    'In ritardo: aggiornata alle 07:00 (8 ore fa).'
   );
   await expect(page.locator('#announce')).toHaveText('La previsione non è aggiornata.');
   await expect(page.locator('#sources details')).toHaveAttribute('open', '');
@@ -57,7 +57,7 @@ test('calls a forecast older than a day old', async ({ page }) => {
   await page.clock.setFixedTime(new Date(NOW.getTime() + 25 * 3_600_000));
   await page.goto('/pedrengo');
   await expect(page.locator('#statusline .bad')).toHaveText(
-    'Previsione vecchia: emessa ieri alle 14:00.'
+    'Previsione vecchia, aggiornata ieri alle 14:00.'
   );
   await expect(page.locator('#announce')).toHaveText('La previsione è vecchia.');
 });
@@ -85,7 +85,7 @@ test('says when the data cannot be fetched', async ({ page, context }) => {
 
 test('says once when the device goes offline, and when it is back', async ({ page, context }) => {
   await page.goto('/pedrengo');
-  await expect(page.locator('#statusline')).toHaveText('Emessa alle 14:00, 1 h 10 min fa.');
+  await expect(page.locator('#statusline')).toHaveText('Aggiornata alle 14:00 (1 h 10 min fa).');
   await expect(page.locator('#announce')).toHaveText('');
   await context.setOffline(true);
   await page.clock.runFor(10 * 60_000);
@@ -94,7 +94,7 @@ test('says once when the device goes offline, and when it is back', async ({ pag
   );
   await expect(page.locator('#announce')).toHaveText('Sei offline.');
   await context.setOffline(false);
-  await expect(page.locator('#statusline')).toHaveText('Emessa alle 14:00, 1 h 20 min fa.');
+  await expect(page.locator('#statusline')).toHaveText('Aggiornata alle 14:00 (1 h 20 min fa).');
   await expect(page.locator('#announce')).toHaveText('Di nuovo in linea.');
 });
 
