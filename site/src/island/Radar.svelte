@@ -383,20 +383,19 @@
       <div class="steps" aria-hidden="true">
         {#each radar.scale as bin (bin.index)}<i class="r{bin.index}" data-qa="radar-{bin.index}"
           ></i>{/each}
-        <i class="nodata"></i>
       </div>
       <div class="bounds" aria-hidden="true">
         {#each radar.scale as bin (bin.index)}<span>{bound(bin.from_mm_h)}</span>{/each}
       </div>
       <ul class="words">
         {#each radar.scale as bin (bin.index)}
-          <li class:minor={bin.index === 1 || bin.index === 5}>
+          <li class="c{bin.index}" class:minor={bin.index === 1 || bin.index === 5}>
             <span class="vh">{range(bin)} {t('unit.mmh')}, {className(bin.index)}</span>
             <span class="word" aria-hidden="true">{className(bin.index)}</span>
           </li>
         {/each}
-        <li class="nd">{t('radar.legend_nodata')}</li>
       </ul>
+      <p class="nd"><i class="nodata" aria-hidden="true"></i>{t('radar.legend_nodata')}</p>
     </div>
     {@render credit(true)}
   {/if}

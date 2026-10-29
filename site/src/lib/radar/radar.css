@@ -280,9 +280,10 @@
     color: var(--ink-2);
   }
   .ramp .steps,
-  .ramp .bounds {
+  .ramp .bounds,
+  .ramp .words {
     display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr)) 1.5rem;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     column-gap: 2px;
   }
   .ramp .steps i {
@@ -306,11 +307,6 @@
   .ramp .steps .r6 {
     background: var(--radar-6);
   }
-  .ramp .steps .nodata {
-    margin-inline-start: 0.5rem;
-    background: repeating-linear-gradient(135deg, var(--nodata) 0 2px, transparent 2px 5px);
-    border: 1px solid var(--nodata);
-  }
   .ramp .title {
     margin: 0 0 var(--space-1);
   }
@@ -323,17 +319,32 @@
       visibility: hidden;
     }
   }
-  /* Four words in a row where the steps are too narrow for six; from 30em
-     each class has its name under its step. Every name stays for screen readers. */
+  /* Each word centred under the step it names: four on two staggered rows
+     where one row would touch, four on one row from 25em, all six from 32em.
+     The names left out stay for screen readers. */
   .ramp .words {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 0 var(--space-3);
-    list-style: none;
+    grid-template-rows: auto auto;
     margin: var(--space-1) 0 0;
     padding: 0;
+    list-style: none;
     color: var(--ink);
+  }
+  .ramp .words li {
+    justify-self: center;
+    white-space: nowrap;
+  }
+  .ramp .words .c2 {
+    grid-area: 1 / 2;
+  }
+  .ramp .words .c3 {
+    grid-area: 2 / 3;
+  }
+  .ramp .words .c4 {
+    grid-area: 1 / 4;
+  }
+  .ramp .words .c6 {
+    grid-area: 2 / 6;
+    justify-self: end;
   }
   .ramp .words .minor {
     position: absolute;
@@ -341,16 +352,19 @@
   .ramp .words .minor .word {
     display: none;
   }
-  .ramp .words .nd {
-    flex-basis: 100%;
-    text-align: end;
-    color: var(--ink-2);
+  @container ramp (min-width: 25em) {
+    .ramp .words .c3,
+    .ramp .words .c6 {
+      grid-row: 1;
+    }
   }
-  @container ramp (min-width: 30em) {
-    .ramp .words {
-      display: grid;
-      grid-template-columns: repeat(6, minmax(0, 1fr)) 1.5rem;
-      column-gap: 2px;
+  @container ramp (min-width: 32em) {
+    .ramp .words .c1 {
+      grid-area: 1 / 1;
+      justify-self: start;
+    }
+    .ramp .words .c5 {
+      grid-area: 1 / 5;
     }
     .ramp .words .minor {
       position: static;
@@ -358,9 +372,19 @@
     .ramp .words .minor .word {
       display: inline;
     }
-    .ramp .words .nd {
-      grid-column: 1 / -1;
-    }
+  }
+  .ramp .nd {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: var(--space-2) 0 0;
+    color: var(--ink-2);
+  }
+  .ramp .nodata {
+    inline-size: 1.5rem;
+    block-size: 0.75rem;
+    background: repeating-linear-gradient(135deg, var(--nodata) 0 2px, transparent 2px 5px);
+    border: 1px solid var(--nodata);
   }
   .credit {
     margin: var(--space-3) 0 0;
