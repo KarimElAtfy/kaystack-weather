@@ -1,6 +1,6 @@
 // The town page from the keyboard: every control in reading order with its
 // focus showing, the skip link and the section bar, the 48 ore range read
-// aloud hour by hour, and the table header under the bar.
+// aloud hour by hour, and the section bar as the only thing that sticks.
 import { expect, test, type Page } from '@playwright/test';
 import { openState, TOWNS } from './fixtures.ts';
 
@@ -120,15 +120,12 @@ test('plays and stops the radar from the keyboard', async ({ page, baseURL }) =>
   await expect(page.getByRole('button', { name: 'Avvia' })).toBeFocused();
 });
 
-test('keeps the table header under the section bar', async ({ page, baseURL }) => {
+test('leaves the table header in the table', async ({ page, baseURL }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await openState(page, 'pioggia', '/pedrengo', baseURL ?? '');
   await page.getByRole('button', { name: 'Tabella' }).click();
-  await page
-    .locator('#ore-48 table.data')
-    .evaluate((table) => window.scrollTo(0, table.getBoundingClientRect().top + scrollY + 400));
   const header = page.locator('#ore-48 table.data thead th').first();
-  expect(await header.evaluate((th) => th.getBoundingClientRect().top)).toBe(44);
+  expect(await header.evaluate((th) => getComputedStyle(th).position)).toBe('static');
 });
 
 test('sticks nothing below 500 px of height', async ({ page, baseURL }) => {

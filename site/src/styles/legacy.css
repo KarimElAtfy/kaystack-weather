@@ -780,13 +780,6 @@
     font-weight: 600;
     vertical-align: bottom;
   }
-  @media (min-height: 500px) {
-    table.data thead th {
-      position: sticky;
-      top: var(--bar);
-      z-index: 1;
-    }
-  }
   table.data thead th .sub {
     display: block;
     font-weight: 400;
