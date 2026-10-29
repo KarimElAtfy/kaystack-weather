@@ -113,14 +113,13 @@ test('shows only the days the models reach, with no sky made up', async ({
 }) => {
   await page.goto('/pedrengo');
   await expect(page.locator('#h-giorni10')).toHaveText('10 giorni');
-  await expect(page.locator('#giorni-10 tbody svg.sym')).toHaveCount(10);
+  await expect(page.locator('#giorni-10 .days svg.sym')).toHaveCount(10);
   await context.unrouteAll();
   await useScenario(context, 'mancanti', baseURL ?? '');
   await page.goto('/pedrengo');
   await expect(page.locator('#h-giorni10')).toHaveText('9 giorni');
-  await expect(page.locator('#giorni-10 tbody tr:not(.sep)')).toHaveCount(9);
-  await expect(page.locator('#giorni-10 tbody svg.sym')).toHaveCount(0);
-  await expect(page.locator('#giorni-10 tbody .c-sky').first()).toHaveText('Dato non disponibile');
+  await expect(page.locator('#giorni-10 .days li')).toHaveCount(9);
+  await expect(page.locator('#giorni-10 .days svg.sym')).toHaveCount(0);
 });
 
 test('never calls a value corrected that did not get the correction', async ({
@@ -141,9 +140,11 @@ test('never calls a value corrected that did not get the correction', async ({
   await expect(d10.locator('.note')).toHaveText(
     'Minima e massima senza correzione: oggi la correzione non è disponibile.'
   );
-  await expect(d10.locator('.foot')).toContainText('Minima e massima sono la media semplice');
-  // "Nessun valore è corretto" is allowed: it says the opposite.
-  const text = ((await page.locator('body').textContent()) ?? '').toLowerCase();
+  await expect(d10.locator('.foot')).toContainText('Minima e massima sono la media dei modelli');
+  // "Nessun valore è corretto" and "non corretta" are allowed: they say the opposite.
+  const text = ((await page.locator('body').textContent()) ?? '')
+    .toLowerCase()
+    .replaceAll('non corretta', '');
   expect(text).not.toContain('corretta');
   expect(text).not.toContain('corrette');
   expect(text).not.toContain('la correzione è quella');
@@ -156,5 +157,17 @@ test('reads the sources when the list is opened on fresh data', async ({ page })
   await expect(page.locator('#sources .srcs li')).toHaveCount(4);
   await expect(page.locator('#sources .srcs li').last()).toContainText(
     'Dati delle 07:20, 7 ore fa. Arrivano con 3-9 ore di ritardo'
+  );
+});
+
+test('reads each day as one sentence and opens it to the ranges', async ({ page }) => {
+  await page.goto('/pedrengo');
+  const first = page.locator('#giorni-10 summary').first();
+  await expect(first.locator('.vh')).toHaveText(
+    /^Domani, minima -?\d+°, massima -?\d+°, pioggia (nessun modello|\d+ modell[io]) su \d+$/
+  );
+  await first.click();
+  await expect(page.locator('#giorni-10 details').first()).toContainText(
+    'media dei modelli, non corretta'
   );
 });

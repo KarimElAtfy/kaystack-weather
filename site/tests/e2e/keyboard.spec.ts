@@ -98,8 +98,9 @@ test('reaches the radar controls from the 48 ore range on a phone', async ({ pag
   await page.setViewportSize({ width: 360, height: 800 });
   await openState(page, 'pioggia', '/pedrengo', baseURL ?? '');
   await page.getByRole('slider', { name: 'Ora del grafico' }).focus();
+  // Each of the ten days opens, so each is a stop on the way.
   const names: string[] = [];
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 16; i++) {
     await page.keyboard.press('Tab');
     names.push((await focused(page))?.name ?? '');
   }
