@@ -1,10 +1,11 @@
 <script lang="ts">
   import { t } from '#lib/copy/t.ts';
   import { int, mm, models, temp, wind } from '#lib/format.ts';
-  import { firstShown, observed, summary } from '#lib/chart/h48.ts';
+  import { firstShown, nextHour, observed, summary } from '#lib/chart/h48.ts';
   import Icon from '#lib/symbols/Icon.svelte';
   import { dayNumber, dstLabel, hm, weekdayLong } from '#lib/time.ts';
   import Meteogram from './Meteogram.svelte';
+  import Table48 from './Table48.svelte';
   import type { TownData } from './town.svelte.ts';
 
   let { data }: { data: TownData } = $props();
@@ -26,8 +27,6 @@
       // Storage refused: the choice lasts until the page closes.
     }
   }
-  // The table holds every number of the chart; it loads only when asked for.
-  const table = $derived(view === 'table' ? import('./Table48.svelte') : null);
 
   const forecast = $derived(data.forecast.value);
   const hourly = $derived(forecast?.hourly);
@@ -43,9 +42,11 @@
   const raw = $derived(hourly ? !hourly.temperature_c.corrected : false);
   const hasDst = $derived(times.some((_, i) => dstLabel(times, i) !== null));
 
-  const readout = $derived.by(() => {
-    if (!hourly || selected === null) return null;
-    const i = selected;
+  // The range starts on the next full hour and speaks for it before any hour is chosen.
+  const spokenHour = $derived(selected ?? nextHour(times, data.clock));
+  const lines = $derived.by(() => {
+    if (!hourly) return null;
+    const i = spokenHour;
     const label = dstLabel(times, i);
     const T = hourly.temperature_c;
     const amount = hourly.precipitation_mm.mean[i];
@@ -58,14 +59,15 @@
       `${wind(hourly.wind_kmh.mean[i], hourly.wind_dir_deg.mean[i])}, ${t('h48.cell_gust', { g: int(hourly.gust_kmh.mean[i]) })}`
     ];
   });
-  const spoken = $derived(readout?.join(', ') ?? '');
+  const readout = $derived(selected === null ? null : lines);
+  const spoken = $derived(lines?.join(', ') ?? '');
 
   // The browser's own Page Up and Page Down steps vary; the design wants six hours.
   function pageKeys(event: KeyboardEvent) {
     const step = event.key === 'PageUp' ? -6 : event.key === 'PageDown' ? 6 : 0;
     if (!step) return;
     event.preventDefault();
-    picked = Math.min(times.length - 1, Math.max(first, (selected ?? first) + step));
+    picked = Math.min(times.length - 1, Math.max(first, spokenHour + step));
   }
   const rain = $derived(
     hourly ? summary(hourly, data.clock, observed(data.now.value?.radar, data.clock)).rain : ''
@@ -124,16 +126,14 @@
       min={first}
       max={times.length - 1}
       step="1"
-      value={selected ?? first}
+      value={spokenHour}
       oninput={(event) => (picked = Number(event.currentTarget.value))}
       onkeydown={pageKeys}
       aria-label={t('h48.range_label')}
       aria-valuetext={spoken || undefined}
     />
-  {:else if table}
-    {#await table then { default: Table48 }}
-      <Table48 {hourly} {first} lat={data.town.lat} lon={data.town.lon} />
-    {/await}
+  {:else}
+    <Table48 {hourly} {first} lat={data.town.lat} lon={data.town.lon} />
   {/if}
   <div class="foot">
     {#if hasGap && !raw}<p>{t('state.partial_hours')}</p>{/if}

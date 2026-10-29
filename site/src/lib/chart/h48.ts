@@ -17,6 +17,12 @@ export function firstShown(times: number[], now: number): number {
   return first;
 }
 
+// The hour the range starts on: the next full hour.
+export function nextHour(times: number[], now: number): number {
+  const i = times.findIndex((time) => time >= now);
+  return i === -1 ? times.length - 1 : i;
+}
+
 // What the radar sees at the town, only while it is fresh enough to say what
 // is happening now; under its lightest class, 0,2 mm/h, it is not raining.
 export type Observed = 'dry' | 'rain' | null;
