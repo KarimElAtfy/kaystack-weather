@@ -1,6 +1,6 @@
 // The town page from the keyboard: every control in reading order with its
 // focus showing, the skip link and the section bar, the 48 ore range read
-// aloud hour by hour, and the section bar as the only thing that sticks.
+// aloud hour by hour, and where the bar sits on each kind of screen.
 import { expect, test, type Page } from '@playwright/test';
 import { openState, TOWNS } from './fixtures.ts';
 
@@ -46,7 +46,10 @@ for (const town of TOWNS) {
       "Ora dell'immagine",
       'Stato delle fonti'
     ];
-    const at = order.map((name) => names.indexOf(name));
+    // The station link is named by the station, then why the forecast uses it.
+    const at = order.map((name) =>
+      names.findIndex((seen) => seen === name || seen.endsWith(`, ${name}`))
+    );
     expect(at.every((index) => index >= 0)).toBe(true);
     expect(at).toEqual([...at].sort((a, b) => a - b));
   });
@@ -81,15 +84,17 @@ test('skips to the content, then follows the section bar', async ({ page, baseUR
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/#main$/);
   await page.keyboard.press('Tab');
-  expect((await focused(page))?.name).toBe('Perché una stazione');
-  await page.keyboard.press('Tab');
-  await page.keyboard.press('Tab');
+  expect((await focused(page))?.name).toBe('Torre Boldone, Perché una stazione');
+  for (let i = 0; i < 10 && (await focused(page))?.name !== '48 ore'; i++) {
+    await page.keyboard.press('Tab');
+  }
   expect((await focused(page))?.name).toBe('48 ore');
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/#ore-48$/);
   // Clear of the sticky bar, and marked as the section being read.
+  const bar = await page.locator('.sections').evaluate((e) => e.getBoundingClientRect().bottom);
   const top = await page.locator('#ore-48').evaluate((e) => e.getBoundingClientRect().top);
-  expect(top).toBeGreaterThanOrEqual(44);
+  expect(top).toBeGreaterThanOrEqual(bar);
   expect(top).toBeLessThan(120);
   await expect(page.locator('.sections a[href="#ore-48"]')).toHaveAttribute('aria-current', 'true');
 });
@@ -113,30 +118,75 @@ test('reaches the radar controls from the 48 ore range on a phone', async ({ pag
 test('plays and stops the radar from the keyboard', async ({ page, baseURL }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await openState(page, 'pioggia', '/sesto-calende', baseURL ?? '');
-  await page.getByRole('button', { name: 'Avvia' }).focus();
+  const play = page.getByRole('button', { name: 'Avvia' });
+  await play.focus();
+  // Below the fold the frames load only once the map is near the screen.
+  await expect(play).not.toHaveAttribute('aria-disabled', 'true');
   await page.keyboard.press('Space');
   await expect(page.getByRole('button', { name: 'Ferma' })).toBeFocused();
   await page.keyboard.press('Space');
   await expect(page.getByRole('button', { name: 'Avvia' })).toBeFocused();
 });
 
-test('leaves the table header in the table', async ({ page, baseURL }) => {
-  await page.setViewportSize({ width: 1280, height: 900 });
+test('keeps the section bar at the bottom of an upright phone', async ({ page, baseURL }) => {
+  await page.setViewportSize({ width: 375, height: 667 });
+  await openState(page, 'pioggia', '/pedrengo', baseURL ?? '');
+  const bar = page.locator('[data-qa="section-bar"]');
+  const box = await bar.evaluate((e) => {
+    const r = e.getBoundingClientRect();
+    return {
+      top: r.top,
+      bottom: r.bottom,
+      height: r.height,
+      position: getComputedStyle(e).position
+    };
+  });
+  expect(box.position).toBe('fixed');
+  expect(box.bottom).toBe(667);
+  // The page keeps that much room free at its end and for anything focused.
+  const room = await page.evaluate(() => ({
+    end: parseFloat(getComputedStyle(document.querySelector('.app')!).paddingBottom),
+    focus: parseFloat(getComputedStyle(document.documentElement).scrollPaddingBottom)
+  }));
+  expect(box.height).toBeLessThanOrEqual(room.end);
+  expect(box.height).toBeLessThanOrEqual(room.focus);
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  const footer = await page.locator('footer').evaluate((e) => e.getBoundingClientRect().bottom);
+  expect(footer).toBeLessThanOrEqual(box.top);
+  await bar.getByRole('link', { name: '10 giorni' }).click();
+  await expect(page).toHaveURL(/#giorni-10$/);
+  await expect(bar.getByRole('link', { name: '10 giorni' })).toHaveAttribute(
+    'aria-current',
+    'true'
+  );
+});
+
+test('keeps the section bar at the top of a tablet, the table header in the table', async ({
+  page,
+  baseURL
+}) => {
+  await page.setViewportSize({ width: 820, height: 1180 });
   await openState(page, 'pioggia', '/pedrengo', baseURL ?? '');
   await page.getByRole('button', { name: 'Tabella' }).click();
+  await page
+    .locator('#ore-48 table.data')
+    .evaluate((table) => window.scrollTo(0, table.getBoundingClientRect().top + scrollY + 400));
+  const bar = page.locator('[data-qa="section-bar"]');
+  expect(await bar.evaluate((e) => getComputedStyle(e).position)).toBe('sticky');
+  expect(await bar.evaluate((e) => e.getBoundingClientRect().top)).toBe(0);
   const header = page.locator('#ore-48 table.data thead th').first();
   expect(await header.evaluate((th) => getComputedStyle(th).position)).toBe('static');
 });
 
-test('sticks nothing below 500 px of height', async ({ page, baseURL }) => {
-  await page.setViewportSize({ width: 900, height: 480 });
+test('shows no section bar on a phone on its side', async ({ page, baseURL }) => {
+  await page.setViewportSize({ width: 852, height: 393 });
   await openState(page, 'pioggia', '/pedrengo', baseURL ?? '');
   await page.getByRole('button', { name: 'Tabella' }).click();
-  const position = (selector: string) =>
-    page
-      .locator(selector)
+  await expect(page.locator('[data-qa="section-bar"]')).toBeHidden();
+  expect(
+    await page
+      .locator('#ore-48 table.data thead th')
       .first()
-      .evaluate((e) => getComputedStyle(e).position);
-  expect(await position('.sections')).toBe('static');
-  expect(await position('#ore-48 table.data thead th')).toBe('static');
+      .evaluate((th) => getComputedStyle(th).position)
+  ).toBe('static');
 });

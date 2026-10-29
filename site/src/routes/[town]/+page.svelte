@@ -28,58 +28,49 @@
 <Header towns={data.towns} current={town.slug} />
 
 <main id="main" data-town={JSON.stringify(town)}>
-  <div class="wrap">
-    <div class="town-head">
-      <h1>{name} <span class="prov">{named(`town.province.${town.slug}`)}</span></h1>
-      <p class="trust">
-        {station[0]}<strong>{town.station}</strong>{station[1]}
-        <a href="/come-funziona#stazione">{t('trust.why')}</a>
-        <span id="statusline">{t('state.loading')}</span>
-      </p>
-      <p id="announce" class="vh" role="status"></p>
+  <div class="wrap hero-area">
+    <div class="hero-grid">
+      <div class="town-head">
+        <h1>{name} <span class="prov">{named(`town.province.${town.slug}`)}</span></h1>
+        <p class="trust" data-qa="town-line">
+          {station[0]}<a
+            href="/come-funziona#stazione"
+            aria-label="{town.station}, {t('trust.why')}">{town.station}</a
+          >{station[1]}
+          <span id="statusline">{t('state.loading')}</span>
+        </p>
+        <p id="announce" class="vh" role="status"></p>
+      </div>
+      <section id="adesso" aria-labelledby="h-adesso">
+        <h2 id="h-adesso" class="vh">{t('now.h2')}</h2>
+        <div id="adesso-body" class="skel skel-now">{t('state.loading')}</div>
+      </section>
     </div>
   </div>
 
-  <nav class="sections" aria-label={t('nav.label')}>
+  <nav class="sections" aria-label={t('nav.label')} data-qa="section-bar">
     <div class="wrap">
-      {#each sections as [id, key] (id)}
-        <a href="#{id}">{t(key)}</a>
-      {/each}
+      <ul>
+        {#each sections as [id, key] (id)}
+          <li><a href="#{id}" data-qa="section-bar-{id}">{t(key)}</a></li>
+        {/each}
+      </ul>
     </div>
   </nav>
 
-  <div class="wrap">
-    <div class="layout">
-      <section id="adesso" class="panel" aria-labelledby="h-adesso">
-        <div class="sec-head">
-          <h2 id="h-adesso">{t('now.h2')}</h2>
-          <span class="kind">{t('now.measured')}</span>
-        </div>
-        <div id="adesso-body" class="skel skel-now">{t('state.loading')}</div>
-      </section>
-      <section id="ore-48" class="panel" aria-labelledby="h-ore48">
-        <div class="sec-head">
-          <h2 id="h-ore48">{t('h48.h2')}</h2>
-          <span class="kind">{t('h48.forecast')}</span>
-        </div>
-        <div id="ore48-body" class="skel skel-48">{t('state.loading')}</div>
-      </section>
-      <section id="giorni-10" class="panel" aria-labelledby="h-giorni10">
-        <div class="sec-head">
-          <h2 id="h-giorni10">{t('d10.h2')}</h2>
-          <span class="kind">{t('h48.forecast')}</span>
-        </div>
-        <div id="giorni10-body" class="skel skel-10">{t('state.loading')}</div>
-      </section>
-      <section id="radar" class="panel" aria-labelledby="h-radar">
-        <div class="sec-head">
-          <h2 id="h-radar">{t('radar.h2')}</h2>
-          <span class="kind">{t('now.measured_short')}</span>
-        </div>
-        <p class="sec-meta">{t('radar.sub')}</p>
-        <div id="radar-body" class="skel skel-radar">{t('state.loading')}</div>
-      </section>
-    </div>
+  <div class="wrap blocks">
+    <section id="ore-48" class="block" aria-labelledby="h-ore48">
+      <h2 id="h-ore48">{t('h48.h2')}</h2>
+      <div id="ore48-body" class="skel skel-48">{t('state.loading')}</div>
+    </section>
+    <section id="giorni-10" class="block" aria-labelledby="h-giorni10">
+      <h2 id="h-giorni10">{t('d10.h2')}</h2>
+      <div id="giorni10-body" class="skel skel-10">{t('state.loading')}</div>
+    </section>
+    <section id="radar" class="block" aria-labelledby="h-radar">
+      <h2 id="h-radar">{t('radar.h2')}</h2>
+      <div id="radar-body" class="skel skel-radar">{t('state.loading')}</div>
+    </section>
   </div>
   <noscript>
     <div class="wrap"><p class="note">{t('state.noscript')}</p></div>
