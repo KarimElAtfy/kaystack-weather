@@ -1,4 +1,6 @@
 <script lang="ts">
+  import './symbols.css';
+  import { inkLayer, sunLayer } from './layers.ts';
   import type { Sky } from './pick.ts';
 
   // Without a label the symbol is decorative: the same information is in text nearby.
@@ -16,6 +18,7 @@
   focusable="false"
 >
   {#if label}<title>{label}</title>{/if}
-  <use href="#{sky.base}" />
+  {#if sunLayer(sky.base)}<use href="#{sky.base}-sun" />{/if}
+  {#if inkLayer(sky.base)}<use href="#{sky.base}-ink" />{/if}
   {#if sky.drops}<use href="#{sky.drops}" />{/if}
 </svg>

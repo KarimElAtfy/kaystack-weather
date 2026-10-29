@@ -1,0 +1,33 @@
+/* The sky symbols in the sprite. Each colour reads one token, so the page's light
+   and dark values reach the clones <use> makes from the sprite in the same page. */
+@layer blocks {
+  .y-sun,
+  .y-ink,
+  .y-rain-line {
+    fill: none;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .y-sun {
+    stroke: var(--temp);
+  }
+  .y-bolt {
+    fill: var(--temp);
+    stroke-width: 1;
+  }
+  .y-ink {
+    stroke: var(--ink-2);
+  }
+  /* Overcast is the plain cloud filled with a wash of its own line colour. */
+  .y-tint {
+    fill: var(--ink-2);
+    fill-opacity: 0.2;
+  }
+  .y-rain {
+    fill: var(--rain);
+  }
+  .y-rain-line {
+    stroke: var(--rain);
+  }
+}

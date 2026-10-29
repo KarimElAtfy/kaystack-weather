@@ -1,109 +1,160 @@
-// The weather symbols and interface icons, drawn on a 32 x 32 grid for this
-// site, written at build time into one sprite that each town page carries in its
-// own HTML. The page's stylesheet colours the classes with its tokens: WebKit and
+// The weather symbols and interface icons, drawn as strokes on a 32 x 32 grid and
+// written at build time into one sprite that each town page carries in its own
+// HTML. symbols.css colours the classes with the page's tokens: WebKit and
 // Firefox do not pass the tokens into a sprite read from a file by <use>.
+//
+// Every sky comes as layers, one per colour: <id>-sun (sun and lightning) and
+// <id>-ink (moon, clouds, fog, snow), plus <id> drawing both, so a test can find
+// each colour inside the box of the <use> that draws it.
 
-// The favicon is drawn by the browser outside the page, so it has its own
-// colours, the light theme's.
+import { inkLayer, sunLayer } from './layers.ts';
+
+// The favicon is drawn by the browser outside the page, so it carries its own
+// colours: the light theme's, and the dark theme's for dark tab strips.
 const FAVICON_STYLE = `
-.s-sun{fill:#e9a10b}
-.s-ray{stroke:#e9a10b;stroke-width:2;stroke-linecap:round}
-.s-cloud{fill:#e9ecf0}
-.s-edge{fill:#7f8996}`;
+.y-sun,.y-ink{fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.y-sun{stroke:#b8461b}
+.y-ink{stroke:#57534b}
+@media (prefers-color-scheme:dark){.y-sun{stroke:#f08b55}.y-ink{stroke:#b3ac9f}}`;
 
 const n = (x: number) => Number(x.toFixed(2));
 
-function sun(cx: number, cy: number, r: number, ray: number): string {
-  let s = `<circle class="s-sun" cx="${cx}" cy="${cy}" r="${r}"/>`;
+type Circle = [number, number, number];
+// Three bumps whose lower ends rest on one flat base: left, top, right.
+type Cloud = [Circle, Circle, Circle];
+
+// The upper of the two points where circles a and b cross.
+function cross([ax, ay, ar]: Circle, [bx, by, br]: Circle): [number, number] {
+  const d = Math.hypot(bx - ax, by - ay);
+  const along = (ar * ar - br * br + d * d) / (2 * d);
+  const h = Math.sqrt(ar * ar - along * along);
+  const [mx, my] = [ax + (along * (bx - ax)) / d, ay + (along * (by - ay)) / d];
+  const [ux, uy] = [(-(by - ay) * h) / d, ((bx - ax) * h) / d];
+  return my + uy < my - uy ? [mx + ux, my + uy] : [mx - ux, my - uy];
+}
+
+const angle = ([cx, cy]: Circle, [x, y]: [number, number]) => Math.atan2(y - cy, x - cx);
+
+// A clockwise arc on circle c from angle a0 to the point p.
+function arc(c: Circle, a0: number, p: [number, number]): string {
+  const span = (angle(c, p) - a0 + 4 * Math.PI) % (2 * Math.PI);
+  return `A${c[2]} ${c[2]} 0 ${span > Math.PI ? 1 : 0} 1 ${n(p[0])} ${n(p[1])}`;
+}
+
+// The outline of a cloud as one path, so no bump shows its hidden half.
+function outline([l, t, r]: Cloud): string {
+  const base = l[1] + l[2];
+  const lt = cross(l, t);
+  const tr = cross(t, r);
+  return (
+    `M${l[0]} ${base} ` +
+    arc(l, Math.PI / 2, lt) +
+    arc(t, angle(t, lt), tr) +
+    arc(r, angle(r, tr), [r[0], base]) +
+    'Z'
+  );
+}
+
+const cloud = (c: Cloud, tint = false) =>
+  `<path class="${tint ? 'y-ink y-tint' : 'y-ink'}" d="${outline(c)}"/>`;
+
+const BIG: Cloud = [
+  [10, 19.5, 4.5],
+  [16.5, 14.5, 7],
+  [23, 19.5, 4.5]
+];
+const SMALL: Cloud = [
+  [15.6, 22.2, 3.8],
+  [20.8, 18.4, 5.6],
+  [25.8, 22.2, 3.8]
+];
+
+// A ray is left out where it would run into the cloud beside the sun.
+function sun(cx: number, cy: number, r: number, ray: number, beside?: Cloud): string {
+  let s = `<circle class="y-sun" cx="${cx}" cy="${cy}" r="${r}"/>`;
   for (let i = 0; i < 8; i++) {
     const a = (i * Math.PI) / 4;
-    const [c, si] = [Math.cos(a), Math.sin(a)];
-    s += `<line class="s-ray" x1="${n(cx + c * (r + 2))}" y1="${n(cy + si * (r + 2))}" x2="${n(cx + c * (r + 2 + ray))}" y2="${n(cy + si * (r + 2 + ray))}"/>`;
+    const [x1, y1] = [cx + Math.cos(a) * (r + 2.4), cy + Math.sin(a) * (r + 2.4)];
+    const [x2, y2] = [cx + Math.cos(a) * (r + 2.4 + ray), cy + Math.sin(a) * (r + 2.4 + ray)];
+    const hits = beside?.some(([bx, by, br]) => Math.hypot(x2 - bx, y2 - by) < br + 2.2);
+    if (!hits) s += `<line class="y-sun" x1="${n(x1)}" y1="${n(y1)}" x2="${n(x2)}" y2="${n(y2)}"/>`;
   }
   return s;
 }
 
 const moon = (cx: number, cy: number, r: number) =>
-  `<path class="s-moon" d="M${n(cx + r * 0.35)} ${cy - r} A${r} ${r} 0 1 0 ${cx + r} ${n(cy + r * 0.45)} A${n(r * 0.8)} ${n(r * 0.8)} 0 0 1 ${n(cx + r * 0.35)} ${cy - r} Z"/>`;
-
-type Cloud = { circles: [number, number, number][]; box: [number, number, number, number] };
-
-// A cloud is circles and a box; its outline is the same shapes, drawn larger behind.
-function shapes(c: Cloud, grow: number): string {
-  const circles = c.circles.map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${n(r + grow)}"/>`);
-  const [x, y, w, h] = c.box;
-  return `${circles.join('')}<rect x="${n(x - grow)}" y="${n(y - grow)}" width="${n(w + 2 * grow)}" height="${n(h + 2 * grow)}" rx="${grow}"/>`;
-}
-const cloud = (c: Cloud, fill: string) =>
-  `<g class="s-edge">${shapes(c, 1.3)}</g><g class="${fill}">${shapes(c, 0)}</g>`;
-
-const BIG: Cloud = {
-  circles: [
-    [10.5, 19, 5.5],
-    [17, 14.5, 7.5],
-    [23.5, 19, 5.5]
-  ],
-  box: [10.5, 17, 13, 7.5]
-};
-const SMALL: Cloud = {
-  circles: [
-    [15.5, 23, 4.2],
-    [21, 19.5, 5.8],
-    [26.2, 23.2, 4]
-  ],
-  box: [15.5, 21, 10.7, 6.2]
-};
-const BACK: Cloud = {
-  circles: [
-    [14, 12.5, 5],
-    [20, 9.5, 6],
-    [25.5, 13, 4.2]
-  ],
-  box: [14, 11, 11.5, 6.2]
-};
+  `<path class="y-ink" d="M${n(cx + r * 0.35)} ${n(cy - r)} A${r} ${r} 0 1 0 ${n(cx + r)} ${n(cy + r * 0.45)} A${n(r * 0.8)} ${n(r * 0.8)} 0 0 1 ${n(cx + r * 0.35)} ${n(cy - r)} Z"/>`;
 
 function drop(x: number, y: number, s: number, hollow = false): string {
-  const d = `M${x} ${y} C${x} ${y} ${n(x - 2.3 * s)} ${n(y + 3 * s)} ${n(x - 2.3 * s)} ${n(y + 4.2 * s)} A${n(2.3 * s)} ${n(2.3 * s)} 0 0 0 ${n(x + 2.3 * s)} ${n(y + 4.2 * s)} C${n(x + 2.3 * s)} ${n(y + 3 * s)} ${x} ${y} ${x} ${y} Z`;
-  return `<path class="${hollow ? 's-rain-line' : 's-rain'}" d="${d}"/>`;
+  const d = `M${x} ${y} C${x} ${y} ${n(x - 2.2 * s)} ${n(y + 2.9 * s)} ${n(x - 2.2 * s)} ${n(y + 4 * s)} A${n(2.2 * s)} ${n(2.2 * s)} 0 0 0 ${n(x + 2.2 * s)} ${n(y + 4 * s)} C${n(x + 2.2 * s)} ${n(y + 2.9 * s)} ${x} ${y} ${x} ${y} Z`;
+  return `<path class="${hollow ? 'y-rain-line' : 'y-rain'}" d="${d}"/>`;
 }
 
-const up = (inner: string, dy: number) => `<g transform="translate(0 ${dy})">${inner}</g>`;
-const few = (night: boolean) =>
-  (night ? moon(11, 11, 7) : sun(11.5, 11.5, 4.6, 2.4)) + cloud(SMALL, 's-cloud');
-const overcast = () => cloud(BACK, 's-cloud-back') + up(cloud(BIG, 's-cloud'), 1.5);
+const flake = (x: number, y: number) =>
+  [0, 60, 120]
+    .map((deg) => {
+      const [dx, dy] = [
+        Math.cos((deg * Math.PI) / 180) * 1.9,
+        Math.sin((deg * Math.PI) / 180) * 1.9
+      ];
+      return `<line class="y-ink" x1="${n(x - dx)}" y1="${n(y - dy)}" x2="${n(x + dx)}" y2="${n(y + dy)}"/>`;
+    })
+    .join('');
+
+const up = (inner: string, dy: number) =>
+  inner && dy ? `<g transform="translate(0 ${dy})">${inner}</g>` : inner;
+
+type Layers = { sun?: string; ink?: string };
+
+const BOLT =
+  '<path class="y-sun y-bolt" d="M17.4 21.2 L13.6 27 H16.4 L15 31 L19.6 25.2 H16.8 L18.6 21.2 Z"/>';
 
 // A base is the sky without rain; its -wet form sits higher to leave room for drops.
-const SYMBOLS: Record<string, string> = {
-  'clear-day': sun(16, 16, 6, 3),
-  'clear-night': moon(15, 16, 9),
-  'few-day': few(false),
-  'few-night': few(true),
-  cloudy: cloud(BIG, 's-cloud'),
-  overcast: overcast(),
-  'few-day-wet': up(few(false), -4),
-  'few-night-wet': up(few(true), -4),
-  'cloudy-wet': up(cloud(BIG, 's-cloud'), -3.5),
-  'overcast-wet': up(overcast(), -4),
-  'drops-maybe': drop(16, 24.6, 1, true),
-  'drops-1': drop(16, 24.4, 1),
-  'drops-2': drop(12.5, 24.4, 1) + drop(19.5, 24.4, 1),
-  'drops-3': drop(10, 24.8, 0.85) + drop(16, 24.8, 0.85) + drop(22, 24.8, 0.85),
-  thunder:
-    up(overcast(), -4) +
-    '<path class="s-sun" d="M17.6 21.5 L13.2 27.6 H16.3 L14.6 31.6 L19.8 25.2 H16.8 L18.8 21.5 Z"/>',
-  snow:
-    up(overcast(), -4) +
-    [11.5, 16.5, 21.5]
-      .map((x, i) => `<circle class="s-snow" cx="${x}" cy="${i === 1 ? 29.5 : 26.5}" r="1.6"/>`)
-      .join(''),
-  fog: [
-    [7, 25, 11],
-    [4, 28, 16],
-    [7, 25, 21],
-    [10, 22, 26]
-  ]
-    .map(([a, b, y]) => `<line class="s-fog" x1="${a}" y1="${y}" x2="${b}" y2="${y}"/>`)
-    .join('')
+function skies(): Record<string, Layers> {
+  // With rain the cloud moves up beside the sun, which stays put so its rays
+  // keep inside the box; the rays are then cut against the moved cloud.
+  const few = (night: boolean, lift = 0): Layers => {
+    const c = SMALL.map(([x, y, r]) => [x, y + lift, r]) as Cloud;
+    return night
+      ? { ink: moon(10, 10, 5) + cloud(c) }
+      : { sun: sun(11, 11, 4, 2.6, c), ink: cloud(c) };
+  };
+  const overcast = cloud(BIG, true);
+  return {
+    'clear-day': { sun: sun(16, 16, 5.5, 3.2) },
+    'clear-night': { ink: moon(15, 16, 8.5) },
+    'few-day': few(false),
+    'few-night': few(true),
+    cloudy: { ink: up(cloud(BIG), 1.5) },
+    overcast: { ink: up(overcast, 1.5) },
+    'few-day-wet': few(false, -4),
+    'few-night-wet': few(true, -4),
+    'cloudy-wet': { ink: up(cloud(BIG), -3) },
+    'overcast-wet': { ink: up(overcast, -3) },
+    thunder: { sun: BOLT, ink: up(overcast, -3) },
+    snow: {
+      ink: up(overcast, -3) + flake(11, 26.5) + flake(16.5, 29) + flake(22, 26.5)
+    },
+    fog: {
+      ink: [
+        [7, 25, 11],
+        [5, 27, 15.5],
+        [7, 25, 20],
+        [10, 22, 24.5]
+      ]
+        .map(([a, b, y]) => `<line class="y-ink" x1="${a}" y1="${y}" x2="${b}" y2="${y}"/>`)
+        .join('')
+    }
+  };
+}
+
+const SKIES = skies();
+
+const DROPS: Record<string, string> = {
+  'drops-maybe': drop(16, 23.6, 1, true),
+  'drops-1': drop(16, 23.4, 1),
+  'drops-2': drop(12.5, 23.4, 1) + drop(19.5, 23.4, 1),
+  'drops-3': drop(10, 23.8, 0.85) + drop(16, 23.8, 0.85) + drop(22, 23.8, 0.85)
 };
 
 // Interface icons on a 16 x 16 grid, in the text colour around them.
@@ -117,20 +168,33 @@ const ICONS: Record<string, string> = {
   pause: '<path class="i-dot" d="M4 2.5h3v11H4zM9 2.5h3v11H9z"/>'
 };
 
-export const SYMBOL_IDS = Object.keys(SYMBOLS);
+export const SYMBOL_IDS = [...Object.keys(SKIES), ...Object.keys(DROPS)];
 export const ICON_IDS = Object.keys(ICONS);
 
+const symbol = (id: string, body: string) =>
+  `<symbol id="${id}" viewBox="0 0 32 32">${body}</symbol>`;
+
 export function sprite(): string {
-  const symbols = Object.entries(SYMBOLS).map(
-    ([id, body]) => `<symbol id="${id}" viewBox="0 0 32 32">${body}</symbol>`
-  );
+  const layered = Object.entries(SKIES).flatMap(([id, { sun: s, ink }]) => {
+    if (Boolean(s) !== sunLayer(id) || Boolean(ink) !== inkLayer(id))
+      throw new Error(`${id}: its layers do not match layers.ts`);
+    const parts = [
+      ...(s ? [symbol(`${id}-sun`, s)] : []),
+      ...(ink ? [symbol(`${id}-ink`, ink)] : [])
+    ];
+    const both = [s ? `<use href="#${id}-sun"/>` : '', ink ? `<use href="#${id}-ink"/>` : ''];
+    return [...parts, symbol(id, both.join(''))];
+  });
+  const drops = Object.entries(DROPS).map(([id, body]) => symbol(id, body));
   const icons = Object.entries(ICONS).map(
     ([id, body]) => `<symbol id="i-${id}" viewBox="0 0 16 16">${body}</symbol>`
   );
-  return `<svg xmlns="http://www.w3.org/2000/svg">${[...symbols, ...icons].join('')}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg">${[...layered, ...drops, ...icons].join('')}</svg>`;
 }
 
-// The tab icon: the few_day symbol on its own.
-export const favicon = () =>
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><style>${FAVICON_STYLE}</style>${SYMBOLS['few-day']}</svg>
+// The tab icon: the few-day symbol on its own.
+export const favicon = () => {
+  const { sun: s, ink } = SKIES['few-day'] ?? {};
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><style>${FAVICON_STYLE}</style>${s ?? ''}${ink ?? ''}</svg>
 `;
+};
