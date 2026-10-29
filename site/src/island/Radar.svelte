@@ -227,6 +227,13 @@
     return { update: move };
   }
   const k = $derived(radar && mapSize ? mapSize / radar.frame_width_px : 0);
+  // The played part of the track, which WebKit and Chrome cannot style on
+  // their own: a custom property the track's gradient reads, set through the CSSOM.
+  function played(node: HTMLElement, share: number) {
+    const set = (share: number) => node.style.setProperty('--played', String(share));
+    set(share);
+    return { update: set };
+  }
 </script>
 
 {#snippet credit(map: boolean)}
@@ -335,6 +342,7 @@
         </div>
         <input
           type="range"
+          use:played={last ? shown / last : 1}
           min="0"
           max={last}
           step="1"

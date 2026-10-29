@@ -175,7 +175,7 @@
   }
   .timeline .ticks {
     position: absolute;
-    inset-inline: 0.5rem;
+    inset-inline: 0.625rem;
     top: 0;
     block-size: var(--tap);
     display: flex;
@@ -197,6 +197,8 @@
     background: none;
     border-inline-start: 2px dashed var(--ink-3);
   }
+  /* A 2 px track, the played part in ink, a 1.25rem ink thumb; the input
+     keeps its 44 px height as the hit area. */
   .timeline input[type='range'] {
     position: relative;
     display: block;
@@ -204,7 +206,44 @@
     min-block-size: var(--tap);
     margin: 0;
     background: transparent;
-    accent-color: var(--ink);
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .timeline input[type='range']::-webkit-slider-runnable-track {
+    block-size: 2px;
+    background: linear-gradient(
+      to right,
+      var(--ink) calc(0.625rem + var(--played, 1) * (100% - 1.25rem)),
+      var(--ink-3) 0
+    );
+  }
+  .timeline input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+    margin-block-start: calc(1px - 0.625rem);
+    border: 0;
+    border-radius: 50%;
+    background: var(--ink);
+  }
+  .timeline input[type='range']::-moz-range-track {
+    block-size: 2px;
+    background: var(--ink-3);
+  }
+  .timeline input[type='range']::-moz-range-progress {
+    block-size: 2px;
+    background: var(--ink);
+  }
+  .timeline input[type='range']::-moz-range-thumb {
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+    border: 0;
+    border-radius: 50%;
+    background: var(--ink);
+  }
+  .timeline input[type='range']:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
   }
   .timeline input[aria-disabled='true'] {
     opacity: 0.5;
