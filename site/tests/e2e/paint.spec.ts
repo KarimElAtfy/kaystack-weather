@@ -68,7 +68,7 @@ for (const scheme of ['light', 'dark'] as const) {
 
     test('paints the clouds of the weather symbols', async ({ page, baseURL }) => {
       await open(page, 'pioggia', baseURL ?? '');
-      const days = page.locator('#giorni-10 table.days');
+      const days = page.locator('#giorni-10 .days');
       await days.scrollIntoViewIfNeeded();
       const found = await shares(page, days, '--sym-cloud');
       expect(found.black).toBeLessThan(0.001);
