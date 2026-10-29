@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { expect, test } from 'vitest';
 import { decodeForecast, decodeNow } from '#lib/data/decode.ts';
-import { firstShown, lastFullHour, nextHour, niceStep, observed, summary } from './h48.ts';
+import { firstShown, lastFullHour, observed, summary } from './h48.ts';
 
 const forecast = (scenario: string) =>
   decodeForecast(
@@ -9,10 +9,9 @@ const forecast = (scenario: string) =>
   );
 const NOW = Date.parse('2026-10-24T13:10:00Z');
 
-test('trims the hours already gone and picks the next full hour', () => {
+test('trims the hours already gone', () => {
   const times = forecast('pioggia').hourly.time.map(Date.parse);
   expect(new Date(times[firstShown(times, NOW)]!).toISOString()).toBe('2026-10-24T13:00:00.000Z');
-  expect(new Date(times[nextHour(times, NOW)]!).toISOString()).toBe('2026-10-24T14:00:00.000Z');
 });
 
 test('says when most models give rain, by the hour it starts', () => {
@@ -45,12 +44,6 @@ test('says no model gives rain on a dry day', () => {
   expect(summary(forecast('asciutto').hourly, NOW).rain).toBe(
     'Nessun modello dà pioggia nelle prossime 12 ore.'
   );
-});
-
-test('rounds axis steps', () => {
-  expect(niceStep(12, 4)).toBe(2);
-  expect(niceStep(30, 3)).toBe(10);
-  expect(niceStep(7, 4)).toBe(2);
 });
 
 test('finds the last hour with every model', () => {

@@ -1,5 +1,5 @@
 // The parts of the 48-hour view that are rules rather than drawing: which hours
-// are shown, the summary sentence, and the steps of the axes.
+// are shown and the summary sentence.
 import { t } from '#lib/copy/t.ts';
 import { temp } from '#lib/format.ts';
 import { radarAtTownFreshness } from '#lib/data/states.ts';
@@ -15,20 +15,6 @@ export function firstShown(times: number[], now: number): number {
     if (time <= now) first = i;
   });
   return first;
-}
-
-// The hour picked when the page opens: the next full hour.
-export function nextHour(times: number[], now: number): number {
-  const i = times.findIndex((time) => time >= now);
-  return i === -1 ? times.length - 1 : i;
-}
-
-// A round step that gives about `target` ticks over `range`.
-export function niceStep(range: number, target: number): number {
-  const raw = range / target;
-  const power = 10 ** Math.floor(Math.log10(raw));
-  const m = raw / power;
-  return (m < 1.5 ? 1 : m < 3.5 ? 2 : m < 7.5 ? 5 : 10) * power;
 }
 
 // What the radar sees at the town, only while it is fresh enough to say what

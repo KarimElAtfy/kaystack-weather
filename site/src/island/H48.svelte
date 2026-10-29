@@ -1,11 +1,10 @@
 <script lang="ts">
   import { t } from '#lib/copy/t.ts';
-  import { int, mm, models, pct, temp, wind } from '#lib/format.ts';
-  import { firstShown, lastFullHour, nextHour, observed, summary } from '#lib/chart/h48.ts';
+  import { int, mm, models, temp, wind } from '#lib/format.ts';
+  import { firstShown, observed, summary } from '#lib/chart/h48.ts';
   import Icon from '#lib/symbols/Icon.svelte';
-  import { dayName, dstLabel, hm, weekdayLong, dayNumber } from '#lib/time.ts';
+  import { dayNumber, dstLabel, hm, weekdayLong } from '#lib/time.ts';
   import Meteogram from './Meteogram.svelte';
-  import Table48 from './Table48.svelte';
   import type { TownData } from './town.svelte.ts';
 
   let { data }: { data: TownData } = $props();
@@ -27,76 +26,52 @@
       // Storage refused: the choice lasts until the page closes.
     }
   }
+  // The table holds every number of the chart; it loads only when asked for.
+  const table = $derived(view === 'table' ? import('./Table48.svelte') : null);
 
   const forecast = $derived(data.forecast.value);
   const hourly = $derived(forecast?.hourly);
   const times = $derived(hourly ? hourly.time.map(Date.parse) : []);
   const first = $derived(firstShown(times, data.clock));
+  // No hour is chosen until someone touches the chart or moves the range.
   let picked = $state<number | null>(null);
   const selected = $derived(
-    picked !== null && picked >= first && picked < times.length
-      ? picked
-      : nextHour(times, data.clock)
+    picked !== null && picked >= first && picked < times.length ? picked : null
   );
-  const issued = $derived(forecast ? Date.parse(forecast.issued_at) : 0);
-  const sentence = $derived(
-    hourly ? summary(hourly, data.clock, observed(data.now.value?.radar, data.clock)) : null
-  );
-  // The summary starts with the radar, so the block waits for now.json as well:
-  // a sentence growing a moment later would move the page.
-  const nowRead = $derived(data.now.value !== null || data.now.problem !== null);
-  const lastFull = $derived(hourly ? (times[lastFullHour(hourly)] ?? 0) : 0);
   const hasGap = $derived(hourly?.temperature_c.mean.some((v) => v === null) ?? false);
   // Without the correction the page says so, and never calls the values corrected.
   const raw = $derived(hourly ? !hourly.temperature_c.corrected : false);
   const hasDst = $derived(times.some((_, i) => dstLabel(times, i) !== null));
 
-  // Everything the readout shows, as one sentence for the hour control.
   const readout = $derived.by(() => {
-    if (!hourly) return null;
+    if (!hourly || selected === null) return null;
     const i = selected;
-    const at = times[i] ?? 0;
     const label = dstLabel(times, i);
     const T = hourly.temperature_c;
-    const n = hourly.rain.n_models[i] ?? 0;
-    const m = hourly.rain.m_models[i] ?? 0;
     const amount = hourly.precipitation_mm.mean[i];
-    return {
-      when: `${weekdayLong(at)} ${dayNumber(at)}, ${hm(at)}${label ? ` (${label})` : ''}`,
-      temp: T.mean[i] == null ? t('state.nodata') : temp(T.mean[i]),
-      range:
-        T.mean[i] == null ? '' : t('h48.readout_temp', { min: int(T.low[i]), max: int(T.high[i]) }),
-      rain: models(n, m),
-      mm: amount ? t('h48.readout_mm', { mm: mm(amount) }) : '',
-      wind: wind(hourly.wind_kmh.mean[i], hourly.wind_dir_deg.mean[i]),
-      gust: t('h48.cell_gust', { g: int(hourly.gust_kmh.mean[i]) }),
-      cloud: t('h48.readout_cloud', { pct: pct(hourly.cloud_pct.mean[i]) })
-    };
+    return [
+      `${weekdayLong(times[i]!)} ${dayNumber(times[i]!)}, ${hm(times[i]!)}${label ? ` (${label})` : ''}`,
+      T.mean[i] == null
+        ? t('state.nodata')
+        : `${temp(T.mean[i])}, ${t('h48.readout_temp', { min: int(T.low[i]), max: int(T.high[i]) })}`,
+      `${t('h48.col_rain')}: ${models(hourly.rain.n_models[i] ?? 0, hourly.rain.m_models[i] ?? 0)}${amount ? `, ${t('h48.readout_mm', { mm: mm(amount) })}` : ''}`,
+      `${wind(hourly.wind_kmh.mean[i], hourly.wind_dir_deg.mean[i])}, ${t('h48.cell_gust', { g: int(hourly.gust_kmh.mean[i]) })}`
+    ];
   });
-  const spoken = $derived(
-    readout
-      ? [
-          readout.when,
-          `${readout.temp} ${readout.range}`,
-          `${readout.rain} ${readout.mm}`,
-          `${readout.wind} ${readout.gust}`,
-          readout.cloud
-        ]
-          .map((part) => part.trim())
-          .join(', ')
-      : ''
-  );
+  const spoken = $derived(readout?.join(', ') ?? '');
 
   // The browser's own Page Up and Page Down steps vary; the design wants six hours.
   function pageKeys(event: KeyboardEvent) {
     const step = event.key === 'PageUp' ? -6 : event.key === 'PageDown' ? 6 : 0;
     if (!step) return;
     event.preventDefault();
-    picked = Math.min(times.length - 1, Math.max(first, selected + step));
+    picked = Math.min(times.length - 1, Math.max(first, (selected ?? first) + step));
   }
-  const rangeMinMax = $derived.by(() => {
-    if (!hourly) return null;
-    const values = hourly.temperature_c.mean.filter(
+  const rain = $derived(
+    hourly ? summary(hourly, data.clock, observed(data.now.value?.radar, data.clock)).rain : ''
+  );
+  const range = $derived.by(() => {
+    const values = (hourly?.temperature_c.mean ?? []).filter(
       (v, i): v is number => v !== null && i >= first
     );
     return values.length
@@ -105,77 +80,38 @@
   });
 </script>
 
-{#if !forecast || !hourly || !nowRead}
+{#if !forecast || !hourly}
   {#if data.forecast.problem}
     <p class="note bad"><Icon name="bad" /><span>{t('state.forecast_missing')}</span></p>
   {:else}
     <div class="skel skel-48">{t('state.loading')}</div>
   {/if}
 {:else}
-  <p class="sec-meta">{t('h48.meta', { ora: hm(issued), stazione: data.town.station })}</p>
-  {#if sentence}
-    <p class="summary">
-      {sentence.now ? `${sentence.now} ` : ''}<strong>{sentence.rain}</strong>
-      {sentence.temp}
-    </p>
-  {/if}
   {#if raw}
     <p class="note info"><Icon name="info" /><span>{t('h48.note_raw')}</span></p>
   {/if}
   {#if hasDst}
     <p class="note info"><Icon name="info" /><span>{t('h48.dst_note')}</span></p>
   {/if}
-  <div class="toolbar">
-    <div class="seg" role="group" aria-label={t('h48.view_label')}>
-      <button type="button" aria-pressed={view === 'chart'} onclick={() => show('chart')}
-        >{t('h48.view_chart')}</button
-      >
-      <button type="button" aria-pressed={view === 'table'} onclick={() => show('table')}
-        >{t('h48.view_table')}</button
-      >
-    </div>
+  <div class="seg" role="group" aria-label={t('h48.view_label')}>
+    <button type="button" aria-pressed={view === 'chart'} onclick={() => show('chart')}
+      >{t('h48.view_chart')}</button
+    >
+    <button type="button" aria-pressed={view === 'table'} onclick={() => show('table')}
+      >{t('h48.view_table')}</button
+    >
   </div>
   {#if view === 'chart'}
-    <div class="legend" aria-hidden="true">
-      <span
-        ><i class="key line key-temp"></i>{t(raw ? 'h48.legend_mean_raw' : 'h48.legend_mean')}</span
-      >
-      <span><i class="key band key-band"></i>{t('h48.legend_range')}</span>
-      <span><i class="key bar key-rain"></i>{t('h48.legend_rain')}</span>
-      <span><i class="key line key-wind"></i>{t('h48.legend_wind')}</span>
-      <span><i class="key dot key-gust"></i>{t('h48.legend_gust')}</span>
-    </div>
-    {#if readout}
-      <div class="readout" aria-label={t('h48.readout_label')}>
-        <div class="when">{readout.when}</div>
-        <div class="item">
-          <span class="key line key-temp"></span><b>{readout.temp}</b>
-          <span class="sub">{readout.range}</span>
-        </div>
-        <div class="item">
-          <span class="key bar key-rain"></span><b>{readout.rain}</b>
-          <span class="sub">{readout.mm}</span>
-        </div>
-        <div class="item">
-          <span class="key line key-wind"></span><b>{readout.wind}</b>
-          <span class="sub">{readout.gust}</span>
-        </div>
-        <div class="item"><span class="key band key-cloud"></span><span>{readout.cloud}</span></div>
-      </div>
-    {/if}
     <div
       role="img"
-      aria-label={rangeMinMax
-        ? t('h48.chart_aria', {
-            min: rangeMinMax.min,
-            max: rangeMinMax.max,
-            pioggia: sentence?.rain ?? ''
-          })
+      aria-label={range
+        ? t('h48.chart_aria', { min: range.min, max: range.max, pioggia: rain })
         : undefined}
     >
       <Meteogram
         {hourly}
         {first}
+        {readout}
         now={data.clock}
         lat={data.town.lat}
         lon={data.town.lon}
@@ -188,24 +124,61 @@
       min={first}
       max={times.length - 1}
       step="1"
-      value={selected}
+      value={selected ?? first}
       oninput={(event) => (picked = Number(event.currentTarget.value))}
       onkeydown={pageKeys}
       aria-label={t('h48.range_label')}
-      aria-valuetext={spoken}
+      aria-valuetext={spoken || undefined}
     />
-    <p class="help">{t('h48.chart_help')}</p>
-  {:else}
-    <Table48 {hourly} {first} lat={data.town.lat} lon={data.town.lon} />
+  {:else if table}
+    {#await table then { default: Table48 }}
+      <Table48 {hourly} {first} lat={data.town.lat} lon={data.town.lon} />
+    {/await}
   {/if}
   <div class="foot">
     {#if hasGap && !raw}<p>{t('state.partial_hours')}</p>{/if}
     <p>{t(raw ? 'h48.footnote_raw' : 'h48.footnote')}</p>
-    <p>
-      {t('h48.models_note', {
-        m: hourly.temperature_c.m_models[0] ?? 0,
-        ora1: `${dayName(lastFull, data.clock)} ${t('time.at', { ora: hm(lastFull) })}`
-      })}
-    </p>
   </div>
 {/if}
+
+<style>
+  @layer blocks {
+    .seg {
+      display: inline-flex;
+      margin-block-end: var(--space-3);
+    }
+    .seg button {
+      min-block-size: var(--tap);
+      padding-inline: var(--space-4);
+      font: inherit;
+      font-size: var(--text-m);
+      color: var(--ink-2);
+      background: var(--paper);
+      border: 1px solid var(--ink-3);
+      border-radius: 0;
+    }
+    .seg button + button {
+      border-inline-start: 0;
+    }
+    .seg button[aria-pressed='true'] {
+      color: var(--paper);
+      background: var(--ink);
+      border-color: var(--ink);
+    }
+    .scrub {
+      display: block;
+      inline-size: 100%;
+      min-block-size: var(--tap);
+      margin: var(--space-2) 0 0;
+      accent-color: var(--ink);
+    }
+    .foot {
+      margin-block-start: var(--space-3);
+      font-size: var(--text-s);
+      color: var(--ink-2);
+    }
+    .foot p {
+      margin: 0;
+    }
+  }
+</style>
