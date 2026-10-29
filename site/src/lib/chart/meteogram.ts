@@ -33,7 +33,7 @@ export function rows(width: number, font: number, cap: number | null): Rows {
     ['sky', icon + 6],
     ['temp', narrow ? PLOT_NARROW : PLOT_WIDE],
     ['rainTitle', line + 6],
-    ['rain', narrow ? 28 : 36],
+    ['rain', (narrow ? 28 : 36) + line],
     ['windTitle', line + 6],
     ['arrows', 14],
     ['wind', line],

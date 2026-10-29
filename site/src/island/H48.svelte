@@ -93,9 +93,9 @@
     <p class="note info"><Icon name="info" /><span>{t('h48.note_raw')}</span></p>
   {/if}
   {#if hasDst}
-    <p class="note info"><Icon name="info" /><span>{t('h48.dst_note')}</span></p>
+    <p class="dst">{t('h48.dst_note')}</p>
   {/if}
-  <div class="seg" role="group" aria-label={t('h48.view_label')}>
+  <div class="toggle" role="group" aria-label={t('h48.view_label')}>
     <button type="button" aria-pressed={view === 'chart'} onclick={() => show('chart')}
       >{t('h48.view_chart')}</button
     >
@@ -143,27 +143,34 @@
 
 <style>
   @layer blocks {
-    .seg {
+    .toggle {
       display: inline-flex;
       margin-block-end: var(--space-3);
+      border: 1px solid var(--ink-3);
     }
-    .seg button {
+    .toggle button {
       min-block-size: var(--tap);
       padding-inline: var(--space-4);
       font: inherit;
       font-size: var(--text-m);
       color: var(--ink-2);
-      background: var(--paper);
-      border: 1px solid var(--ink-3);
+      background: none;
+      border: 0;
+      border-block-end: 2px solid transparent;
       border-radius: 0;
+      cursor: pointer;
     }
-    .seg button + button {
-      border-inline-start: 0;
+    .toggle button[aria-pressed='true'] {
+      color: var(--ink);
+      font-weight: 600;
+      border-block-end-color: var(--ink);
     }
-    .seg button[aria-pressed='true'] {
-      color: var(--paper);
-      background: var(--ink);
-      border-color: var(--ink);
+    .dst {
+      margin: 0 0 var(--space-3);
+      padding-inline-start: var(--space-3);
+      border-inline-start: 2px solid var(--ink-3);
+      font-size: var(--text-s);
+      color: var(--ink-2);
     }
     .scrub {
       display: block;

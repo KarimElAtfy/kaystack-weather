@@ -68,11 +68,13 @@
   const R = $derived(rows(W, font, cap || null));
   const lane = (name: keyof typeof R) => (R[name] as [number, number] | undefined) ?? null;
 
+  // The right margin holds the temperature scale, so its labels never sit on the line.
+  const plot = $derived(W - 2 - Math.ceil(measure('-10°')) - 6);
   const g = $derived.by(() => {
     const t0 = at(first);
     const t1 = at(times.length - 1);
-    const X = (ms: number) => 1 + ((ms - t0) / (t1 - t0)) * (W - 2);
-    const perHour = (W - 2) / ((t1 - t0) / HOUR_MS);
+    const X = (ms: number) => 1 + ((ms - t0) / (t1 - t0)) * plot;
+    const perHour = plot / ((t1 - t0) / HOUR_MS);
     const [top, bottom] = lane('temp')!;
     const T = hourly.temperature_c;
     const values = shown
@@ -125,7 +127,7 @@
         i > first &&
         Number(hour(at(i))) % hourStep === 0 &&
         repeatedHour(times, i) !== 'winter' &&
-        g.X(at(i)) - measure('00') / 2 > measure(t('time.just_now')) + 8 &&
+        g.X(at(i)) - measure('00') / 2 > measure(t('h48.axis_now')) + 8 &&
         g.X(at(i)) + measure('00') / 2 < W
     )
   );
@@ -204,6 +206,8 @@
     longest([long, short], W + 8, (s) => measure(s, true)) ?? short;
 
   const [rainTop, rainBottom] = $derived(lane('rain') ?? [0, 0]);
+  // Bars stop a line short of the lane's top, so the count above the tallest stays inside.
+  const barTop = $derived(rainTop + font + 4);
   const rainShare = (i: number) => (hourly.rain.n_models[i] ?? 0) / (hourly.rain.m_models[i] || 1);
   const wet = $derived(shown.filter((i) => (hourly.rain.n_models[i] ?? 0) > 0));
   const wettest = $derived(
@@ -242,7 +246,7 @@
   function choose(event: PointerEvent) {
     if (event.type === 'pointermove' && event.pointerType !== 'mouse' && !event.buttons) return;
     const box = (event.currentTarget as SVGSVGElement).getBoundingClientRect();
-    const ms = g.t0 + ((event.clientX - box.left - 1) / (W - 2)) * (g.t1 - g.t0);
+    const ms = g.t0 + ((event.clientX - box.left - 1) / plot) * (g.t1 - g.t0);
     let best = first;
     for (const i of shown) if (Math.abs(at(i) - ms) < Math.abs(at(best) - ms)) best = i;
     selected = best;
@@ -388,7 +392,7 @@
       <text class="title" x="0" y={lane('rainTitle')![1] - 5}
         >{title(t('h48.panel_rain'), t('h48.col_rain'))}</text
       >
-      <rect class="track" x="0" y={rainTop} width={W} height={rainBottom - rainTop} />
+      <line class="base" x1="0" x2={W} y1={rainBottom} y2={rainBottom} />
       {#if wettest === null}
         <text class="none" x={W / 2} y={(rainTop + rainBottom) / 2 + font / 3} text-anchor="middle"
           >{t('rain48.none')}</text
@@ -398,11 +402,11 @@
           class="half"
           x1="0"
           x2={W}
-          y1={(rainTop + rainBottom) / 2}
-          y2={(rainTop + rainBottom) / 2}
+          y1={(barTop + rainBottom) / 2}
+          y2={(barTop + rainBottom) / 2}
         />
         {#each wet as i (i)}
-          {@const h = rainShare(i) * (rainBottom - rainTop)}
+          {@const h = rainShare(i) * (rainBottom - barTop)}
           <rect
             class="rbar"
             data-qa="rain"
@@ -420,7 +424,7 @@
         <text
           class="mark"
           x={Math.min(W - half, Math.max(half, g.X(at(wettest)) - barWidth / 2))}
-          y={Math.max(rainTop + font, rainBottom - rainShare(wettest) * (rainBottom - rainTop) - 4)}
+          y={rainBottom - rainShare(wettest) * (rainBottom - barTop) - 4}
           text-anchor="middle">{text}</text
         >
       {/if}
@@ -441,7 +445,7 @@
         <text class="wv" x={g.X(at(i))} y={wind[1] - 3} text-anchor="middle">{int(v)}</text>
       {/each}
 
-      <text class="now" x="0" y={axis[1] - 5}>{t('time.just_now')}</text>
+      <text class="now" x="0" y={axis[1] - 5}>{t('h48.axis_now')}</text>
       {#each ticks as i (i)}
         <text x={g.X(at(i))} y={axis[1] - 5} text-anchor="middle">{hour(at(i))}</text>
       {/each}
@@ -449,7 +453,7 @@
         {@const x2 = steps[k + 1] !== undefined ? g.X(at(steps[k + 1]!)) : W}
         <line
           class="mline"
-          stroke-width={1 + ((M[i] ?? 0) / (M[first] || 1)) * 3}
+          stroke-width={1 + ((M[i] ?? 0) / (M[first] || 1)) * 2}
           x1={g.X(at(i)) + (k ? 1 : 0)}
           x2={x2 - 1}
           y1={models[0] + 4}
@@ -566,15 +570,15 @@
       stroke-linejoin: round;
       stroke-linecap: round;
     }
-    .track {
-      fill: color-mix(in srgb, var(--rain) 8%, var(--paper));
+    .base {
+      stroke: var(--ink-3);
     }
     .rbar {
       fill: var(--rain);
     }
     .half {
-      stroke: var(--paper);
-      stroke-dasharray: 2 2;
+      stroke: var(--ink-3);
+      stroke-dasharray: 2 3;
     }
     .arrow {
       fill: var(--ink-2);
