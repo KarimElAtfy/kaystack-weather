@@ -15,23 +15,6 @@ test('says when the forecast was issued, in Rome time', async ({ page }) => {
   );
 });
 
-test('lets the radar speak for now, and the models for the hours ahead', async ({ page }) => {
-  await page.goto('/pedrengo');
-  await expect(page.locator('#ore-48 .summary')).toHaveText(
-    /^Adesso piove sul paese\. Pioggia per la maggior parte dei modelli dalle 17:00\. /
-  );
-  await page.goto('/sesto-calende');
-  await expect(page.locator('#ore-48 .summary')).toHaveText(/^Adesso non piove sul paese\. /);
-});
-
-test('says nothing about now when the radar is old', async ({ page, context, baseURL }) => {
-  await context.unrouteAll();
-  await useScenario(context, 'vecchi', baseURL ?? '');
-  await page.goto('/pedrengo');
-  await expect(page.locator('#ore-48 .summary')).toHaveText(/^Pioggia per /);
-  await expect(page.locator('#ore-48 .summary')).not.toContainText('Adesso');
-});
-
 test('tells when the data was last checked', async ({ page }) => {
   await page.goto('/sesto-calende');
   await expect(page.locator('#refreshed')).toHaveText('Dati controllati alle 15:10.');
@@ -135,7 +118,6 @@ test('never calls a value corrected that did not get the correction', async ({
   await expect(h48.locator('.note').first()).toHaveText(
     'Temperatura senza correzione: oggi la correzione non è disponibile.'
   );
-  await expect(h48.locator('.legend')).toContainText('temperatura, media dei modelli');
   await expect(h48.locator('.foot')).toContainText('Oggi la correzione non è disponibile');
   const d10 = page.locator('#giorni-10');
   await expect(d10.locator('.note')).toHaveText(

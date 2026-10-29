@@ -55,7 +55,7 @@ for (const town of TOWNS) {
     await openState(page, 'pioggia', `/${town}`, baseURL ?? '');
     const hour = page.getByRole('slider', { name: 'Ora del grafico' });
     await hour.focus();
-    await expect(hour).toHaveAttribute('aria-valuetext', /^sabato 24, 16:00, -?\d+ °C modelli da/);
+    await expect(hour).toHaveAttribute('aria-valuetext', /^sabato 24, 16:00, -?\d+ °C, modelli da/);
     await page.keyboard.press('ArrowRight');
     await expect(hour).toHaveAttribute('aria-valuetext', /^sabato 24, 17:00, /);
   });
